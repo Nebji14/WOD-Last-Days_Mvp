@@ -96,12 +96,20 @@ function refreshSession(): Promise<boolean> {
   return refreshInFlight;
 }
 
+/**
+ * Convertit une réponse en erreur.
+ *
+ * Une erreur 5xx sans le format de l'API ne vient pas du serveur applicatif
+ * mais du proxy `/api`, qui ne parvient pas à le joindre : elle est signalée
+ * comme une indisponibilité du service.
+ */
 async function toApiError(response: Response): Promise<ApiError> {
   const body: unknown = await response.json().catch(() => null);
   const error = isRecord(body) && isRecord(body.error) ? body.error : {};
+  const fallbackCode = response.status >= 500 ? "service_unavailable" : "internal_error";
   return new ApiError(
     response.status,
-    typeof error.code === "string" ? error.code : "internal_error",
+    typeof error.code === "string" ? error.code : fallbackCode,
     Array.isArray(error.details) ? error.details.filter(isRecord).map(toDetail) : [],
     typeof error.request_id === "string" ? error.request_id : null,
   );

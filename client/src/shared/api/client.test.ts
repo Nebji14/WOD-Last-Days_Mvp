@@ -65,6 +65,15 @@ describe("apiRequest", () => {
     await expect(apiRequest("/api/x")).rejects.toMatchObject({ code: "network_error", status: 0 });
   });
 
+  it("signale un serveur injoignable derrière le proxy par service_unavailable", async () => {
+    mockFetch(new Response("Internal Server Error", { status: 500 }));
+
+    await expect(apiRequest("/api/x")).rejects.toMatchObject({
+      code: "service_unavailable",
+      status: 500,
+    });
+  });
+
   it("renouvelle la session expirée puis rejoue la requête", async () => {
     const fetchMock = mockFetch(
       jsonResponse(401, apiErrorBody("not_authenticated")),

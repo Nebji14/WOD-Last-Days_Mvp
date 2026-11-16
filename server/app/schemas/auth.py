@@ -1,0 +1,51 @@
+"""Modèles d'entrée et de sortie des routes d'authentification."""
+
+from uuid import UUID
+
+from pydantic import BaseModel, ConfigDict, Field
+
+from app.domain.accounts import Account, Role
+
+# Bornes larges : elles protègent le serveur des charges excessives. Les règles
+# précises (format, sécurité) sont appliquées par le domaine, avec des codes
+# d'erreur dédiés.
+_MAX_USERNAME_INPUT = 64
+_MAX_PASSWORD_INPUT = 256
+
+
+class RegisterRequest(BaseModel):
+    """Demande d'inscription d'un joueur (US-001, écran 02b)."""
+
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=False)
+
+    username: str = Field(min_length=1, max_length=_MAX_USERNAME_INPUT)
+    password: str = Field(min_length=1, max_length=_MAX_PASSWORD_INPUT)
+    password_confirmation: str = Field(min_length=1, max_length=_MAX_PASSWORD_INPUT)
+
+
+class LoginRequest(BaseModel):
+    """Demande de connexion par nom d'utilisateur et mot de passe (US-002, US-023)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    username: str = Field(min_length=1, max_length=_MAX_USERNAME_INPUT)
+    password: str = Field(min_length=1, max_length=_MAX_PASSWORD_INPUT)
+
+
+class AccountResponse(BaseModel):
+    """Compte tel qu'il est exposé au client. N'inclut aucune donnée interne."""
+
+    id: UUID
+    username: str
+    display_name: str
+    role: Role
+
+    @classmethod
+    def from_account(cls, account: Account) -> "AccountResponse":
+        """Projette un compte du domaine vers sa représentation publique."""
+        return cls(
+            id=account.id,
+            username=account.username,
+            display_name=account.display_name,
+            role=account.role,
+        )

@@ -10,7 +10,7 @@ import httpx
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import auth, chat, health, realtime
+from app.api import auth, characters, chat, health, realtime, sheet_items
 from app.api.deps import Container
 from app.core.config import Settings, get_settings
 from app.core.database import create_pool
@@ -24,9 +24,14 @@ from app.realtime import endpoint as realtime_endpoint
 from app.realtime.hub import ConnectionHub
 from app.realtime.tickets import TicketStore
 from app.repositories.accounts import PgAccountRepository
+from app.repositories.characters import PgCharacterRepository
 from app.repositories.chat import PgChatRepository
+from app.repositories.sheet_items import PgSheetItemRepository
 from app.services.auth import AuthService
+from app.services.character_access import CharacterAccess
+from app.services.characters import CharacterService
 from app.services.chat import ChatService
+from app.services.sheet_items import SheetItemService
 from app.services.table import TableService
 
 
@@ -51,6 +56,10 @@ def create_app(settings: Settings | None = None, container: Container | None = N
         pool = await create_pool(settings)
         accounts = PgAccountRepository(pool)
         hub = ConnectionHub()
+        character_repository = PgCharacterRepository(pool)
+        item_repository = PgSheetItemRepository(pool)
+        table_service = TableService(accounts, character_repository, hub)
+        access = CharacterAccess(character_repository, accounts, hub, table_service.refresh)
         async with httpx.AsyncClient() as http_client:
             app.state.container = Container(
                 settings=settings,
@@ -63,9 +72,11 @@ def create_app(settings: Settings | None = None, container: Container | None = N
                 token_verifier=SupabaseTokenVerifier(settings.supabase_url),
                 rate_limiter=RateLimiter(),
                 chat_service=ChatService(PgChatRepository(pool), hub),
-                table_service=TableService(accounts, hub),
+                table_service=table_service,
                 hub=hub,
                 tickets=TicketStore(),
+                character_service=CharacterService(character_repository, item_repository, access),
+                sheet_item_service=SheetItemService(item_repository, access),
             )
             try:
                 yield
@@ -91,6 +102,8 @@ def create_app(settings: Settings | None = None, container: Container | None = N
     app.include_router(health.router)
     app.include_router(auth.router)
     app.include_router(chat.router)
+    app.include_router(characters.router)
+    app.include_router(sheet_items.router)
     app.include_router(realtime.router)
     app.include_router(realtime_endpoint.router)
     return app

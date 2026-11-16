@@ -1,8 +1,8 @@
 """Registre des connexions temps réel et diffusion des événements.
 
-Chaque événement est un objet JSON ``{"type": ..., "data": ...}``. Les
-événements de ce module sont publics : ils partent vers toutes les connexions
-authentifiées.
+Chaque événement est un objet JSON ``{"type": ..., "data": ...}``. L'état de
+la table et le chat partent vers toutes les connexions authentifiées ; un
+changement de personnage ne part que vers ceux qui peuvent consulter sa fiche.
 """
 
 import asyncio
@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 
 EVENT_TABLE_STATE = "table.state"
 EVENT_CHAT_MESSAGE = "chat.message"
+EVENT_CHARACTER_CHANGED = "character.changed"
 
 # Codes de fermeture applicatifs (plage 4000-4999 réservée aux applications).
 CLOSE_UNAUTHENTICATED = 4401
@@ -33,7 +34,7 @@ class ConnectionHub:
     """Connexions WebSocket authentifiées, regroupées par compte.
 
     Implémente les contrats de diffusion attendus par les services
-    (``TableBroadcaster``, ``ChatBroadcaster``).
+    (``TableBroadcaster``, ``ChatBroadcaster``, ``CharacterBroadcaster``).
     """
 
     def __init__(self) -> None:
@@ -58,6 +59,16 @@ class ConnectionHub:
         await self._broadcast(
             EVENT_CHAT_MESSAGE, MessageResponse.from_message(message).model_dump(mode="json")
         )
+
+    async def character_changed(self, character_id: UUID, recipients: set[UUID]) -> None:
+        """Signale à ``recipients`` qu'un personnage a changé ou a été supprimé.
+
+        L'événement ne porte que l'identifiant : la fiche se relit par l'API,
+        qui applique les droits de chaque lecteur (US-009 · CA1, T3).
+        """
+        payload = {"type": EVENT_CHARACTER_CHANGED, "data": {"character_id": str(character_id)}}
+        targets = [ws for ws, owner in self._connections.items() if owner in recipients]
+        await asyncio.gather(*(self._send(ws, payload) for ws in targets))
 
     async def close_account(self, account_id: UUID, code: int) -> None:
         """Ferme toutes les connexions d'un compte (déconnexion, US-003 et T3)."""

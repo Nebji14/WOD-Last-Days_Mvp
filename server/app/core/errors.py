@@ -39,6 +39,8 @@ class ErrorCode(StrEnum):
     RATE_LIMITED = "rate_limited"
     NOT_FOUND = "not_found"
     MESSAGE_DELETED = "message_deleted"
+    RULE_VIOLATION = "rule_violation"
+    EDIT_CONFLICT = "edit_conflict"
     SERVICE_UNAVAILABLE = "service_unavailable"
     INTERNAL_ERROR = "internal_error"
 

@@ -118,6 +118,7 @@ def test_arrivals_and_departures_are_broadcast(ctx: TestContext, connect: Connec
         "account_id": str(lea.account_id),
         "display_name": "lea.vale",
         "online": True,
+        "character": None,
     }
 
 

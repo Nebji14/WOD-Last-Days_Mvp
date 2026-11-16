@@ -14,8 +14,12 @@ from app.main import create_app
 from app.realtime.hub import ConnectionHub
 from app.realtime.tickets import TicketStore
 from app.services.auth import AuthService
+from app.services.character_access import CharacterAccess
+from app.services.characters import CharacterService
 from app.services.chat import ChatService
+from app.services.sheet_items import SheetItemService
 from app.services.table import TableService
+from tests.fake_characters import FakeCharacterStore
 from tests.fakes import (
     FakeAccountStore,
     FakeIdentityProvider,
@@ -37,6 +41,7 @@ class TestContext:
     accounts: FakeAccountStore
     identity: FakeIdentityProvider
     auth_service: AuthService
+    characters: FakeCharacterStore
 
 
 @pytest.fixture
@@ -57,6 +62,9 @@ def ctx(settings: Settings) -> Iterator[TestContext]:
     accounts = FakeAccountStore()
     identity = FakeIdentityProvider()
     hub = ConnectionHub()
+    characters = FakeCharacterStore(accounts)
+    table_service = TableService(accounts, characters, hub)
+    access = CharacterAccess(characters, accounts, hub, table_service.refresh)
     auth_service = AuthService(
         accounts, identity, settings.technical_email_domain, gm_access_path="mj-test"
     )
@@ -66,9 +74,11 @@ def ctx(settings: Settings) -> Iterator[TestContext]:
         token_verifier=FakeTokenVerifier(identity),
         rate_limiter=RateLimiter(),
         chat_service=ChatService(FakeMessageStore(accounts), hub),
-        table_service=TableService(accounts, hub),
+        table_service=table_service,
         hub=hub,
         tickets=TicketStore(),
+        character_service=CharacterService(characters, characters, access),
+        sheet_item_service=SheetItemService(characters, access),
     )
     with TestClient(create_app(settings, container), headers={"Origin": ORIGIN}) as client:
-        yield TestContext(client, accounts, identity, auth_service)
+        yield TestContext(client, accounts, identity, auth_service, characters)

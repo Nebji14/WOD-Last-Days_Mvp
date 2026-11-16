@@ -7,8 +7,10 @@ un stockage partagé.
 
 from dataclasses import dataclass
 from typing import Protocol
+from uuid import UUID
 
 from app.domain.accounts import Account, Role
+from app.domain.character import SeatCharacter
 from app.domain.table import Seat, SeatMap
 
 
@@ -20,17 +22,26 @@ class TableState:
         gm_name: nom affiché du MJ, ``None`` tant que son compte n'existe pas.
         gm_online: présence du MJ (US-012 · CA2).
         seats: places attribuées aux joueurs, dans l'ordre des positions.
+        characters: personnage joué par compte ; un compte sans personnage en
+            est absent (03-E4).
     """
 
     gm_name: str | None
     gm_online: bool
     seats: list[Seat]
+    characters: dict[UUID, SeatCharacter]
 
 
 class GmDirectory(Protocol):
     """Accès au compte du MJ attendu par le service."""
 
     async def get_gm(self) -> Account | None: ...
+
+
+class SeatCharacterDirectory(Protocol):
+    """Accès au personnage joué par chaque compte."""
+
+    async def played_by(self, account_ids: list[UUID]) -> dict[UUID, SeatCharacter]: ...
 
 
 class TableBroadcaster(Protocol):
@@ -44,11 +55,18 @@ class TableService:
 
     Args:
         accounts: accès au compte du MJ, pour afficher son nom même absent.
+        characters: accès au personnage joué par chaque joueur assis.
         broadcaster: diffusion en temps réel vers les participants connectés.
     """
 
-    def __init__(self, accounts: GmDirectory, broadcaster: TableBroadcaster) -> None:
+    def __init__(
+        self,
+        accounts: GmDirectory,
+        characters: SeatCharacterDirectory,
+        broadcaster: TableBroadcaster,
+    ) -> None:
         self._accounts = accounts
+        self._characters = characters
         self._broadcaster = broadcaster
         self._seats = SeatMap()
         self._gm_connections = 0
@@ -75,13 +93,19 @@ class TableService:
             self._seats.leave(account.id)
         await self._broadcaster.table_changed(await self.state())
 
+    async def refresh(self) -> None:
+        """Rediffuse l'état de la table : un personnage joué a changé (US-009 · CA1)."""
+        await self._broadcaster.table_changed(await self.state())
+
     async def state(self) -> TableState:
         """Retourne l'état courant de la table."""
         if self._gm_name is None:
             gm = await self._accounts.get_gm()
             self._gm_name = gm.display_name if gm else None
+        seats = self._seats.seats()
         return TableState(
             gm_name=self._gm_name,
             gm_online=self._gm_connections > 0,
-            seats=self._seats.seats(),
+            seats=seats,
+            characters=await self._characters.played_by([seat.account_id for seat in seats]),
         )

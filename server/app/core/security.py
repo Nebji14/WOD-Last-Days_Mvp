@@ -28,9 +28,14 @@ class InvalidTokenError(Exception):
 
 @dataclass(frozen=True, slots=True)
 class TokenClaims:
-    """Informations vérifiées extraites d'un jeton d'accès."""
+    """Informations vérifiées extraites d'un jeton d'accès.
+
+    Attributs:
+        expires_at: date d'expiration du jeton, en secondes depuis l'époque Unix.
+    """
 
     account_id: UUID
+    expires_at: float
 
 
 @dataclass(frozen=True, slots=True)
@@ -84,8 +89,8 @@ class SupabaseTokenVerifier:
                 issuer=self._issuer,
                 options={"require": ["exp", "sub", "aud", "iss"]},
             )
-            return TokenClaims(account_id=UUID(payload["sub"]))
-        except (jwt.PyJWTError, ValueError) as exc:
+            return TokenClaims(account_id=UUID(payload["sub"]), expires_at=float(payload["exp"]))
+        except (jwt.PyJWTError, ValueError, TypeError) as exc:
             raise InvalidTokenError from exc
 
 

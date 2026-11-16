@@ -10,7 +10,7 @@ import httpx
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import auth, health
+from app.api import auth, chat, health, realtime
 from app.api.deps import Container
 from app.core.config import Settings, get_settings
 from app.core.database import create_pool
@@ -20,8 +20,14 @@ from app.core.middleware import register_middlewares
 from app.core.rate_limit import RateLimiter
 from app.core.security import SupabaseTokenVerifier
 from app.gateways.supabase_auth import SupabaseAuthGateway
+from app.realtime import endpoint as realtime_endpoint
+from app.realtime.hub import ConnectionHub
+from app.realtime.tickets import TicketStore
 from app.repositories.accounts import PgAccountRepository
+from app.repositories.chat import PgChatRepository
 from app.services.auth import AuthService
+from app.services.chat import ChatService
+from app.services.table import TableService
 
 
 def create_app(settings: Settings | None = None, container: Container | None = None) -> FastAPI:
@@ -43,17 +49,23 @@ def create_app(settings: Settings | None = None, container: Container | None = N
             yield
             return
         pool = await create_pool(settings)
+        accounts = PgAccountRepository(pool)
+        hub = ConnectionHub()
         async with httpx.AsyncClient() as http_client:
             app.state.container = Container(
                 settings=settings,
                 auth_service=AuthService(
-                    accounts=PgAccountRepository(pool),
+                    accounts=accounts,
                     identity=SupabaseAuthGateway(settings, http_client),
                     technical_email_domain=settings.technical_email_domain,
                     gm_access_path=settings.gm_access_path,
                 ),
                 token_verifier=SupabaseTokenVerifier(settings.supabase_url),
                 rate_limiter=RateLimiter(),
+                chat_service=ChatService(PgChatRepository(pool), hub),
+                table_service=TableService(accounts, hub),
+                hub=hub,
+                tickets=TicketStore(),
             )
             try:
                 yield
@@ -78,4 +90,7 @@ def create_app(settings: Settings | None = None, container: Container | None = N
     register_error_handlers(app)
     app.include_router(health.router)
     app.include_router(auth.router)
+    app.include_router(chat.router)
+    app.include_router(realtime.router)
+    app.include_router(realtime_endpoint.router)
     return app

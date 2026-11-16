@@ -1,10 +1,13 @@
-"""Doublures de test : dépôt de comptes, fournisseur d'identité et vérificateur de jetons."""
+"""Doublures de test : dépôts en mémoire, fournisseur d'identité et vérificateur de jetons."""
 
-from dataclasses import dataclass, field
+import time
+from dataclasses import dataclass, field, replace
+from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
 from app.core.security import InvalidTokenError, SessionTokens, TokenClaims
 from app.domain.accounts import Account, AccountStatus, Role
+from app.domain.chat import ChatMessage
 from app.gateways.supabase_auth import IdentityAlreadyExistsError, InvalidCredentialsError
 from app.repositories.accounts import UsernameAlreadyExistsError
 
@@ -21,6 +24,9 @@ class FakeAccountStore:
     async def get_by_username(self, username: str) -> Account | None:
         wanted = username.lower()
         return next((a for a in self.accounts.values() if a.username.lower() == wanted), None)
+
+    async def get_gm(self) -> Account | None:
+        return next((a for a in self.accounts.values() if a.role is Role.GM), None)
 
     async def create(
         self, *, account_id: UUID, username: str, display_name: str, auth_email: str, role: Role
@@ -98,4 +104,55 @@ class FakeTokenVerifier:
         user_id = self._identity.sessions.get(token)
         if user_id is None:
             raise InvalidTokenError
-        return TokenClaims(account_id=user_id)
+        return TokenClaims(account_id=user_id, expires_at=time.time() + 3600)
+
+
+class FakeMessageStore:
+    """Dépôt de messages en mémoire, avec l'envoi idempotent de la base."""
+
+    def __init__(self, accounts: FakeAccountStore) -> None:
+        self._accounts = accounts
+        self.messages: dict[UUID, ChatMessage] = {}
+        self._tokens: dict[tuple[UUID, UUID], UUID] = {}
+
+    async def get(self, message_id: UUID) -> ChatMessage | None:
+        return self.messages.get(message_id)
+
+    async def list_page(self, before: int | None, limit: int) -> list[ChatMessage]:
+        ordered = sorted(self.messages.values(), key=lambda m: m.position, reverse=True)
+        return [m for m in ordered if before is None or m.position < before][:limit]
+
+    async def create(self, author_id: UUID, client_token: UUID, body: str) -> ChatMessage:
+        existing = self._tokens.get((author_id, client_token))
+        if existing is not None:
+            return self.messages[existing]
+        author = self._accounts.accounts[author_id]
+        message = ChatMessage(
+            id=uuid4(),
+            position=len(self.messages) + 1,
+            author_id=author_id,
+            author_name=author.display_name,
+            author_role=author.role,
+            body=body,
+            sent_at=datetime.now(UTC),
+            edited_at=None,
+            deleted_by_role=None,
+        )
+        self.messages[message.id] = message
+        self._tokens[(author_id, client_token)] = message.id
+        return message
+
+    async def update_body(self, message_id: UUID, body: str) -> ChatMessage | None:
+        message = self.messages.get(message_id)
+        if message is None or message.is_deleted:
+            return None
+        self.messages[message_id] = replace(message, body=body, edited_at=datetime.now(UTC))
+        return self.messages[message_id]
+
+    async def mark_deleted(self, message_id: UUID, deleted_by: UUID) -> ChatMessage | None:
+        message = self.messages.get(message_id)
+        if message is None or message.is_deleted:
+            return None
+        role = self._accounts.accounts[deleted_by].role
+        self.messages[message_id] = replace(message, body=None, deleted_by_role=role)
+        return self.messages[message_id]

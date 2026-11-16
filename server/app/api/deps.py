@@ -11,7 +11,11 @@ from app.core.errors import AppError, ErrorCode
 from app.core.rate_limit import RateLimiter
 from app.core.security import ACCESS_COOKIE, InvalidTokenError, TokenVerifier
 from app.domain.accounts import Account, Role
+from app.realtime.hub import ConnectionHub
+from app.realtime.tickets import TicketStore
 from app.services.auth import AuthService
+from app.services.chat import ChatService
+from app.services.table import TableService
 
 
 @dataclass(frozen=True, slots=True)
@@ -22,6 +26,10 @@ class Container:
     auth_service: AuthService
     token_verifier: TokenVerifier
     rate_limiter: RateLimiter
+    chat_service: ChatService
+    table_service: TableService
+    hub: ConnectionHub
+    tickets: TicketStore
 
 
 def get_container(request: Request) -> Container:
@@ -37,8 +45,20 @@ def _not_authenticated() -> AppError:
     return AppError(ErrorCode.NOT_AUTHENTICATED, "Authentification requise.", status_code=401)
 
 
-async def get_current_account(request: Request, container: ContainerDep) -> Account:
-    """Identifie le compte de la requête à partir du cookie de session.
+@dataclass(frozen=True, slots=True)
+class Session:
+    """Session authentifiée d'une requête.
+
+    Attributs:
+        expires_at: expiration du jeton d'accès, en secondes depuis l'époque Unix.
+    """
+
+    account: Account
+    expires_at: float
+
+
+async def get_current_session(request: Request, container: ContainerDep) -> Session:
+    """Identifie la session de la requête à partir du cookie de session.
 
     Le jeton est vérifié (signature, expiration, émetteur, audience) et le
     compte doit toujours exister et être actif.
@@ -56,7 +76,15 @@ async def get_current_account(request: Request, container: ContainerDep) -> Acco
     account = await container.auth_service.get_active_account(claims.account_id)
     if account is None:
         raise _not_authenticated()
-    return account
+    return Session(account=account, expires_at=claims.expires_at)
+
+
+CurrentSession = Annotated[Session, Depends(get_current_session)]
+
+
+async def get_current_account(session: CurrentSession) -> Account:
+    """Retourne le compte de la session en cours."""
+    return session.account
 
 
 CurrentAccount = Annotated[Account, Depends(get_current_account)]

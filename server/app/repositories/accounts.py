@@ -39,6 +39,13 @@ class PgAccountRepository:
         )
         return _to_account(row) if row else None
 
+    async def get_gm(self) -> Account | None:
+        """Retourne le compte du MJ (unique, C01), ou ``None`` s'il n'est pas créé."""
+        row = await self._pool.fetchrow(
+            f"select {_COLUMNS} from account where role = 'gm'"  # noqa: S608
+        )
+        return _to_account(row) if row else None
+
     async def create(
         self,
         *,

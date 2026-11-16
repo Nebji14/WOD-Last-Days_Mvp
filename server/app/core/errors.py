@@ -38,6 +38,7 @@ class ErrorCode(StrEnum):
     PASSWORD_TOO_WEAK = "password_too_weak"
     RATE_LIMITED = "rate_limited"
     NOT_FOUND = "not_found"
+    MESSAGE_DELETED = "message_deleted"
     SERVICE_UNAVAILABLE = "service_unavailable"
     INTERNAL_ERROR = "internal_error"
 

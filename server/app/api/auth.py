@@ -11,10 +11,12 @@ from app.core.errors import AppError, ErrorCode
 from app.core.security import (
     ACCESS_COOKIE,
     REFRESH_COOKIE,
+    InvalidTokenError,
     clear_session_cookies,
     set_session_cookies,
 )
 from app.domain.accounts import Role
+from app.realtime.hub import CLOSE_UNAUTHENTICATED
 from app.schemas.auth import AccountResponse, LoginRequest, RegisterRequest
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
@@ -79,8 +81,16 @@ async def refresh(request: Request, container: ContainerDep) -> Response:
 
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
 async def logout(request: Request, container: ContainerDep) -> Response:
-    """Ferme la session et retire les cookies (US-003)."""
-    await container.auth_service.logout(request.cookies.get(ACCESS_COOKIE))
+    """Ferme la session, ses connexions temps réel et retire les cookies (US-003, T3)."""
+    access_token = request.cookies.get(ACCESS_COOKIE)
+    if access_token is not None:
+        try:
+            claims = await container.token_verifier.verify(access_token)
+        except InvalidTokenError:
+            pass
+        else:
+            await container.hub.close_account(claims.account_id, CLOSE_UNAUTHENTICATED)
+    await container.auth_service.logout(access_token)
     response = Response(status_code=status.HTTP_204_NO_CONTENT)
     clear_session_cookies(response, container.settings)
     return response

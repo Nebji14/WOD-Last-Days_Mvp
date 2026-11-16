@@ -11,8 +11,17 @@ from app.api.deps import Container
 from app.core.config import Settings
 from app.core.rate_limit import RateLimiter
 from app.main import create_app
+from app.realtime.hub import ConnectionHub
+from app.realtime.tickets import TicketStore
 from app.services.auth import AuthService
-from tests.fakes import FakeAccountStore, FakeIdentityProvider, FakeTokenVerifier
+from app.services.chat import ChatService
+from app.services.table import TableService
+from tests.fakes import (
+    FakeAccountStore,
+    FakeIdentityProvider,
+    FakeMessageStore,
+    FakeTokenVerifier,
+)
 
 ORIGIN = "http://localhost:3000"
 PASSWORD = "chasseur-2026"
@@ -47,6 +56,7 @@ def settings() -> Settings:
 def ctx(settings: Settings) -> Iterator[TestContext]:
     accounts = FakeAccountStore()
     identity = FakeIdentityProvider()
+    hub = ConnectionHub()
     auth_service = AuthService(
         accounts, identity, settings.technical_email_domain, gm_access_path="mj-test"
     )
@@ -55,6 +65,10 @@ def ctx(settings: Settings) -> Iterator[TestContext]:
         auth_service=auth_service,
         token_verifier=FakeTokenVerifier(identity),
         rate_limiter=RateLimiter(),
+        chat_service=ChatService(FakeMessageStore(accounts), hub),
+        table_service=TableService(accounts, hub),
+        hub=hub,
+        tickets=TicketStore(),
     )
     with TestClient(create_app(settings, container), headers={"Origin": ORIGIN}) as client:
         yield TestContext(client, accounts, identity, auth_service)

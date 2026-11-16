@@ -7,6 +7,9 @@
  *   messages et la saisie (03).
  * - [Chat (déroulé)] : le panneau s'agrandit vers le haut et montre tout
  *   l'historique, avec les actions sur les messages (03-A4, 03-E6, 08b).
+ *
+ * Le panneau reste ancré en bas à droite : seules sa largeur et sa hauteur
+ * changent, ce qui anime le déroulé comme le repli.
  */
 import { useState } from "react";
 
@@ -35,10 +38,10 @@ export function ChatPanel({ viewerId, viewerIsGm }: ChatPanelProps) {
   return (
     <section
       aria-label={text.title}
-      className={`border-line absolute z-20 flex flex-col rounded-md border ${
+      className={`border-line absolute right-4 bottom-3.5 z-20 flex flex-col overflow-hidden rounded-md border transition-[width,height,box-shadow,background-color] duration-[450ms] ease-[cubic-bezier(0.2,0.8,0.2,1)] motion-reduce:transition-none ${
         expanded
-          ? "animate-chat-unfold top-[112px] right-4 bottom-3.5 w-[384px] bg-[rgb(14_11_10/0.98)] shadow-[0_16px_40px_rgb(0_0_0/0.87)]"
-          : "right-5 bottom-4 h-[212px] w-[290px] bg-[rgb(14_11_10/0.96)] shadow-[0_10px_24px_rgb(0_0_0/0.67)]"
+          ? "h-[calc(100%-126px)] w-[384px] bg-[rgb(14_11_10/0.98)] shadow-[0_16px_40px_rgb(0_0_0/0.87)]"
+          : "h-[212px] w-[290px] bg-[rgb(14_11_10/0.96)] shadow-[0_10px_24px_rgb(0_0_0/0.67)]"
       }`}
     >
       <header
@@ -59,7 +62,7 @@ export function ChatPanel({ viewerId, viewerIsGm }: ChatPanelProps) {
           <svg
             viewBox="0 0 10 6"
             aria-hidden="true"
-            className={`h-1.5 w-2.5 ${expanded ? "rotate-180" : ""}`}
+            className={`h-1.5 w-2.5 transition-transform duration-300 ${expanded ? "rotate-180" : ""}`}
             fill="none"
             stroke="currentColor"
             strokeWidth="1.5"
@@ -77,7 +80,7 @@ export function ChatPanel({ viewerId, viewerIsGm }: ChatPanelProps) {
           viewerIsGm={viewerIsGm}
         />
       ) : (
-        <div className="flex min-h-0 flex-1 flex-col justify-end gap-[5px] overflow-hidden px-3.5 pt-2 pb-2.5">
+        <div className="animate-chat-content flex min-h-0 flex-1 flex-col justify-end gap-[5px] overflow-hidden px-3.5 pt-2 pb-2.5">
           {messages.slice(-PREVIEW_COUNT).map((message) => (
             <MessageRow
               key={message.id}

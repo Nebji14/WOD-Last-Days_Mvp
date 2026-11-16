@@ -10,7 +10,7 @@
  * - Dès que le lecteur a remonté, une commande ramène aux plus récents
  *   (US-013 · CA4).
  */
-import { useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { errorLabel, labels } from "@/shared/i18n";
 
@@ -79,6 +79,21 @@ export function ChatHistory({ messages, pending, viewerId, viewerIsGm }: ChatHis
     }
   }, [messages, pending, loadingOlder]);
 
+  // Pendant le déroulé du panneau, la hauteur change : la lecture reste calée en bas.
+  useEffect(() => {
+    const element = scrollRef.current;
+    if (!element) {
+      return;
+    }
+    const observer = new ResizeObserver(() => {
+      if (followRef.current) {
+        element.scrollTop = element.scrollHeight;
+      }
+    });
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+
   function handleScroll(): void {
     const element = scrollRef.current;
     if (!element) {
@@ -106,7 +121,7 @@ export function ChatHistory({ messages, pending, viewerId, viewerIsGm }: ChatHis
   }
 
   return (
-    <div className="relative min-h-0 flex-1">
+    <div className="animate-chat-content relative min-h-0 flex-1">
       <div
         ref={scrollRef}
         onScroll={handleScroll}

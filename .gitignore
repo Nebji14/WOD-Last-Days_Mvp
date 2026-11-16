@@ -1,0 +1,29 @@
+# Documents de travail privés : ne jamais publier
+/Cahier des charges*.md
+/Hunter — Référentiel des user stories.md
+/Hunter_MLD_*.dbml
+/*.figcraft
+/QUESTIONS.md
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Dépendances et builds
+node_modules/
+.next/
+out/
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+coverage/
+
+# Système et éditeurs
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

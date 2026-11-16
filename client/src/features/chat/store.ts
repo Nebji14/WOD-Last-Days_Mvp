@@ -106,7 +106,12 @@ export const useChatStore = create<ChatState>()((set, get) => ({
     }
     flushing = true;
     try {
-      for (const item of get().pending.filter((entry) => entry.errorCode === null)) {
+      // La file est relue à chaque tour : un message ajouté pendant un envoi part à la suite.
+      for (;;) {
+        const item = get().pending.find((entry) => entry.errorCode === null);
+        if (item === undefined) {
+          return;
+        }
         try {
           const message = await sendMessage(item.clientToken, item.body);
           set((state) => ({

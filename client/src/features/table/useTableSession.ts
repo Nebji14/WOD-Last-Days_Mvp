@@ -20,6 +20,7 @@ import {
 } from "@/shared/realtime/client";
 import { fetchRealtimeTicket, realtimeUrl } from "@/shared/realtime/ticket";
 import { setFlashForNextPage } from "@/shared/ui/flash";
+import { closeAllDetached } from "@/shared/windows/detached";
 
 import { parseTableState, type TableState } from "./state";
 
@@ -82,6 +83,7 @@ export function useTableSession(): TableSession {
     const unsubscribeStatus = realtime.onStatus((next) => {
       setStatus(next);
       if (next === "unauthenticated") {
+        closeAllDetached();
         router.replace(loginPathAfterLogout(account.role));
       }
     });
@@ -93,12 +95,19 @@ export function useTableSession(): TableSession {
     };
   }, [account, realtime, router]);
 
+  // T3 : fermer la fenêtre principale ferme aussi les fenêtres détachées.
+  useEffect(() => {
+    window.addEventListener("pagehide", closeAllDetached);
+    return () => window.removeEventListener("pagehide", closeAllDetached);
+  }, []);
+
   function logOut(): void {
     if (account === null || loggingOut) {
       return;
     }
     setLoggingOut(true);
     realtime?.stop();
+    closeAllDetached();
     // La déconnexion locale a lieu même si le serveur est injoignable.
     void logout()
       .catch(() => undefined)

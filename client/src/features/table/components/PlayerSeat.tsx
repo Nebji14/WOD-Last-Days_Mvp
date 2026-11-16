@@ -1,16 +1,24 @@
+"use client";
+
 /**
  * Siège d'un joueur autour de la table ([Composant — Siège joueur]).
  *
- * - Mon siège : bordure or, [Étiquette — VOUS] et action principale
- *   ([Mon siège — Vous], [03 — Variante : Mon siège sans personnage]).
+ * - Personnage joué : initiales, nom, concept, santé et volonté, visibles de
+ *   tous (Q03-3). Sans personnage : « Aucun personnage » (03-E4).
+ * - Mon siège : bordure or, [Étiquette — VOUS] et action principale, « Ouvrir
+ *   ma fiche » (03-I1) ou « Créer mon personnage » (03-I2).
+ * - Vue MJ : [Bouton — Ouvrir la fiche (MJ)] sur chaque siège (03-MJ-D4). Le
+ *   serveur revérifie ce droit à l'ouverture de la fiche.
  * - Joueur déconnecté : siège atténué, pastille masquée (03-E2).
  * - Le siège apparaît en fondu à l'arrivée du joueur (03-A6).
  *
  * Un joueur ne peut rien faire sur le siège d'un autre (03-I7).
  */
 import { labels } from "@/shared/i18n";
+import { HealthTrack, WillpowerDots } from "@/shared/ui/Gauges";
+import { openCreation, openSheet } from "@/shared/windows/detached";
 
-import type { PlacedSeat, SeatSlot } from "../seatLayout";
+import { initials, type PlacedSeat, type SeatSlot } from "../seatLayout";
 
 const SLOT_POSITION: Record<SeatSlot, string> = {
   "left-1": "left-10 top-[196px]",
@@ -24,16 +32,28 @@ const SLOT_POSITION: Record<SeatSlot, string> = {
   "bottom-right": "bottom-5 left-[calc(50%+145px)]",
 };
 
-export function PlayerSeat({ slot, seat, mine }: PlacedSeat) {
+const MAIN_ACTION =
+  "from-blood-from to-blood-to border-blood-line font-display text-ink-bright absolute left-3.5 h-8 w-[222px] cursor-pointer rounded-xs border bg-linear-to-b text-[11px] font-bold tracking-[2px] shadow-[0_0_12px_rgb(216_53_44/0.33)] transition hover:brightness-110";
+const GAUGE_LABEL =
+  "font-display text-ink-muted absolute left-3.5 text-[9px] leading-3 font-bold tracking-[2px]";
+
+interface PlayerSeatProps extends PlacedSeat {
+  /** Le MJ regarde la table : il peut ouvrir la fiche de chaque joueur. */
+  readonly gmView: boolean;
+}
+
+export function PlayerSeat({ slot, seat, mine, gmView }: PlayerSeatProps) {
   const text = labels.table.seat;
+  const { character } = seat;
+  const height = mine ? (character ? "h-[168px]" : "h-[128px]") : "h-[124px]";
   const frame = mine
-    ? "border-gold border-[1.5px] shadow-[0_0_22px_rgb(201_176_106/0.25),0_10px_24px_rgb(0_0_0/0.67)] min-h-[128px]"
-    : "border-line border shadow-seat min-h-[124px]";
+    ? "border-gold border-[1.5px] shadow-[0_0_22px_rgb(201_176_106/0.25),0_10px_24px_rgb(0_0_0/0.67)]"
+    : "border-line border shadow-seat";
 
   return (
     <section
       aria-label={seat.displayName}
-      className={`bg-seat animate-seat-in absolute z-10 w-[250px] rounded-md transition-opacity duration-500 ${frame} ${SLOT_POSITION[slot]} ${
+      className={`bg-seat animate-seat-in absolute z-10 w-[250px] rounded-md transition-opacity duration-500 ${height} ${frame} ${SLOT_POSITION[slot]} ${
         seat.online ? "" : "opacity-55"
       }`}
     >
@@ -41,7 +61,7 @@ export function PlayerSeat({ slot, seat, mine }: PlacedSeat) {
         aria-hidden="true"
         className="border-line-strong bg-field font-display text-ink absolute top-3.5 left-3.5 flex size-11 items-center justify-center rounded-full border-[1.5px] text-[15px] font-bold"
       >
-        ?
+        {character ? initials(character.name) : "?"}
       </span>
       {seat.online && (
         <span
@@ -52,27 +72,61 @@ export function PlayerSeat({ slot, seat, mine }: PlacedSeat) {
       <p className="text-ink-muted absolute top-[11px] right-16 left-[70px] truncate text-sm leading-[17px] font-medium italic">
         {seat.displayName}
       </p>
-      <p className="text-ink absolute top-[26px] left-[70px] text-xl leading-6 font-bold">
-        {text.noCharacter}
+      <p className="text-ink absolute top-[26px] right-2 left-[70px] truncate text-xl leading-6 font-bold">
+        {character ? character.name : text.noCharacter}
+      </p>
+      <p className="text-ink-muted absolute top-[50px] right-2 left-[70px] truncate text-[13px] leading-4 italic">
+        {character ? character.concept : mine ? text.createHint : ""}
       </p>
       {mine && (
+        <span className="bg-gold font-display absolute top-3 right-[7px] flex h-[18px] items-center rounded-xs px-[7px] text-[9px] font-bold tracking-[2px] text-[#120c0a]">
+          {text.you}
+        </span>
+      )}
+
+      {character && (
         <>
-          <p className="text-ink-muted absolute top-[50px] left-[70px] text-[13px] leading-4 italic">
-            {text.createHint}
-          </p>
-          <span className="bg-gold font-display absolute top-3 right-[7px] flex h-[18px] items-center rounded-xs px-[7px] text-[9px] font-bold tracking-[2px] text-[#120c0a]">
-            {text.you}
+          <span className={`${GAUGE_LABEL} top-[78px]`}>{text.health}</span>
+          <span className="absolute top-[77px] left-20">
+            <HealthTrack
+              capacity={character.healthMax}
+              wounds={character.woundTrack}
+              label={text.health}
+            />
           </span>
-          {/* TODO(US-007, 03-I2) : ouvrir la création de personnage (écran 06) en fenêtre détachable. */}
-          <button
-            type="button"
-            disabled
-            title={labels.table.comingSoon}
-            className="from-blood-from to-blood-to border-blood-line font-display text-ink-bright absolute top-[82px] left-3.5 h-8 w-[222px] cursor-not-allowed rounded-xs border bg-linear-to-b text-[11px] font-bold tracking-[2px] opacity-60"
-          >
-            {text.createCharacter}
-          </button>
+          <span className={`${GAUGE_LABEL} top-[98px]`}>{text.willpower}</span>
+          <span className="absolute top-[98px] left-20">
+            <WillpowerDots
+              max={character.willpowerMax}
+              current={character.willpowerCurrent}
+              label={text.willpower}
+            />
+          </span>
         </>
+      )}
+
+      {character && gmView && (
+        <button
+          type="button"
+          onClick={() => openSheet(character.id)}
+          className="from-copper-from to-copper-to border-copper font-display text-ink-bright absolute top-[93px] right-3 h-[22px] w-[62px] cursor-pointer rounded-xs border bg-linear-to-b text-[9px] font-bold tracking-[2px] transition hover:brightness-110"
+        >
+          {text.sheet}
+        </button>
+      )}
+      {mine && character && (
+        <button
+          type="button"
+          onClick={() => openSheet(character.id)}
+          className={`${MAIN_ACTION} top-[124px]`}
+        >
+          {text.openSheet}
+        </button>
+      )}
+      {mine && !character && (
+        <button type="button" onClick={openCreation} className={`${MAIN_ACTION} top-[82px]`}>
+          {text.createCharacter}
+        </button>
       )}
     </section>
   );

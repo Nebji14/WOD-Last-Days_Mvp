@@ -87,7 +87,10 @@ export const fr = {
       noCharacter: "Aucun personnage",
       createHint: "Crée ton chasseur pour jouer.",
       createCharacter: "CRÉER MON PERSONNAGE",
+      openSheet: "OUVRIR MA FICHE",
       sheet: "FICHE",
+      health: "SANTÉ",
+      willpower: "VOLONTÉ",
     },
     tools: {
       players: "JOUEURS",

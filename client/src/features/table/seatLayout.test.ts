@@ -4,7 +4,7 @@ import { arrangeSeats, initials } from "./seatLayout";
 import type { Seat } from "./state";
 
 function seat(position: number, accountId: string): Seat {
-  return { position, accountId, displayName: accountId, online: true };
+  return { position, accountId, displayName: accountId, online: true, character: null };
 }
 
 describe("arrangeSeats", () => {

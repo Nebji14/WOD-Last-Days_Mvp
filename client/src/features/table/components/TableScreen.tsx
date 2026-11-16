@@ -55,7 +55,7 @@ export function TableScreen() {
           />
         )}
         {arrangeSeats(seats, isGm ? null : account.id).map((placed) => (
-          <PlayerSeat key={placed.seat.accountId} {...placed} />
+          <PlayerSeat key={placed.seat.accountId} {...placed} gmView={isGm} />
         ))}
         <ChatPanel viewerId={account.id} viewerIsGm={isGm} />
         <ConnectionNotice status={session.status} />

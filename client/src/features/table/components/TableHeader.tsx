@@ -6,6 +6,7 @@
  */
 import type { Account } from "@/features/auth/api";
 import { labels } from "@/shared/i18n";
+import { openProfile } from "@/shared/windows/detached";
 
 import { initials } from "../seatLayout";
 import { GmTools } from "./GmTools";
@@ -51,17 +52,17 @@ export function TableHeader({ account, loggingOut, onLogout }: TableHeaderProps)
       >
         {labels.table.logout}
       </button>
-      {/* TODO(US-012 · CA1, écran 09) : ouvrir le profil dans une fenêtre détachable (03-I3). */}
-      <span
-        role="img"
+      <button
+        type="button"
+        onClick={openProfile}
         aria-label={`${labels.table.profile} : ${account.displayName}`}
-        title={account.displayName}
-        className={`bg-field font-display absolute top-[13px] right-[26px] flex size-[38px] items-center justify-center rounded-full border-[1.5px] font-bold ${
+        title={labels.table.profile}
+        className={`bg-field font-display absolute top-[13px] right-[26px] flex size-[38px] cursor-pointer items-center justify-center rounded-full border-[1.5px] font-bold transition hover:brightness-125 ${
           isGm ? "border-copper text-[12px] text-[#ca8f68]" : "border-gold text-gold text-[15px]"
         }`}
       >
         {isGm ? labels.table.gm.initials : initials(account.displayName).slice(0, 1)}
-      </span>
+      </button>
     </header>
   );
 }

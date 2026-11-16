@@ -12,8 +12,8 @@ import { useEffect, useRef } from "react";
 
 const EMBER_COLORS = ["255, 160, 70", "255, 122, 30", "214, 110, 50"] as const;
 const ASH_COLOR = "138, 129, 122";
-/** Une particule pour cette surface d'écran, en pixels CSS. */
-const AREA_PER_PARTICLE = 22_000;
+/** Surface d'écran par particule, en pixels CSS, selon la densité demandée. */
+const AREA_PER_PARTICLE = { normal: 22_000, sparse: 60_000 } as const;
 const ASH_RATIO = 0.25;
 const MAX_FRAME_SECONDS = 0.05;
 
@@ -64,9 +64,11 @@ function drawParticle(context: CanvasRenderingContext2D, particle: Particle, tim
 interface EmberParticlesProps {
   /** Classes de positionnement et d'opacité du canvas. */
   readonly className?: string;
+  /** `sparse` : braises discrètes de la table de jeu (03-A5). */
+  readonly density?: keyof typeof AREA_PER_PARTICLE;
 }
 
-export function EmberParticles({ className = "" }: EmberParticlesProps) {
+export function EmberParticles({ className = "", density = "normal" }: EmberParticlesProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -94,7 +96,7 @@ export function EmberParticles({ className = "" }: EmberParticlesProps) {
       canvas.width = Math.round(width * ratio);
       canvas.height = Math.round(height * ratio);
       context.setTransform(ratio, 0, 0, ratio, 0, 0);
-      const count = Math.round((width * height) / AREA_PER_PARTICLE);
+      const count = Math.round((width * height) / AREA_PER_PARTICLE[density]);
       particles = Array.from({ length: count }, () => createParticle(width, height));
       if (reducedMotion) {
         render(0);
@@ -125,7 +127,7 @@ export function EmberParticles({ className = "" }: EmberParticlesProps) {
       observer.disconnect();
       cancelAnimationFrame(frame);
     };
-  }, []);
+  }, [density]);
 
   return (
     <canvas

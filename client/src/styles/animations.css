@@ -1,0 +1,128 @@
+/*
+ * Animations de l'interface.
+ * Écran titre : A1 (ouverture), A2 (reflets et halo), A4 (invite), I1 (sortie).
+ * La préférence « réduire les animations » (01-I2) les neutralise en fin de fichier.
+ */
+@theme {
+  /* A1 : ouverture de l'écran titre, dans l'ordre fond → titre → halo → sous-titre → invite. */
+  --animate-title-bg: fade-in 1.4s ease-out both;
+  --animate-title-smoke: smoke-in 2.6s cubic-bezier(0.2, 0.6, 0.2, 1) 1s both;
+  --animate-title-halo:
+    halo-ignite 1.6s ease-out 3.2s both, halo-flicker 4.5s ease-in-out 4.8s infinite;
+  --animate-title-sub: fade-in 1.2s ease-out 4s both;
+  --animate-title-prompt: fade-in 0.8s ease-out 5s both;
+  --animate-flame-shift: flame-shift 3.2s ease-in-out infinite alternate;
+  --animate-prompt-blink: prompt-blink 1s ease-in-out 5.8s infinite alternate;
+  --animate-prompt-confirm: prompt-blink 0.12s linear 5 alternate;
+  --animate-fade-to-black: fade-in 0.7s ease-in both;
+  --animate-toast-in: toast-in 0.35s ease-out both;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* A1 : le titre se condense comme de la fumée (flou et transparent → net et opaque). */
+@keyframes smoke-in {
+  0% {
+    opacity: 0;
+    filter: blur(26px);
+    transform: translateY(1.2cqw) scale(1.06);
+    letter-spacing: 0.16em;
+  }
+  60% {
+    opacity: 0.75;
+    filter: blur(6px);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0);
+    transform: none;
+    letter-spacing: 0.0857em;
+  }
+}
+
+@keyframes halo-ignite {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* A2 : le halo vacille. */
+@keyframes halo-flicker {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  35% {
+    opacity: 0.78;
+    transform: scale(0.97);
+  }
+  60% {
+    opacity: 0.94;
+    transform: scale(1.03);
+  }
+  80% {
+    opacity: 0.84;
+    transform: scale(0.99);
+  }
+}
+
+/* A2 : reflets de flammes sur le bas des lettres. */
+@keyframes flame-shift {
+  from {
+    background-position: 50% 0%;
+  }
+  to {
+    background-position: 50% 100%;
+  }
+}
+
+/* A4 : clignotement de l'invite, opacité 100 % ↔ 15 %. */
+@keyframes prompt-blink {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.15;
+  }
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* 01-I2 : A1 réduite à un fondu simple ; A2 et A4 désactivées. */
+@media (prefers-reduced-motion: reduce) {
+  .animate-title-bg,
+  .animate-title-smoke,
+  .animate-title-halo,
+  .animate-title-sub,
+  .animate-title-prompt {
+    animation: fade-in 0.6s ease-out both;
+  }
+
+  .animate-flame-shift,
+  .animate-prompt-blink,
+  .animate-prompt-confirm {
+    animation: none;
+  }
+}

@@ -37,6 +37,7 @@ async def _create_gm(username: str, email: str, password: str) -> None:
                 accounts=PgAccountRepository(pool),
                 identity=SupabaseAuthGateway(settings, client),
                 technical_email_domain=settings.technical_email_domain,
+                gm_access_path=settings.gm_access_path,
             )
             account = await service.create_gm(username, email, password)
     finally:

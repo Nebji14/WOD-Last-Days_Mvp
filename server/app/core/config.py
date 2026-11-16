@@ -26,6 +26,9 @@ class Settings(BaseSettings):
         session_idle_seconds: durée d'inactivité avant expiration (CDC 12.2).
         technical_email_domain: domaine des adresses techniques associées aux
             noms d'utilisateur des joueurs (décision T-3).
+        gm_access_path: chemin réservé de l'accès du MJ côté client, sans barre
+            oblique (décision T-4). Communiqué uniquement à qui présente les
+            identifiants valides du MJ sur l'accès joueur (02a-E6).
     """
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
@@ -38,6 +41,7 @@ class Settings(BaseSettings):
     allowed_origins: Annotated[list[str], NoDecode] = Field(default_factory=list)
     session_idle_seconds: int = Field(default=7200, ge=300, le=86400)
     technical_email_domain: str = "users.hunter.local"
+    gm_access_path: str = Field(default="", pattern=r"^[A-Za-z0-9-]{0,64}$")
 
     @field_validator("allowed_origins", mode="before")
     @classmethod

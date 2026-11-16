@@ -10,10 +10,8 @@ const REFRESH_PATH = "/api/auth/refresh";
 const AUTH_PREFIX = "/api/auth/";
 const SESSION_EXPIRED_CODE = "not_authenticated";
 
-export interface ApiErrorDetail {
-  readonly field?: string;
-  readonly rule?: string;
-}
+/** Précision jointe à une erreur : champ et règle en cause, ou donnée propre au code d'erreur. */
+export type ApiErrorDetail = Readonly<Record<string, string>>;
 
 /** Erreur renvoyée par l'API, ou panne réseau (`network_error`). */
 export class ApiError extends Error {
@@ -109,11 +107,13 @@ async function toApiError(response: Response): Promise<ApiError> {
   );
 }
 
+/** Ne conserve que les propriétés textuelles d'une précision d'erreur. */
 function toDetail(value: Record<string, unknown>): ApiErrorDetail {
-  return {
-    field: typeof value.field === "string" ? value.field : undefined,
-    rule: typeof value.rule === "string" ? value.rule : undefined,
-  };
+  return Object.fromEntries(
+    Object.entries(value).filter(
+      (entry): entry is [string, string] => typeof entry[1] === "string",
+    ),
+  );
 }
 
 export function isRecord(value: unknown): value is Record<string, unknown> {

@@ -81,14 +81,20 @@ class AuthService:
         accounts: dépôt des comptes.
         identity: fournisseur d'identité.
         technical_email_domain: domaine des adresses techniques des joueurs.
+        gm_access_path: chemin réservé de l'accès du MJ, joint à l'erreur 02a-E6.
     """
 
     def __init__(
-        self, accounts: AccountStore, identity: IdentityProvider, technical_email_domain: str
+        self,
+        accounts: AccountStore,
+        identity: IdentityProvider,
+        technical_email_domain: str,
+        gm_access_path: str = "",
     ) -> None:
         self._accounts = accounts
         self._identity = identity
         self._email_domain = technical_email_domain
+        self._gm_access_path = gm_access_path
 
     async def register_player(
         self, username: str, password: str, password_confirmation: str
@@ -176,7 +182,14 @@ class AuthService:
             await self._discard_session(tokens)
             if account.role is Role.GM:
                 raise AppError(
-                    ErrorCode.WRONG_PORTAL_GM, "Ce compte se connecte par l'accès du MJ.", 403
+                    ErrorCode.WRONG_PORTAL_GM,
+                    "Ce compte se connecte par l'accès du MJ.",
+                    403,
+                    details=(
+                        [{"gm_access_path": f"/{self._gm_access_path}"}]
+                        if self._gm_access_path
+                        else None
+                    ),
                 )
             raise AppError(
                 ErrorCode.WRONG_PORTAL_PLAYER, "Cet accès est réservé au maître du jeu.", 403

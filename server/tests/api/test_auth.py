@@ -136,6 +136,7 @@ def test_gm_on_player_portal_is_refused_without_session(ctx: TestContext) -> Non
 
     assert response.status_code == 403
     assert _error_code(response) == "wrong_portal_gm"
+    assert response.json()["error"]["details"] == [{"gm_access_path": "/mj-test"}]
     assert ACCESS_COOKIE not in response.cookies
     assert ctx.identity.sessions == {}
 

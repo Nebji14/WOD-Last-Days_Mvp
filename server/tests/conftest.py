@@ -47,7 +47,9 @@ def settings() -> Settings:
 def ctx(settings: Settings) -> Iterator[TestContext]:
     accounts = FakeAccountStore()
     identity = FakeIdentityProvider()
-    auth_service = AuthService(accounts, identity, settings.technical_email_domain)
+    auth_service = AuthService(
+        accounts, identity, settings.technical_email_domain, gm_access_path="mj-test"
+    )
     container = Container(
         settings=settings,
         auth_service=auth_service,

@@ -11,6 +11,73 @@ export const fr = {
     game: "HUNTER",
     campaign: "LAST DAYS",
   },
+  title: {
+    prompt: "COMMENCER L'AVENTURE",
+  },
+  auth: {
+    usernameLabel: "Nom d'utilisateur",
+    passwordLabel: "Mot de passe",
+    passwordConfirmationLabel: "Confirmer le mot de passe",
+    showPassword: "Afficher",
+    hidePassword: "Masquer",
+    or: "ou",
+    googleSoon: "Connexion Google bientôt disponible",
+    login: {
+      heading: "Connexion",
+      subtitle: "Reprends la traque là où tu l'as laissée.",
+      usernamePlaceholder: "ton nom de chasseur",
+      submit: "SE CONNECTER",
+      google: "Continuer avec Google",
+      noAccount: "Pas encore de compte ?",
+      toRegister: "Créer un compte",
+    },
+    register: {
+      heading: "Inscription",
+      subtitle: "Rejoins la traque : ton compte gardera tes personnages.",
+      usernamePlaceholder: "choisis ton nom de chasseur",
+      submit: "CRÉER MON COMPTE",
+      google: "S'inscrire avec Google",
+      hasAccount: "Déjà un compte ?",
+      toLogin: "Se connecter",
+    },
+    gm: {
+      banner: "ACCÈS MAÎTRE DU JEU",
+      heading: "Maître du jeu",
+      subtitle: "Le conteur reprend sa place derrière l'écran.",
+      usernameLabel: "Identifiant du MJ",
+      usernamePlaceholder: "identifiant du compte maître du jeu",
+      restricted: "Accès réservé au maître du jeu.",
+    },
+    wrongPortal: {
+      gmTitle: "MAÎTRE DU JEU ?",
+      gmLink: "→  Reprendre ta place derrière l'écran",
+      playerTitle: "HALTE-LÀ !",
+      playerLink: "→  Rejoindre la connexion des joueurs",
+    },
+  },
+  flash: {
+    close: "Fermer la notification",
+    loggedOut: {
+      title: "DÉCONNEXION RÉUSSIE",
+      message: "Tu as quitté la partie et ton compte. À bientôt, chasseur.",
+    },
+    registered: {
+      title: "COMPTE CRÉÉ",
+      message: "Ton compte est prêt. Connecte-toi pour rejoindre la table.",
+    },
+  },
+  table: {
+    loading: "Ouverture de la table…",
+    placeholder: "La table de jeu arrive à l'étape suivante.",
+    connectedAs: "Connecté en tant que",
+    roleGm: "maître du jeu",
+    rolePlayer: "joueur",
+    logout: "SE DÉCONNECTER",
+  },
+  notFound: {
+    title: "PAGE INTROUVABLE",
+    back: "Revenir à l'écran titre",
+  },
   errors: {
     validation_error: "Certaines informations saisies sont invalides.",
     invalid_credentials: "Identifiant ou mot de passe incorrect.",
@@ -29,7 +96,8 @@ export const fr = {
     not_found: "Élément introuvable.",
     service_unavailable: "Le service est momentanément indisponible. Réessaie dans un instant.",
     internal_error: "Une erreur est survenue. Réessaie dans un instant.",
-    network_error: "Connexion perdue. Vérifie ta connexion, puis réessaie.",
+    network_error:
+      "Connexion perdue. Vérifie ta connexion, puis réessaie : rien n'est à ressaisir.",
   },
   passwordRules: {
     min_length: "Au moins 10 caractères.",

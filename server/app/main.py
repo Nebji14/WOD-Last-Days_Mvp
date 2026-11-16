@@ -50,6 +50,7 @@ def create_app(settings: Settings | None = None, container: Container | None = N
                     accounts=PgAccountRepository(pool),
                     identity=SupabaseAuthGateway(settings, http_client),
                     technical_email_domain=settings.technical_email_domain,
+                    gm_access_path=settings.gm_access_path,
                 ),
                 token_verifier=SupabaseTokenVerifier(settings.supabase_url),
                 rate_limiter=RateLimiter(),

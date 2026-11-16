@@ -127,8 +127,13 @@ class SupabaseAuthGateway:
             raise IdentityProviderError from exc
 
     def _tokens_or_invalid(self, response: httpx.Response) -> SessionTokens:
-        """Extrait les jetons d'une réponse, ou signale des identifiants refusés."""
-        if response.status_code in (400, 401, 403):
+        """Extrait les jetons d'une réponse, ou signale des identifiants refusés.
+
+        Seul le statut 400 correspond à des identifiants refusés. Un statut 401
+        ou 403 signale une clé d'API invalide : c'est une erreur de
+        configuration, traitée comme une panne du fournisseur.
+        """
+        if response.status_code == 400:
             raise InvalidCredentialsError
         self._raise_for_unexpected(response)
         body = response.json()

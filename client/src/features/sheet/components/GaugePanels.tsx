@@ -6,12 +6,15 @@
  * Les blessures et la volonté disponible bougent pendant la partie : elles se
  * modifient à tout moment. Les maximums ne changent qu'avec la progression du
  * personnage : ils se modifient en mode modification. Le serveur garde la
- * piste de blessures rangée par gravité et refuse tout dépassement. Pour un
- * PNJ, les maximums sont « fixés par le MJ », sans base calculée.
+ * piste rangée par gravité ; une piste pleine aggrave la blessure la moins
+ * grave. Les trois dernières cases portent les malus −1, −2 et −3, et la
+ * dernière case signale l'état critique. Pour un PNJ, les maximums sont
+ * « fixés par le MJ », sans base calculée.
  */
 import { changeWounds, setSheetField, type WoundSymbol } from "@/features/characters/api";
 import { fill, labels } from "@/shared/i18n";
 
+import { boxPenalty, healthState, woundPenalty } from "../health";
 import { NumberValue, Panel, useSheet } from "./primitives";
 
 const WOUND_STYLE: Record<string, string> = {
@@ -21,6 +24,10 @@ const WOUND_STYLE: Record<string, string> = {
 };
 const ACTION =
   "border-line bg-panel font-display text-ink hover:border-gold cursor-pointer rounded-xs border px-2 py-1 text-[9px] font-bold tracking-[1px]";
+/** Santé maximale saisissable, PNJ compris. */
+const HEALTH_MAX = 20;
+/** Au-delà, les cases rétrécissent pour garder la piste lisible. */
+const LARGE_BOXES_UP_TO = 12;
 const CAPACITY = "text-ink-muted flex items-center gap-1.5 text-sm font-medium italic";
 
 function freeBoxesLabel(free: number): string {
@@ -36,12 +43,31 @@ function capacityLabel(isNpc: boolean, base: number): string {
   return isNpc ? labels.npcSheet.fixedByGm : fill(labels.sheet.health.capacity, { base });
 }
 
+/** Case de la piste, avec son malus sous les trois dernières. */
+function HealthBox({ wound, penalty, large }: { wound: string; penalty: number; large: boolean }) {
+  return (
+    <span className="flex flex-col items-center gap-1">
+      <span
+        className={`font-track flex items-center justify-center border leading-none font-bold ${
+          large ? "size-[26px] text-lg" : "size-5 text-sm"
+        } ${WOUND_STYLE[wound] ?? "border-line bg-panel"}`}
+      >
+        {wound}
+      </span>
+      <span className="text-ink-muted h-3 text-[11px] leading-3 font-semibold">
+        {penalty < 0 ? `−${-penalty}` : ""}
+      </span>
+    </span>
+  );
+}
+
 export function HealthPanel() {
   const { character, sheet, editing, run } = useSheet();
   const text = labels.sheet.health;
   const capacity = sheet.effective.health_max;
   const wounds = sheet.wound_track;
-  const boxes = Array.from({ length: capacity }, (_, index) => wounds[index] ?? "");
+  const state = healthState(wounds, capacity);
+  const penalty = woundPenalty(wounds, capacity);
   const act = (action: "add" | "heal" | "worsen", wound: WoundSymbol | null) => () =>
     void run(() => changeWounds(sheet.id, action, wound, wounds));
   const worsenable: WoundSymbol | null = wounds.includes("/")
@@ -49,6 +75,7 @@ export function HealthPanel() {
     : wounds.includes("X")
       ? "X"
       : null;
+  const addAction = `${ACTION} disabled:cursor-not-allowed disabled:opacity-40`;
 
   return (
     <Panel
@@ -61,7 +88,7 @@ export function HealthPanel() {
             value={capacity}
             editing={editing}
             min={1}
-            max={30}
+            max={HEALTH_MAX}
             onCommit={(value) =>
               void run(() => setSheetField(sheet.id, "health_max", value, capacity))
             }
@@ -70,46 +97,45 @@ export function HealthPanel() {
       }
     >
       <div role="img" aria-label={`${text.title} : ${wounds.length} / ${capacity}`}>
-        <div aria-hidden="true" className="flex flex-wrap gap-[7px]">
-          {boxes.map((wound, index) => (
-            <span
+        <div aria-hidden="true" className="flex flex-wrap gap-x-[7px] gap-y-1">
+          {Array.from({ length: capacity }, (_, index) => (
+            <HealthBox
               key={index}
-              className={`font-track flex size-[26px] items-center justify-center border text-lg leading-none font-bold ${
-                WOUND_STYLE[wound] ?? "border-line bg-panel"
-              }`}
-            >
-              {wound}
-            </span>
+              wound={wounds[index] ?? ""}
+              penalty={boxPenalty(index, capacity)}
+              large={capacity <= LARGE_BOXES_UP_TO}
+            />
           ))}
         </div>
       </div>
-      <p className="text-ink-muted mt-3 text-[15px] font-medium italic">
+      <p className="text-ink-muted mt-2 text-[15px] font-medium italic">
         {text.track} {wounds ? wounds.split("").join(" ") : text.empty} ·{" "}
-        {freeBoxesLabel(capacity - wounds.length)}
+        {freeBoxesLabel(capacity - wounds.length)} ·{" "}
+        {penalty < 0 ? fill(text.penalty, { penalty: `−${-penalty}` }) : text.noPenalty}
       </p>
+      {state !== "fine" && (
+        <p role="status" className="text-danger mt-1 text-[15px] font-semibold">
+          {text.states[state]}
+        </p>
+      )}
       <div className="mt-2.5 flex flex-wrap gap-1.5">
-        <button type="button" onClick={act("add", "/")} className={ACTION}>
+        <button type="button" onClick={act("add", "/")} disabled={state === "dead"} className={addAction}>
           {text.addBashing}
         </button>
-        <button type="button" onClick={act("add", "X")} className={ACTION}>
+        <button type="button" onClick={act("add", "X")} disabled={state === "dead"} className={addAction}>
           {text.addLethal}
         </button>
-        <button type="button" onClick={act("add", "*")} className={ACTION}>
+        <button type="button" onClick={act("add", "*")} disabled={state === "dead"} className={addAction}>
           {text.addAggravated}
         </button>
-        <button
-          type="button"
-          onClick={act("heal", null)}
-          disabled={wounds === ""}
-          className={`${ACTION} disabled:cursor-not-allowed disabled:opacity-40`}
-        >
+        <button type="button" onClick={act("heal", null)} disabled={wounds === ""} className={addAction}>
           {text.heal}
         </button>
         <button
           type="button"
           onClick={act("worsen", worsenable)}
           disabled={worsenable === null}
-          className={`${ACTION} disabled:cursor-not-allowed disabled:opacity-40`}
+          className={addAction}
         >
           {text.worsen}
         </button>

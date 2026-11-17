@@ -41,9 +41,26 @@ def test_added_wound_is_filed_by_severity(track: str, wound: Wound, expected: st
     assert add_wound(track, wound, capacity=7) == expected
 
 
-def test_adding_to_a_full_track_is_refused_without_erasing_anything() -> None:
+@pytest.mark.parametrize(
+    ("track", "wound", "expected"),
+    [
+        ("///////", Wound.BASHING, "X//////"),
+        ("///////", Wound.LETHAL, "X//////"),
+        ("XXXXXXX", Wound.LETHAL, "*XXXXXX"),
+        ("XXXXXXX", Wound.BASHING, "*XXXXXX"),
+        ("*XX////", Wound.AGGRAVATED, "**XX///"),
+        ("*XXXXXX", Wound.BASHING, "**XXXXX"),
+    ],
+)
+def test_full_track_worsens_the_least_severe_wound(
+    track: str, wound: Wound, expected: str
+) -> None:
+    assert add_wound(track, wound, capacity=7) == expected
+
+
+def test_fully_aggravated_track_takes_no_more_wounds() -> None:
     with pytest.raises(TrackFullError):
-        add_wound("*X/", Wound.AGGRAVATED, capacity=3)
+        add_wound("***", Wound.BASHING, capacity=3)
 
 
 def test_healing_removes_the_least_severe_wound_by_default() -> None:

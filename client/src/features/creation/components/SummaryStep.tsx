@@ -29,7 +29,7 @@ const BOUNDS: Readonly<Record<EffectiveField, { min: number; max: number }>> = {
   speed: { min: 0, max: 99 },
   defense: { min: 0, max: 99 },
   initiative: { min: 0, max: 99 },
-  health_max: { min: 1, max: 30 },
+  health_max: { min: 1, max: 20 },
   willpower_max: { min: 0, max: 30 },
 };
 

@@ -96,6 +96,15 @@ export const frSheet = {
       free: "{count} cases libres",
       oneFree: "1 case libre",
       noneFree: "piste pleine",
+      penalty: "malus de blessure {penalty}",
+      noPenalty: "aucun malus",
+      states: {
+        unconscious:
+          "Dernière case contondante : jet de Vigueur à chaque tour pour rester conscient.",
+        bleeding:
+          "Dernière case létale : sans soins médicaux, une blessure létale devient aggravée chaque minute.",
+        dead: "Toutes les cases sont aggravées : le personnage est mort.",
+      },
       addBashing: "+ contondante",
       addLethal: "+ létale",
       addAggravated: "+ aggravée",
@@ -229,7 +238,7 @@ export const frSheet = {
       unknown_field: "Champ inconnu.",
       health_below_wounds: "La santé ne peut pas descendre sous le nombre de blessures.",
       willpower_above_max: "La volonté disponible ne peut pas dépasser la volonté maximale.",
-      TrackFullError: "La piste est pleine : aucune blessure n'est effacée pour faire de la place.",
+      TrackFullError: "Toutes les cases sont aggravées : la piste ne peut plus rien recevoir.",
       NoSuchWoundError: "Aucune blessure de ce type sur la piste.",
       WoundRuleError: "Action impossible sur la piste.",
       xp_insufficient: "Solde d'expérience insuffisant.",

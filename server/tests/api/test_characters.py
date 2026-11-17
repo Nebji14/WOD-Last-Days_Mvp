@@ -271,12 +271,15 @@ def test_wounds_stay_ordered_and_within_health(ctx: TestContext) -> None:
     assert _wound(lea, sheet_id, "add", "*", "/").json()["sheets"][0]["wound_track"] == "*/"
     assert _wound(lea, sheet_id, "add", "X", "*/").json()["sheets"][0]["wound_track"] == "*X/"
 
-    full = _wound(lea, sheet_id, "add", "*", "*X/")
-    assert full.status_code == 422
-    assert rule(full) == "TrackFullError"
+    full = _wound(lea, sheet_id, "add", "/", "*X/")
+    assert full.json()["sheets"][0]["wound_track"] == "*XX"
+    assert _wound(lea, sheet_id, "worsen", "X", "*XX").json()["sheets"][0]["wound_track"] == "**X"
+    assert _wound(lea, sheet_id, "heal", None, "**X").json()["sheets"][0]["wound_track"] == "**"
+    assert _wound(lea, sheet_id, "add", "*", "**").json()["sheets"][0]["wound_track"] == "***"
 
-    assert _wound(lea, sheet_id, "worsen", "/", "*X/").json()["sheets"][0]["wound_track"] == "*XX"
-    assert _wound(lea, sheet_id, "heal", None, "*XX").json()["sheets"][0]["wound_track"] == "*X"
+    dead = _wound(lea, sheet_id, "add", "/", "***")
+    assert dead.status_code == 422
+    assert rule(dead) == "TrackFullError"
 
 
 def test_health_cannot_drop_below_the_wounds_taken(ctx: TestContext) -> None:

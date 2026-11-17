@@ -52,7 +52,8 @@ NUMBER_FIELDS: dict[str, tuple[int, int]] = {
     "speed": (0, 99),
     "defense": (0, 99),
     "initiative": (0, 99),
-    "health_max": (1, 30),
+    # Vigueur + Taille ne dépasse pas 15 ; 20 laisse de la marge aux PNJ.
+    "health_max": (1, 20),
     "willpower_max": (0, 30),
     "willpower_current": (0, 30),
     "morality": (1, 10),

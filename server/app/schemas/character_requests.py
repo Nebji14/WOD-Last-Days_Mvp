@@ -53,7 +53,7 @@ class EffectiveInput(BaseModel):
     speed: int | None = Field(default=None, ge=0, le=99)
     defense: int | None = Field(default=None, ge=0, le=99)
     initiative: int | None = Field(default=None, ge=0, le=99)
-    health_max: int | None = Field(default=None, ge=1, le=30)
+    health_max: int | None = Field(default=None, ge=1, le=20)
     willpower_max: int | None = Field(default=None, ge=0, le=30)
 
 

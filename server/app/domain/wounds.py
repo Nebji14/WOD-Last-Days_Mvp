@@ -2,8 +2,9 @@
 
 La piste est une chaîne où chaque caractère est une blessure : ``*`` aggravée,
 ``X`` létale, ``/`` contondante. Elle est toujours rangée par gravité
-décroissante et sans trou ; les cases vides, à droite, ne sont pas stockées
-.
+décroissante et sans trou ; les cases vides, à droite, ne sont pas stockées.
+Quand toutes les cases sont prises, une nouvelle blessure aggrave la moins
+grave au lieu d'en effacer une.
 
 Module pur : aucun accès réseau ni base de données.
 """
@@ -29,7 +30,7 @@ class WoundRuleError(Exception):
 
 
 class TrackFullError(WoundRuleError):
-    """Toutes les cases de santé portent déjà une blessure."""
+    """Toutes les cases portent une blessure aggravée : le personnage est mort."""
 
 
 class NoSuchWoundError(WoundRuleError):
@@ -54,14 +55,21 @@ def is_valid_track(track: str, capacity: int) -> bool:
 def add_wound(track: str, wound: Wound, capacity: int) -> str:
     """Ajoute une blessure en gardant la piste rangée.
 
-    Aucune blessure existante n'est effacée pour faire de la place.
+    S'il reste une case vide, la blessure s'y inscrit et décale les moins
+    graves vers la droite. Sinon, elle aggrave la blessure la moins grave :
+    contondante → létale, létale → aggravée ; une blessure aggravée la rend
+    directement aggravée. Aucune blessure n'est effacée.
 
     Raises:
-        TrackFullError: si la piste est pleine.
+        TrackFullError: si toutes les cases sont déjà aggravées.
     """
-    if len(track) >= capacity:
+    if len(track) < capacity:
+        return _sorted(track + wound)
+    least = Wound(track[-1]) if track else None
+    if least is None or least is Wound.AGGRAVATED:
         raise TrackFullError
-    return _sorted(track + wound)
+    worse = Wound.AGGRAVATED if wound is Wound.AGGRAVATED else _NEXT_SEVERITY[least]
+    return _sorted(track[:-1] + worse)
 
 
 def heal_wound(track: str, wound: Wound | None = None) -> str:

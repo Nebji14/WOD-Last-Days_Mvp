@@ -62,6 +62,14 @@ class FakeCharacterStore:
     def awaken(self, character_id: UUID) -> None:
         self._put(replace(self._characters[character_id], awakened_at=_now()))
 
+    async def mark_awakened(self, character_id: UUID) -> None:
+        if self._characters[character_id].awakened_at is None:
+            self.awaken(character_id)
+
+    def owned_by(self, owner_id: UUID) -> list[Character]:
+        """Personnages d'un compte, du plus ancien au plus récent."""
+        return [c for c in self._characters.values() if c.owner_id == owner_id]
+
     async def get(self, character_id: UUID) -> Character | None:
         character = self._characters.get(character_id)
         if character is None:

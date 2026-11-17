@@ -20,12 +20,17 @@ interface WindowSize {
 export const SHEET_WINDOW: WindowSize = { width: 1200, height: 900 };
 export const CREATION_WINDOW: WindowSize = { width: 1200, height: 760 };
 export const PROFILE_WINDOW: WindowSize = { width: 1200, height: 800 };
+export const TOOL_WINDOW: WindowSize = { width: 1200, height: 800 };
 
 export function sheetPath(characterId: string): string {
   return `/fiche/${characterId}`;
 }
 export const CREATION_PATH = "/creation";
 export const PROFILE_PATH = "/profil";
+export const PLAYERS_TOOL_PATH = "/outils/joueurs";
+/** Paramètre d'adresse qui ouvre une fiche directement en mode modification (04a-I3). */
+export const EDIT_MODE_PARAM = "mode";
+export const EDIT_MODE_VALUE = "modification";
 
 /**
  * Ouvre une fenêtre détachée, ou ramène au premier plan celle qui porte déjà ce nom.
@@ -52,8 +57,17 @@ export function sheetWindowName(characterId: string): string {
   return `hunter-fiche-${characterId}`;
 }
 
-export function openSheet(characterId: string): void {
-  openDetached(sheetWindowName(characterId), sheetPath(characterId), SHEET_WINDOW);
+/**
+ * Ouvre la fiche d'un personnage.
+ *
+ * @param editing ouvre la fiche en mode modification (04a-I3). Une fiche déjà
+ *   ouverte est seulement ramenée au premier plan.
+ */
+export function openSheet(characterId: string, editing = false): void {
+  const path = editing
+    ? `${sheetPath(characterId)}?${EDIT_MODE_PARAM}=${EDIT_MODE_VALUE}`
+    : sheetPath(characterId);
+  openDetached(sheetWindowName(characterId), path, SHEET_WINDOW);
 }
 
 export function openCreation(): void {
@@ -62,6 +76,11 @@ export function openCreation(): void {
 
 export function openProfile(): void {
   openDetached("hunter-profil", PROFILE_PATH, PROFILE_WINDOW);
+}
+
+/** Outil Joueurs du MJ (04a) : une fenêtre par outil (T2). */
+export function openPlayersTool(): void {
+  openDetached("hunter-outil-joueurs", PLAYERS_TOOL_PATH, TOOL_WINDOW);
 }
 
 /** Ferme toutes les fenêtres détachées ouvertes depuis cette fenêtre (T3). */

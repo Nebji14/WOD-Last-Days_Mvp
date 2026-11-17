@@ -1,0 +1,49 @@
+/** Libellés français de l'outil Joueurs du MJ (écran 04a). */
+export const frPlayers = {
+  playersTool: {
+    windowTitle: "JOUEURS",
+    subtitle: "Outil du maître du jeu · liste et fiches des joueurs",
+    close: "FERMER",
+    loading: "Ouverture de l'outil…",
+    list: {
+      title: "TOUS LES JOUEURS",
+      count: "{total} joueurs · {online} en ligne",
+      countOne: "1 joueur · {online} en ligne",
+      empty: "Aucun joueur inscrit pour l'instant.",
+      noCharacter: "Aucun personnage",
+    },
+    online: "En ligne",
+    offline: "Hors ligne",
+    onlineAtTable: "En ligne · connecté à la table",
+    selectHint: "Choisis un joueur dans la liste.",
+    account: {
+      title: "DONNÉES DU COMPTE",
+      username: "Nom d'utilisateur",
+      methods: "Méthodes de connexion",
+      methodsValue: "Identifiant + mot de passe",
+      state: "État du compte",
+      active: "Actif",
+      disabled: "Désactivé",
+    },
+    characters: {
+      title: "PERSONNAGES · {count}",
+      none: "Ce joueur n'a encore aucun personnage.",
+      consult: "CONSULTER LA FICHE",
+      edit: "MODIFIER LA FICHE",
+      health: "SANTÉ",
+      willpower: "VOLONTÉ",
+    },
+    awakening: {
+      title: "ÉVEIL · VISIBLE PAR LE MJ UNIQUEMENT",
+      dormant: "Non déclenché — attributs de {name} plafonnés à 5.",
+      awakened: "Déclenché le {date} — attributs de {name} jusqu'à 10.",
+      trigger: "DÉCLENCHER L'ÉVEIL",
+      confirmTitle: "DÉCLENCHER L'ÉVEIL",
+      confirmQuestion:
+        "Les attributs de {name} pourront monter jusqu'à 10. L'éveil est définitif et le joueur le découvrira sur sa fiche.",
+      confirm: "DÉCLENCHER",
+      cancel: "ANNULER",
+    },
+    hint: "La fiche s'ouvre dans une nouvelle fenêtre ; le MJ dispose des mêmes possibilités que le joueur propriétaire.",
+  },
+} as const;

@@ -13,16 +13,14 @@
  */
 import { useState } from "react";
 
+import { CharacterPreview } from "@/features/characters/components/CharacterPreview";
 import { type Character, mainSheet } from "@/features/characters/model";
-import { initials } from "@/features/table/seatLayout";
 import { fill, labels } from "@/shared/i18n";
 import { ConfirmDialog } from "@/shared/ui/ConfirmDialog";
-import { HealthTrack, WillpowerDots } from "@/shared/ui/Gauges";
 import { openSheet } from "@/shared/windows/detached";
 
 import { formsSummary } from "../summary";
 
-const GAUGE_LABEL = "font-display text-ink-muted w-16 text-[9px] font-bold tracking-[2px]";
 const TAG = "font-display h-6 rounded-xs px-2.5 text-[10px] font-bold tracking-[2px]";
 
 interface CharacterCardProps {
@@ -36,8 +34,7 @@ interface CharacterCardProps {
 export function CharacterCard({ character, busy, onPlay, onDelete }: CharacterCardProps) {
   const text = labels.profile.characters;
   const [confirming, setConfirming] = useState(false);
-  const sheet = mainSheet(character);
-  const name = sheet.texts.name ?? "";
+  const name = mainSheet(character).texts.name ?? "";
 
   return (
     <li
@@ -46,38 +43,7 @@ export function CharacterCard({ character, busy, onPlay, onDelete }: CharacterCa
         character.is_played ? "border-gold shadow-[0_0_18px_rgb(201_176_106/0.15)]" : "border-line"
       }`}
     >
-      <div className="border-line bg-seat flex w-[250px] shrink-0 flex-col gap-2 rounded-md border p-3.5">
-        <div className="flex items-center gap-3">
-          <span
-            aria-hidden="true"
-            className="border-line-strong bg-field font-display text-ink relative flex size-11 shrink-0 items-center justify-center rounded-full border-[1.5px] text-[15px] font-bold"
-          >
-            {initials(name)}
-            <span className="bg-online absolute -right-0.5 -bottom-0.5 size-[11px] rounded-full border-2 border-[#110e0c]" />
-          </span>
-          <div className="min-w-0">
-            <p className="text-ink-muted truncate text-sm italic">{character.owner_name}</p>
-            <p className="text-ink truncate text-xl leading-6 font-bold">{name}</p>
-            <p className="text-ink-muted truncate text-[13px] italic">{sheet.texts.concept}</p>
-          </div>
-        </div>
-        <div className="mt-1 flex items-center">
-          <span className={GAUGE_LABEL}>{text.health}</span>
-          <HealthTrack
-            capacity={sheet.effective.health_max}
-            wounds={sheet.wound_track}
-            label={text.health}
-          />
-        </div>
-        <div className="flex items-center">
-          <span className={GAUGE_LABEL}>{text.willpower}</span>
-          <WillpowerDots
-            max={sheet.effective.willpower_max}
-            current={sheet.willpower_current}
-            label={text.willpower}
-          />
-        </div>
-      </div>
+      <CharacterPreview character={character} online />
 
       <div className="flex flex-1 flex-col justify-between py-1.5 pr-4">
         <div className="flex flex-col items-start gap-2.5">

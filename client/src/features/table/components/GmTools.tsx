@@ -7,21 +7,26 @@
 import type { ReactNode } from "react";
 
 import { labels } from "@/shared/i18n";
+import { openPlayersTool } from "@/shared/windows/detached";
 
 interface ToolProps {
   readonly label: string;
   readonly hint: string;
+  /** Ouvre la fenêtre détachée de l'outil ; absent tant que l'outil n'existe pas. */
+  readonly onOpen?: () => void;
   readonly children: ReactNode;
 }
 
-// TODO(US-025, US-031, US-040) : ouvrir la fenêtre détachable de l'outil (écrans 04a, 04b, 04c).
-function Tool({ label, hint, children }: ToolProps) {
+// TODO(US-031, US-040) : ouvrir la fenêtre détachable des outils Images et PNJ (04b, 04c).
+function Tool({ label, hint, onOpen, children }: ToolProps) {
+  const ready = onOpen !== undefined;
   return (
     <button
       type="button"
-      disabled
-      title={`${hint} — ${labels.table.comingSoon}`}
-      className="border-line bg-panel flex h-[52px] w-16 cursor-not-allowed flex-col items-center gap-[5px] rounded-sm border pt-2 opacity-60"
+      disabled={!ready}
+      onClick={onOpen}
+      title={ready ? hint : `${hint} — ${labels.table.comingSoon}`}
+      className="border-line bg-panel hover:border-gold disabled:hover:border-line flex h-[52px] w-16 cursor-pointer flex-col items-center gap-[5px] rounded-sm border pt-2 transition-colors disabled:cursor-not-allowed disabled:opacity-60"
     >
       <svg
         viewBox="0 0 24 20"
@@ -45,7 +50,7 @@ export function GmTools() {
 
   return (
     <nav className="absolute top-1.5 left-1/2 flex -translate-x-1/2 gap-2">
-      <Tool label={text.players} hint={text.playersHint}>
+      <Tool label={text.players} hint={text.playersHint} onOpen={openPlayersTool}>
         <circle cx="7.5" cy="4.5" r="3.5" />
         <path d="M1 19c0-3.5 2.9-6 6.5-6s6.5 2.5 6.5 6" />
         <circle cx="18" cy="6" r="3" className="text-ink-muted" stroke="currentColor" />

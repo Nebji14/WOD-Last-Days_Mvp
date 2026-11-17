@@ -13,13 +13,14 @@ import { createRealtimeClient, type RealtimeStatus } from "./client";
 import { fetchRealtimeTicket, realtimeUrl } from "./ticket";
 
 /**
- * @param eventType type d'événement à écouter.
- * @param onEvent appelé à chaque événement de ce type, et à chaque (re)connexion
+ * @param eventTypes type, ou liste de types, d'événements à écouter sur une
+ *   seule connexion.
+ * @param onEvent appelé à chaque événement écouté, et à chaque (re)connexion
  *   avec `null` pour rattraper ce qui a pu être manqué.
  * @returns l'état de la connexion.
  */
 export function useDetachedRealtime(
-  eventType: string,
+  eventTypes: string | readonly string[],
   onEvent: (data: unknown) => void,
 ): RealtimeStatus {
   const [status, setStatus] = useState<RealtimeStatus>("connecting");
@@ -29,9 +30,14 @@ export function useDetachedRealtime(
     handlerRef.current = onEvent;
   }, [onEvent]);
 
+  // Clé stable : une nouvelle liste aux mêmes types ne rouvre pas la connexion.
+  const typesKey = typeof eventTypes === "string" ? eventTypes : eventTypes.join(",");
+
   useEffect(() => {
     const client = createRealtimeClient({ url: realtimeUrl(), fetchTicket: fetchRealtimeTicket });
-    const unsubscribeEvent = client.on(eventType, (data) => handlerRef.current(data));
+    const unsubscribeEvents = typesKey
+      .split(",")
+      .map((type) => client.on(type, (data) => handlerRef.current(data)));
     const unsubscribeStatus = client.onStatus((next) => {
       setStatus(next);
       if (next === "online") {
@@ -43,11 +49,11 @@ export function useDetachedRealtime(
     });
     client.start();
     return () => {
-      unsubscribeEvent();
+      unsubscribeEvents.forEach((unsubscribe) => unsubscribe());
       unsubscribeStatus();
       client.stop();
     };
-  }, [eventType]);
+  }, [typesKey]);
 
   return status;
 }

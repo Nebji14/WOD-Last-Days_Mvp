@@ -97,6 +97,10 @@ class TableService:
         """Rediffuse l'état de la table : un personnage joué a changé (US-009 · CA1)."""
         await self._broadcaster.table_changed(await self.state())
 
+    def online_accounts(self) -> set[UUID]:
+        """Joueurs actuellement connectés à la table (US-025 · CA2)."""
+        return {seat.account_id for seat in self._seats.seats() if seat.online}
+
     async def state(self) -> TableState:
         """Retourne l'état courant de la table."""
         if self._gm_name is None:

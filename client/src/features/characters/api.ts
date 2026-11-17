@@ -62,6 +62,11 @@ export function playCharacter(characterId: string): Promise<Character> {
   return write("POST", `/api/characters/${characterId}/play`);
 }
 
+/** Déclenche l'éveil d'un personnage (04a-I5). Réservé au MJ, refusé par le serveur sinon. */
+export function awakenCharacter(characterId: string): Promise<Character> {
+  return write("POST", `/api/characters/${characterId}/awaken`);
+}
+
 /**
  * Modifie un champ, enregistré seul et aussitôt (US-009 · CA1).
  *

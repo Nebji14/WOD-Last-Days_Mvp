@@ -14,8 +14,10 @@ from app.domain.accounts import Account, Role
 from app.realtime.hub import ConnectionHub
 from app.realtime.tickets import TicketStore
 from app.services.auth import AuthService
+from app.services.awakening import AwakeningService
 from app.services.characters import CharacterService
 from app.services.chat import ChatService
+from app.services.players import PlayerService
 from app.services.sheet_items import SheetItemService
 from app.services.table import TableService
 
@@ -34,6 +36,8 @@ class Container:
     tickets: TicketStore
     character_service: CharacterService
     sheet_item_service: SheetItemService
+    player_service: PlayerService
+    awakening_service: AwakeningService
 
 
 def get_container(request: Request) -> Container:

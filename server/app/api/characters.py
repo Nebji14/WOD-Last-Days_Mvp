@@ -97,6 +97,15 @@ async def play_character(
     return character_response(character, account)
 
 
+@router.post("/characters/{character_id}/awaken", dependencies=[SheetWrite])
+async def awaken_character(
+    character_id: UUID, container: ContainerDep, account: CurrentAccount
+) -> AnyCharacterResponse:
+    """Déclenche l'éveil du personnage (04a-I5). Réservé au MJ, sans indice pour un joueur."""
+    character = await container.awakening_service.awaken(account, character_id)
+    return character_response(character, account)
+
+
 @router.patch("/characters/{character_id}", dependencies=[SheetWrite])
 async def update_character_field(
     character_id: UUID,

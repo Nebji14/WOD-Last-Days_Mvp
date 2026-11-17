@@ -23,10 +23,16 @@ import { type SheetFace, SheetTitleBar } from "./SheetTitleBar";
 const MESSAGE =
   "bg-night text-ink-muted flex min-h-screen items-center justify-center p-8 text-xl italic";
 
-export function SheetScreen({ characterId }: { readonly characterId: string }) {
+interface SheetScreenProps {
+  readonly characterId: string;
+  /** Ouvre la fiche directement en mode modification (04a-I3). */
+  readonly initialEditing?: boolean;
+}
+
+export function SheetScreen({ characterId, initialEditing = false }: SheetScreenProps) {
   const { status, character, notice, run, dismissNotice } = useSheetController(characterId);
   const [face, setFace] = useState<SheetFace>("recto");
-  const [editing, setEditing] = useState(false);
+  const [editing, setEditing] = useState(initialEditing);
   const [activeId, setActiveId] = useState<string | null>(null);
 
   const main = character === null ? null : mainSheet(character);

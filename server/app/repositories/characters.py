@@ -119,6 +119,13 @@ class PgCharacterRepository:
                 "(select 1 from sheet_tactic st where st.tactic_id = t.id)"
             )
 
+    async def mark_awakened(self, character_id: UUID) -> None:
+        """Enregistre la date de l'éveil, sans toucher à un éveil déjà daté (04a-I5)."""
+        await self._pool.execute(
+            "update character set awakened_at = now() where id = $1 and awakened_at is null",
+            character_id,
+        )
+
     async def set_played(self, owner_id: UUID, character_id: UUID) -> None:
         """Désigne le personnage joué à la table par ce compte (09-I4)."""
         await self._pool.execute(

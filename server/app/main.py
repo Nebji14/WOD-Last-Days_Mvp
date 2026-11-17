@@ -10,7 +10,7 @@ import httpx
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import auth, characters, chat, health, realtime, sheet_items
+from app.api import auth, characters, chat, health, players, realtime, sheet_items
 from app.api.deps import Container
 from app.core.config import Settings, get_settings
 from app.core.database import create_pool
@@ -26,11 +26,14 @@ from app.realtime.tickets import TicketStore
 from app.repositories.accounts import PgAccountRepository
 from app.repositories.characters import PgCharacterRepository
 from app.repositories.chat import PgChatRepository
+from app.repositories.players import PgPlayerRepository
 from app.repositories.sheet_items import PgSheetItemRepository
 from app.services.auth import AuthService
+from app.services.awakening import AwakeningService
 from app.services.character_access import CharacterAccess
 from app.services.characters import CharacterService
 from app.services.chat import ChatService
+from app.services.players import PlayerService
 from app.services.sheet_items import SheetItemService
 from app.services.table import TableService
 
@@ -77,6 +80,8 @@ def create_app(settings: Settings | None = None, container: Container | None = N
                 tickets=TicketStore(),
                 character_service=CharacterService(character_repository, item_repository, access),
                 sheet_item_service=SheetItemService(item_repository, access),
+                player_service=PlayerService(PgPlayerRepository(pool), table_service),
+                awakening_service=AwakeningService(character_repository, access),
             )
             try:
                 yield
@@ -104,6 +109,7 @@ def create_app(settings: Settings | None = None, container: Container | None = N
     app.include_router(chat.router)
     app.include_router(characters.router)
     app.include_router(sheet_items.router)
+    app.include_router(players.router)
     app.include_router(realtime.router)
     app.include_router(realtime_endpoint.router)
     return app

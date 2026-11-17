@@ -7,8 +7,9 @@
  *   tous (Q03-3). Sans personnage : « Aucun personnage » (03-E4).
  * - Mon siège : bordure or, [Étiquette — VOUS] et action principale, « Ouvrir
  *   ma fiche » (03-I1) ou « Créer mon personnage » (03-I2).
- * - Vue MJ : [Bouton — Ouvrir la fiche (MJ)] sur chaque siège (03-MJ-D4). Le
- *   serveur revérifie ce droit à l'ouverture de la fiche.
+ * - Vue MJ : aucun bouton de fiche sur les sièges. Le MJ ouvre les fiches
+ *   depuis l'outil Joueurs (04a), décision du développeur du 2026-11-17 qui
+ *   remplace 03-MJ-D4.
  * - Joueur déconnecté : siège atténué, pastille masquée (03-E2).
  * - Le siège apparaît en fondu à l'arrivée du joueur (03-A6).
  *
@@ -37,12 +38,7 @@ const MAIN_ACTION =
 const GAUGE_LABEL =
   "font-display text-ink-muted absolute left-3.5 text-[9px] leading-3 font-bold tracking-[2px]";
 
-interface PlayerSeatProps extends PlacedSeat {
-  /** Le MJ regarde la table : il peut ouvrir la fiche de chaque joueur. */
-  readonly gmView: boolean;
-}
-
-export function PlayerSeat({ slot, seat, mine, gmView }: PlayerSeatProps) {
+export function PlayerSeat({ slot, seat, mine }: PlacedSeat) {
   const text = labels.table.seat;
   const { character } = seat;
   const height = mine ? (character ? "h-[168px]" : "h-[128px]") : "h-[124px]";
@@ -105,15 +101,6 @@ export function PlayerSeat({ slot, seat, mine, gmView }: PlayerSeatProps) {
         </>
       )}
 
-      {character && gmView && (
-        <button
-          type="button"
-          onClick={() => openSheet(character.id)}
-          className="from-copper-from to-copper-to border-copper font-display text-ink-bright absolute top-[93px] right-3 h-[22px] w-[62px] cursor-pointer rounded-xs border bg-linear-to-b text-[9px] font-bold tracking-[2px] transition hover:brightness-110"
-        >
-          {text.sheet}
-        </button>
-      )}
       {mine && character && (
         <button
           type="button"

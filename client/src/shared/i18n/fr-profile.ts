@@ -42,8 +42,6 @@ export const frProfile = {
       mainForm: "principale",
       oneForm: "1 forme : {names}",
       manyForms: "{count} formes : {names}",
-      health: "SANTÉ",
-      willpower: "VOLONTÉ",
     },
   },
 } as const;

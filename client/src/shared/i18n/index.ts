@@ -1,10 +1,11 @@
 /** Point d'accès unique aux libellés de l'interface. */
 import { fr } from "./fr";
 import { frCreation } from "./fr-creation";
+import { frPlayers } from "./fr-players";
 import { frProfile } from "./fr-profile";
 import { frSheet } from "./fr-sheet";
 
-export const labels = { ...fr, ...frSheet, ...frCreation, ...frProfile };
+export const labels = { ...fr, ...frSheet, ...frCreation, ...frProfile, ...frPlayers };
 
 export type ErrorLabelKey = keyof typeof fr.errors;
 type RuleLabelKey = keyof typeof frSheet.sheet.rules;

@@ -11,6 +11,7 @@
 import { useEffect } from "react";
 
 import { errorLabel, labels } from "@/shared/i18n";
+import { DetachedTitleBar } from "@/shared/ui/DetachedTitleBar";
 
 import { useProfile } from "../useProfile";
 import { AccountPanel } from "./AccountPanel";
@@ -36,22 +37,11 @@ export function ProfileScreen() {
 
   return (
     <div className="bg-night text-ink flex h-screen flex-col">
-      <header className="border-line bg-panel flex h-[60px] shrink-0 items-center justify-between border-b px-8">
-        <div>
-          <h1 className="font-display text-ink-bright text-[20px] font-bold tracking-[4px]">
-            {text.windowTitle}
-          </h1>
-          <p className="text-ink-muted text-sm italic">{isGm ? text.subtitleGm : text.subtitle}</p>
-        </div>
-        <button
-          type="button"
-          onClick={() => window.close()}
-          className="border-line-strong font-display text-ink flex h-[34px] cursor-pointer items-center gap-2.5 rounded-xs border px-3.5 text-[11px] font-bold tracking-[2.5px] hover:brightness-125"
-        >
-          {text.close}
-          <span aria-hidden="true">✕</span>
-        </button>
-      </header>
+      <DetachedTitleBar
+        title={text.windowTitle}
+        subtitle={isGm ? text.subtitleGm : text.subtitle}
+        closeLabel={text.close}
+      />
       <main
         className={`grid min-h-0 flex-1 gap-4 p-8 ${
           isGm ? "grid-cols-[360px] justify-center" : "grid-cols-[360px_minmax(0,1fr)]"

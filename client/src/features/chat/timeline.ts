@@ -2,6 +2,7 @@
  * Mise en forme de l'historique du chat : séparateurs de jour (08b,
  * [Historique des messages]).
  */
+import { longDate } from "@/shared/format/date";
 import { labels } from "@/shared/i18n";
 
 import type { ChatMessage } from "./api";
@@ -24,9 +25,7 @@ export function dayLabel(date: Date, now: Date): string {
   if (dayKey(date) === dayKey(yesterday)) {
     return labels.chat.yesterday;
   }
-  return date
-    .toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })
-    .toUpperCase();
+  return longDate(date).toUpperCase();
 }
 
 /** Intercale un séparateur avant le premier message de chaque jour. */

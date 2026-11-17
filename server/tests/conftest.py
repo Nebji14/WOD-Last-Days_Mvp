@@ -14,12 +14,15 @@ from app.main import create_app
 from app.realtime.hub import ConnectionHub
 from app.realtime.tickets import TicketStore
 from app.services.auth import AuthService
+from app.services.awakening import AwakeningService
 from app.services.character_access import CharacterAccess
 from app.services.characters import CharacterService
 from app.services.chat import ChatService
+from app.services.players import PlayerService
 from app.services.sheet_items import SheetItemService
 from app.services.table import TableService
 from tests.fake_characters import FakeCharacterStore
+from tests.fake_players import FakePlayerStore
 from tests.fakes import (
     FakeAccountStore,
     FakeIdentityProvider,
@@ -79,6 +82,8 @@ def ctx(settings: Settings) -> Iterator[TestContext]:
         tickets=TicketStore(),
         character_service=CharacterService(characters, characters, access),
         sheet_item_service=SheetItemService(characters, access),
+        player_service=PlayerService(FakePlayerStore(accounts, characters), table_service),
+        awakening_service=AwakeningService(characters, access),
     )
     with TestClient(create_app(settings, container), headers={"Origin": ORIGIN}) as client:
         yield TestContext(client, accounts, identity, auth_service, characters)

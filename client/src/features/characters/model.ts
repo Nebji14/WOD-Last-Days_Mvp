@@ -1,0 +1,222 @@
+/**
+ * Modèle d'un personnage et de ses fiches, tel que le renvoie l'API.
+ *
+ * Les noms d'attributs et de compétences sont ceux du serveur ; leurs libellés
+ * français sont dans les fichiers de libellés.
+ */
+import { ApiError, isRecord } from "@/shared/api/client";
+
+export type Category = "mental" | "physical" | "social";
+export const CATEGORIES: readonly Category[] = ["mental", "physical", "social"];
+
+export const ATTRIBUTES = {
+  mental: ["intelligence", "wits", "resolve"],
+  physical: ["strength", "dexterity", "stamina"],
+  social: ["presence", "manipulation", "composure"],
+} as const;
+
+export const SKILLS = {
+  mental: [
+    "academics",
+    "computer",
+    "crafts",
+    "investigation",
+    "medicine",
+    "occult",
+    "politics",
+    "science",
+  ],
+  physical: [
+    "athletics",
+    "brawl",
+    "drive",
+    "firearms",
+    "larceny",
+    "stealth",
+    "survival",
+    "weaponry",
+  ],
+  social: [
+    "animal_ken",
+    "empathy",
+    "expression",
+    "intimidation",
+    "persuasion",
+    "socialize",
+    "streetwise",
+    "subterfuge",
+  ],
+} as const;
+
+export type AttributeName = (typeof ATTRIBUTES)[Category][number];
+export type SkillName = (typeof SKILLS)[Category][number];
+
+/** Plafond ordinaire d'un attribut ; 10 pour un personnage éveillé (05, ÉVEIL V4). */
+export const ATTRIBUTE_MAX = 5;
+export const ATTRIBUTE_MAX_AWAKENED = 10;
+export const SKILL_MAX = 5;
+
+export type EntryKind = "merit" | "flaw" | "power" | "item" | "weapon" | "armor";
+
+export const ENTRY_NUMBER_FIELDS = [
+  "level",
+  "quantity",
+  "damage_modifier",
+  "size",
+  "initiative_penalty",
+  "general_protection",
+  "ballistic_protection",
+  "min_strength",
+  "defense_penalty",
+] as const;
+export type EntryNumberField = (typeof ENTRY_NUMBER_FIELDS)[number];
+
+export type Entry = {
+  readonly id: string;
+  readonly kind: EntryKind;
+  readonly name: string;
+  readonly description: string;
+  readonly range: string | null;
+} & { readonly [field in EntryNumberField]: number | null };
+
+export interface MoralityNote {
+  readonly id: string;
+  readonly level: number;
+  readonly body: string;
+}
+
+export interface Tactic {
+  readonly id: string;
+  readonly name: string;
+  readonly description: string;
+}
+
+export interface Expense {
+  readonly id: string;
+  readonly is_tactical: boolean;
+  readonly points: number;
+  readonly justification: string;
+  readonly created_at: string;
+}
+
+export interface Note {
+  readonly id: string;
+  readonly title: string;
+  readonly body: string;
+  readonly updated_at: string;
+}
+
+export type EffectiveField =
+  "size" | "speed" | "defense" | "initiative" | "health_max" | "willpower_max";
+
+export interface Sheet {
+  readonly id: string;
+  readonly is_main: boolean;
+  readonly form_name: string;
+  readonly texts: Readonly<Record<string, string>>;
+  readonly attributes: Readonly<Record<AttributeName, number>>;
+  readonly skills: Readonly<Record<SkillName, number>>;
+  /** Valeurs saisies et stockées (RM-005). */
+  readonly effective: Readonly<Record<EffectiveField, number>>;
+  /** Valeurs de référence calculées par le serveur, jamais stockées (RM-005). */
+  readonly base: Readonly<Record<EffectiveField, number>>;
+  readonly wound_track: string;
+  readonly willpower_current: number;
+  readonly morality: number;
+  readonly specialties: Readonly<Partial<Record<SkillName, readonly string[]>>>;
+  readonly morality_notes: readonly MoralityNote[];
+  readonly entries: readonly Entry[];
+  readonly tactics: readonly Tactic[];
+}
+
+export interface Experience {
+  readonly total: number;
+  readonly balance: number;
+}
+
+export interface Character {
+  readonly id: string;
+  readonly owner_id: string;
+  readonly owner_name: string;
+  readonly is_played: boolean;
+  readonly can_manage_notes: boolean;
+  readonly supernatural_level: number;
+  readonly supernatural_name: string;
+  readonly xp_general: Experience;
+  readonly xp_tactical: Experience;
+  readonly sheets: readonly Sheet[];
+  readonly expenses: readonly Expense[];
+  readonly notes: readonly Note[];
+  /** Présent et vrai uniquement pour un personnage éveillé (05, ÉVEIL V4). */
+  readonly awakened?: true;
+  /** Présent uniquement pour le MJ : date de l'éveil, ou `null` (05, ÉVEIL V5). */
+  readonly awakened_at?: string | null;
+}
+
+/** Plafond des attributs de ce personnage, d'après ce que le serveur en dit au lecteur. */
+export function attributeMax(character: Character): number {
+  return character.awakened === true || typeof character.awakened_at === "string"
+    ? ATTRIBUTE_MAX_AWAKENED
+    : ATTRIBUTE_MAX;
+}
+
+export function mainSheet(character: Character): Sheet {
+  const main = character.sheets.find((sheet) => sheet.is_main) ?? character.sheets[0];
+  if (main === undefined) {
+    throw new ApiError(502, "internal_error");
+  }
+  return main;
+}
+
+function isSheet(value: unknown): value is Sheet {
+  return (
+    isRecord(value) &&
+    typeof value.id === "string" &&
+    typeof value.is_main === "boolean" &&
+    typeof value.form_name === "string" &&
+    isRecord(value.texts) &&
+    isRecord(value.attributes) &&
+    isRecord(value.skills) &&
+    isRecord(value.effective) &&
+    isRecord(value.base) &&
+    typeof value.wound_track === "string" &&
+    typeof value.willpower_current === "number" &&
+    typeof value.morality === "number" &&
+    isRecord(value.specialties) &&
+    Array.isArray(value.morality_notes) &&
+    Array.isArray(value.entries) &&
+    Array.isArray(value.tactics)
+  );
+}
+
+function isExperience(value: unknown): value is Experience {
+  return isRecord(value) && typeof value.total === "number" && typeof value.balance === "number";
+}
+
+/**
+ * Valide la structure d'un personnage renvoyé par l'API.
+ *
+ * @throws {ApiError} si la réponse n'a pas la forme attendue.
+ */
+export function parseCharacter(data: unknown): Character {
+  if (
+    isRecord(data) &&
+    typeof data.id === "string" &&
+    typeof data.owner_id === "string" &&
+    typeof data.owner_name === "string" &&
+    typeof data.is_played === "boolean" &&
+    typeof data.can_manage_notes === "boolean" &&
+    typeof data.supernatural_level === "number" &&
+    typeof data.supernatural_name === "string" &&
+    isExperience(data.xp_general) &&
+    isExperience(data.xp_tactical) &&
+    Array.isArray(data.sheets) &&
+    data.sheets.length > 0 &&
+    data.sheets.every(isSheet) &&
+    Array.isArray(data.expenses) &&
+    Array.isArray(data.notes)
+  ) {
+    return data as unknown as Character;
+  }
+  throw new ApiError(502, "internal_error");
+}

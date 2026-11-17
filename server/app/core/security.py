@@ -20,6 +20,10 @@ REFRESH_COOKIE = "hunter_rt"
 _JWT_ALGORITHMS = ["ES256", "RS256"]
 _JWT_AUDIENCE = "authenticated"
 _JWKS_CACHE_SECONDS = 3600
+# Tolérance sur les dates du jeton (émission, expiration) : l'horloge de
+# Supabase peut avancer de quelques fractions de seconde sur celle du serveur,
+# ce qui ferait refuser un jeton tout juste émis.
+_JWT_CLOCK_LEEWAY_SECONDS = 5
 
 
 class InvalidTokenError(Exception):
@@ -87,6 +91,7 @@ class SupabaseTokenVerifier:
                 algorithms=_JWT_ALGORITHMS,
                 audience=_JWT_AUDIENCE,
                 issuer=self._issuer,
+                leeway=_JWT_CLOCK_LEEWAY_SECONDS,
                 options={"require": ["exp", "sub", "aud", "iss"]},
             )
             return TokenClaims(account_id=UUID(payload["sub"]), expires_at=float(payload["exp"]))

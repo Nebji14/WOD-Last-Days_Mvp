@@ -81,7 +81,10 @@ export function useImageLibrary(): ImageLibraryState {
     }
   }, [fail]);
 
-  useDetachedRealtime("images.changed", useCallback(() => void reload(), [reload]));
+  useDetachedRealtime(
+    "images.changed",
+    useCallback(() => void reload(), [reload]),
+  );
 
   useEffect(() => {
     const timer = window.setInterval(() => void reload(), LINK_REFRESH_MS);
@@ -114,7 +117,10 @@ export function useImageLibrary(): ImageLibraryState {
       for (const file of files) {
         uploadCounter.current += 1;
         const key = `upload-${uploadCounter.current}`;
-        setUploads((current) => [...current, { key, name: file.name, progress: 0, errorCode: null }]);
+        setUploads((current) => [
+          ...current,
+          { key, name: file.name, progress: 0, errorCode: null },
+        ]);
         uploadImage(file, folderId, (progress) => patchUpload(key, { progress }))
           .then(() => {
             if (mountedRef.current) {

@@ -13,6 +13,7 @@
  * ajoutent, soignent ou aggravent une blessure (Q05-4) ; le serveur garde la
  * piste rangée et sans trou (RM-008) et refuse tout dépassement (RM-011).
  * Volonté : points disponibles sur la volonté maximale effective (RM-011).
+ * PNJ : maximums « fixés par le MJ », sans base (07-D7, RM-023).
  */
 import { changeWounds, setSheetField, type WoundSymbol } from "@/features/characters/api";
 import { fill, labels } from "@/shared/i18n";
@@ -36,8 +37,13 @@ function freeBoxesLabel(free: number): string {
   return free === 1 ? text.oneFree : fill(text.free, { count: free });
 }
 
+/** Libellé devant le maximum : base calculée, ou « fixée par le MJ » pour un PNJ. */
+function capacityLabel(isNpc: boolean, base: number): string {
+  return isNpc ? labels.npcSheet.fixedByGm : fill(labels.sheet.health.capacity, { base });
+}
+
 export function HealthPanel() {
-  const { sheet, editing, run } = useSheet();
+  const { character, sheet, editing, run } = useSheet();
   const text = labels.sheet.health;
   const capacity = sheet.effective.health_max;
   const wounds = sheet.wound_track;
@@ -55,7 +61,7 @@ export function HealthPanel() {
       title={text.title}
       aside={
         <span className={CAPACITY}>
-          {fill(text.capacity, { base: sheet.base.health_max })}
+          {capacityLabel(character.npc != null, sheet.base.health_max)}
           <NumberValue
             label={text.title}
             value={capacity}
@@ -119,7 +125,7 @@ export function HealthPanel() {
 }
 
 export function WillpowerPanel() {
-  const { sheet, editing, run } = useSheet();
+  const { character, sheet, editing, run } = useSheet();
   const text = labels.sheet.willpower;
   const max = sheet.effective.willpower_max;
   const current = sheet.willpower_current;
@@ -131,7 +137,7 @@ export function WillpowerPanel() {
       title={text.title}
       aside={
         <span className={CAPACITY}>
-          {fill(labels.sheet.health.capacity, { base: sheet.base.willpower_max })}
+          {capacityLabel(character.npc != null, sheet.base.willpower_max)}
           <NumberValue
             label={text.title}
             value={max}

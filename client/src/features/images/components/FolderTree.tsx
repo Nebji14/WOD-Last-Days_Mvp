@@ -11,11 +11,11 @@
 import { type DragEvent, useState } from "react";
 
 import { labels } from "@/shared/i18n";
+import { InlineName } from "@/shared/ui/InlineName";
 
 import type { ImageFolder, LibraryImage } from "../api";
 import { childrenOf, imageCounts } from "../tree";
 import { carriesItem, type DraggedItem, droppedItem, startDrag } from "./dragData";
-import { InlineName } from "./InlineName";
 
 const FOLDER_NAME_MAX = 60;
 const INDENT = ["pl-2", "pl-6", "pl-10", "pl-14", "pl-[4.5rem]"] as const;

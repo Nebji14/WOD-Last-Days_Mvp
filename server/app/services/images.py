@@ -11,17 +11,17 @@ from typing import Protocol
 from uuid import UUID, uuid4
 
 from app.core.errors import AppError, ErrorCode
+from app.domain.hierarchy import would_create_cycle
 from app.domain.images import (
     FOLDER_NAME_MAX,
     IMAGE_NAME_MAX,
     MAX_IMAGE_BYTES,
     Image,
     ImageFolder,
-    clean_name,
     detect_image_type,
     image_name_from_filename,
-    would_create_cycle,
 )
+from app.domain.names import clean_name
 from app.gateways.supabase_storage import StorageError
 from app.services.image_links import UrlSigner, image_links, storage_unavailable
 

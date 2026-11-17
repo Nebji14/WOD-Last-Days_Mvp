@@ -46,6 +46,37 @@ class NewCharacter:
     specialties: Sequence[Specialty]
 
 
+async def insert_main_sheet(
+    connection: asyncpg.Connection, character_id: UUID, new: NewCharacter
+) -> UUID:
+    """Crée la forme principale d'un personnage ou d'un PNJ, et ses spécialités.
+
+    À appeler dans la transaction qui crée le personnage.
+
+    Returns:
+        L'identifiant de la feuille créée.
+    """
+    columns = [name for name in new.values if name in SHEET_FIELDS]
+    placeholders = ", ".join(f"${index}" for index in range(2, len(columns) + 2))
+    sheet_id: UUID = await connection.fetchval(
+        f"""
+        insert into character_sheet (character_id, is_main, {", ".join(columns)})
+        values ($1, true, {placeholders})
+        returning id
+        """,  # noqa: S608 - colonnes issues de SHEET_FIELDS
+        character_id,
+        *(new.values[name] for name in columns),
+    )
+    await connection.executemany(
+        "insert into sheet_specialty (sheet_id, skill, label, position) values ($1, $2, $3, $4)",
+        [
+            (sheet_id, specialty.skill, specialty.label, position)
+            for position, specialty in enumerate(new.specialties)
+        ],
+    )
+    return sheet_id
+
+
 class PgCharacterRepository:
     """Dépôt des personnages sur PostgreSQL.
 
@@ -77,29 +108,11 @@ class PgCharacterRepository:
         Returns:
             L'identifiant du personnage créé.
         """
-        columns = [name for name in new.values if name in SHEET_FIELDS]
-        placeholders = ", ".join(f"${index}" for index in range(2, len(columns) + 2))
         async with self._pool.acquire() as connection, connection.transaction():
             character_id: UUID = await connection.fetchval(
                 "insert into character (owner_id) values ($1) returning id", owner_id
             )
-            sheet_id = await connection.fetchval(
-                f"""
-                insert into character_sheet (character_id, is_main, {", ".join(columns)})
-                values ($1, true, {placeholders})
-                returning id
-                """,  # noqa: S608 - colonnes issues de SHEET_FIELDS
-                character_id,
-                *(new.values[name] for name in columns),
-            )
-            await connection.executemany(
-                "insert into sheet_specialty (sheet_id, skill, label, position) "
-                "values ($1, $2, $3, $4)",
-                [
-                    (sheet_id, specialty.skill, specialty.label, position)
-                    for position, specialty in enumerate(new.specialties)
-                ],
-            )
+            await insert_main_sheet(connection, character_id, new)
             await connection.execute(
                 "update account set played_character_id = $2 where id = $1",
                 owner_id,

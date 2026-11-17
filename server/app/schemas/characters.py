@@ -15,6 +15,7 @@ from pydantic import BaseModel
 from app.domain.accounts import Account, Role
 from app.domain.character import Character, EntryKind, Sheet, can_manage_notes
 from app.domain.derived import base_values
+from app.domain.npc_profile import NpcModel, NpcProfile
 from app.domain.traits import ATTRIBUTE_NAMES, SKILL_NAMES
 
 _EFFECTIVE_FIELDS = ("size", "speed", "defense", "initiative", "health_max", "willpower_max")
@@ -152,11 +153,37 @@ class ExperienceResponse(BaseModel):
     balance: int
 
 
+class NpcProfileResponse(BaseModel):
+    """Données propres à une feuille de PNJ (07), lues par le MJ seul."""
+
+    model: NpcModel
+    category_id: UUID | None
+    notes: str
+    power: int | None
+    finesse: int | None
+    resilience: int | None
+
+    @classmethod
+    def from_profile(cls, profile: NpcProfile) -> "NpcProfileResponse":
+        return cls(
+            model=profile.model,
+            category_id=profile.category_id,
+            notes=profile.notes,
+            power=profile.power,
+            finesse=profile.finesse,
+            resilience=profile.resilience,
+        )
+
+
 class CharacterResponse(BaseModel):
-    """Personnage tel qu'il est exposé à un joueur dont le personnage n'est pas éveillé."""
+    """Personnage tel qu'il est exposé à un joueur dont le personnage n'est pas éveillé.
+
+    ``owner_id`` et ``npc`` distinguent un PNJ (sans propriétaire), que seul le
+    MJ lit (US-041).
+    """
 
     id: UUID
-    owner_id: UUID
+    owner_id: UUID | None
     owner_name: str
     is_played: bool
     can_manage_notes: bool
@@ -167,6 +194,7 @@ class CharacterResponse(BaseModel):
     sheets: list[SheetResponse]
     expenses: list[ExpenseResponse]
     notes: list[NoteResponse]
+    npc: NpcProfileResponse | None = None
 
 
 class AwakenedCharacterResponse(CharacterResponse):
@@ -215,6 +243,7 @@ def character_response(character: Character, viewer: Account) -> AnyCharacterRes
             NoteResponse(id=n.id, title=n.title, body=n.body, updated_at=n.updated_at)
             for n in character.notes
         ],
+        "npc": NpcProfileResponse.from_profile(character.npc) if character.npc else None,
     }
     if viewer.role is Role.GM:
         return GmCharacterResponse(**fields, awakened_at=character.awakened_at)

@@ -236,6 +236,7 @@ export const frSheet = {
       xp_insufficient: "Solde d'expérience insuffisant.",
       xp_total_below_spent: "Le total acquis ne peut pas descendre sous les points déjà dépensés.",
       main_form: "La forme principale ne peut pas être supprimée.",
+      npc_feature: "Un PNJ n'a ni expérience, ni tactiques, ni formes.",
     },
   },
 } as const;

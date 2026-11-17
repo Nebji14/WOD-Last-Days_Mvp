@@ -167,4 +167,3 @@ async def remove_from_table(image_id: UUID, container: ContainerDep, _gm: Curren
     """Retire une image de la table sans la supprimer (04b-I6, US-031 · CA6)."""
     await container.image_table_service.remove_from_table(image_id)
     return Response(status_code=_NO_CONTENT)
-

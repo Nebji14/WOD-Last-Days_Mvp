@@ -61,7 +61,11 @@ export function OnTablePanel({ scene, onPutDown, onRemove }: OnTablePanelProps) 
         )}
         {scene.pile.map((image) => (
           <Row key={image.id} image={image}>
-            <button type="button" onClick={() => onRemove(image.id)} className={`${LINK} text-danger`}>
+            <button
+              type="button"
+              onClick={() => onRemove(image.id)}
+              className={`${LINK} text-danger`}
+            >
               {text.removeFromTable}
             </button>
           </Row>

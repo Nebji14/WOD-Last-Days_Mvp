@@ -13,7 +13,12 @@ from app.domain.accounts import Account
 from app.domain.character import Character, EntryKind, Tactic, can_manage_notes
 from app.domain.traits import SKILL_NAMES, SPECIALTY_MAX_LENGTH, parse_specialties
 from app.repositories.sheet_items import EntryValues, ItemKind
-from app.services.character_access import CharacterAccess, not_found, rule_violation
+from app.services.character_access import (
+    CharacterAccess,
+    not_found,
+    require_player_character,
+    rule_violation,
+)
 
 DEFAULT_NOTE_TITLE = "Sans titre"
 _LEVELLED_KINDS = frozenset({EntryKind.MERIT, EntryKind.FLAW, EntryKind.POWER})
@@ -128,7 +133,7 @@ class SheetItemService:
             AppError: ``rule_violation`` si la compétence est inconnue.
         """
         character = await self._sheet_owner(actor, sheet_id)
-        if skill not in SKILL_NAMES:
+        if skill not in SKILL_NAMES or (character.npc is not None and character.npc.is_simplified):
             raise rule_violation("unknown_field", skill)
         labels = [label[:SPECIALTY_MAX_LENGTH] for label in parse_specialties(text)]
         await self._items.replace_specialties(sheet_id, skill, labels)
@@ -186,14 +191,16 @@ class SheetItemService:
     async def add_tactic(
         self, actor: Account, sheet_id: UUID, name: str, description: str
     ) -> Character:
-        """Crée une tactique et la rattache à la feuille."""
+        """Crée une tactique et la rattache à la feuille. Pas de tactique pour un PNJ (07-D6)."""
         character = await self._sheet_owner(actor, sheet_id)
+        require_player_character(character, "tactic")
         await self._items.create_tactic(sheet_id, name.strip(), description.strip())
         return await self._access.changed(character.id)
 
     async def link_tactic(self, actor: Account, sheet_id: UUID, tactic_id: UUID) -> Character:
         """Rattache à la feuille une tactique déjà connue d'un autre personnage."""
         character = await self._sheet_owner(actor, sheet_id)
+        require_player_character(character, "tactic")
         if not await self._items.tactic_exists(tactic_id):
             raise not_found()
         await self._items.link_tactic(sheet_id, tactic_id)
@@ -233,6 +240,7 @@ class SheetItemService:
             AppError: ``rule_violation`` si le solde est insuffisant.
         """
         character = await self._access.editable(actor, character_id)
+        require_player_character(character, "points")
         if points > character.xp_balance(is_tactical):
             raise rule_violation("xp_insufficient", "points")
         await self._items.add_expense(character_id, is_tactical, points, justification.strip())

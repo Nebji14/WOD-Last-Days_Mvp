@@ -49,9 +49,7 @@ class ImageTableService:
         broadcaster: signal temps réel vers tous les participants.
     """
 
-    def __init__(
-        self, store: SceneStore, signer: UrlSigner, broadcaster: ImageBroadcaster
-    ) -> None:
+    def __init__(self, store: SceneStore, signer: UrlSigner, broadcaster: ImageBroadcaster) -> None:
         self._store = store
         self._signer = signer
         self._broadcaster = broadcaster

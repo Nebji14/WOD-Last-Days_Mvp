@@ -1,4 +1,7 @@
-"""Modèle d'un personnage joueur et de ses feuilles, et droits d'accès (CDC 8.3).
+"""Modèle d'un personnage et de ses feuilles, et droits d'accès (CDC 8.3).
+
+Un personnage est un personnage joueur (avec propriétaire) ou un PNJ du MJ
+(sans propriétaire, avec un profil de PNJ ; US-039 à US-043).
 
 Un personnage porte ce qui est commun à toutes ses formes (expérience, notes,
 avantage surnaturel, éveil). Chaque forme est une feuille complète ; la forme
@@ -13,6 +16,7 @@ from enum import StrEnum
 from uuid import UUID
 
 from app.domain.accounts import Account, Role
+from app.domain.npc_profile import NpcProfile
 
 
 class EntryKind(StrEnum):
@@ -115,17 +119,19 @@ class Sheet:
 
 @dataclass(frozen=True, slots=True)
 class Character:
-    """Personnage joueur.
+    """Personnage joueur ou PNJ.
 
     Attributs:
         awakened_at: date de l'éveil, ``None`` s'il n'est pas déclenché. Secret
             du MJ : jamais transmis au joueur avant le déclenchement.
+        owner_id: propriétaire du personnage joueur ; ``None`` pour un PNJ.
         is_played: personnage affiché sur le siège de son propriétaire (Q03-5).
+        npc: profil du PNJ ; ``None`` pour un personnage joueur.
         sheets: formes du personnage, la principale en premier.
     """
 
     id: UUID
-    owner_id: UUID
+    owner_id: UUID | None
     owner_name: str
     awakened_at: datetime | None
     supernatural_level: int
@@ -136,6 +142,12 @@ class Character:
     sheets: list[Sheet]
     expenses: list[Expense]
     notes: list[Note]
+    npc: NpcProfile | None = None
+
+    @property
+    def is_npc(self) -> bool:
+        """Feuille de PNJ : ni expérience, ni tactiques, ni formes, ni notes autonomes."""
+        return self.npc is not None
 
     @property
     def is_awakened(self) -> bool:
@@ -174,19 +186,20 @@ class SeatCharacter:
     willpower_current: int
 
 
-def can_read(actor: Account, owner_id: UUID) -> bool:
+def can_read(actor: Account, owner_id: UUID | None) -> bool:
     """Le propriétaire et le MJ consultent la fiche (US-008, US-026).
 
-    Un joueur n'ouvre jamais la fiche d'un autre joueur.
+    Un joueur n'ouvre jamais la fiche d'un autre joueur, ni celle d'un PNJ
+    (``owner_id`` à ``None``), réservée au MJ (US-041).
     """
-    return actor.role is Role.GM or actor.id == owner_id
+    return actor.role is Role.GM or (owner_id is not None and actor.id == owner_id)
 
 
-def can_edit(actor: Account, owner_id: UUID) -> bool:
+def can_edit(actor: Account, owner_id: UUID | None) -> bool:
     """Le MJ modifie la fiche avec les mêmes possibilités que son propriétaire (US-009, US-027)."""
     return can_read(actor, owner_id)
 
 
-def can_manage_notes(actor: Account, owner_id: UUID) -> bool:
+def can_manage_notes(actor: Account, owner_id: UUID | None) -> bool:
     """Seul le propriétaire crée, modifie et supprime ses notes ; le MJ les lit (05c-N5)."""
     return actor.id == owner_id

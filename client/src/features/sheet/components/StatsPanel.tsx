@@ -6,9 +6,11 @@
  * Deux colonnes (RM-005) : BASE, calculée par le serveur et jamais stockée, et
  * EFFECTIVE, saisie librement et seule conservée. Modifier un attribut recalcule
  * la base sans toucher à l'effective. La protection globale se saisit à la
- * main, sans aucun calcul (RM-024).
+ * main, sans aucun calcul (RM-024). PNJ simplifié : aucune base calculée,
+ * colonne BASE à « — » (RM-022).
  */
 import { setSheetField } from "@/features/characters/api";
+import { isSimplifiedNpc } from "@/features/characters/model";
 import { labels } from "@/shared/i18n";
 
 import { COLUMN_LABEL, NumberValue, Panel, TextValue, useSheet } from "./primitives";
@@ -17,8 +19,9 @@ const STATS = ["size", "speed", "defense", "initiative"] as const;
 const ROW = "grid h-7 grid-cols-[minmax(0,1fr)_56px_70px] items-center gap-x-2";
 
 export function StatsPanel() {
-  const { sheet, editing, run } = useSheet();
+  const { character, sheet, editing, run } = useSheet();
   const text = labels.sheet.stats;
+  const noBase = isSimplifiedNpc(character);
 
   return (
     <Panel title={text.title}>
@@ -31,7 +34,7 @@ export function StatsPanel() {
         <div key={stat} className={ROW}>
           <span className="text-ink text-base font-semibold">{text[stat]}</span>
           <span className="text-ink-muted text-center text-base font-medium">
-            {sheet.base[stat]}
+            {noBase ? "—" : sheet.base[stat]}
           </span>
           <span className="flex justify-center">
             <NumberValue
@@ -71,7 +74,9 @@ export function StatsPanel() {
           />
         </span>
       </div>
-      <p className="text-ink-faint mt-2 text-[13px] font-medium italic">{text.reminder}</p>
+      <p className="text-ink-faint mt-2 text-[13px] font-medium italic">
+        {noBase ? labels.npcSheet.noBase : text.reminder}
+      </p>
     </Panel>
   );
 }

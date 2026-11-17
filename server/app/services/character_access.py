@@ -52,6 +52,18 @@ def rule_violation(rule: str, subject: str | None = None) -> AppError:
     )
 
 
+def require_player_character(character: Character, subject: str) -> None:
+    """Refuse sur un PNJ ce qui n'appartient qu'aux personnages joueurs.
+
+    Un PNJ n'a ni expérience, ni tactiques, ni formes, ni éveil (07-D2, D3, D6).
+
+    Raises:
+        AppError: ``rule_violation`` avec la règle ``npc_feature``.
+    """
+    if character.is_npc:
+        raise rule_violation("npc_feature", subject)
+
+
 def edit_conflict() -> AppError:
     """La valeur a changé entre-temps : rien n'est écrasé (CDC 12.3, 05-E3)."""
     return AppError(
@@ -132,14 +144,20 @@ class CharacterAccess:
         await self.notify(character.id, character.owner_id, character.is_played)
         return character
 
-    async def notify(self, character_id: UUID, owner_id: UUID, seat_affected: bool) -> None:
-        """Diffuse le changement, et l'état de la table si un siège l'affiche (US-009 · CA1)."""
-        recipients = {owner_id}
+    async def gm_recipients(self) -> set[UUID]:
+        """Compte du MJ, destinataire de tous les changements ; vide tant qu'il n'existe pas."""
         if self._gm_id is None:
             gm = await self._accounts.get_gm()
             self._gm_id = gm.id if gm else None
-        if self._gm_id is not None:
-            recipients.add(self._gm_id)
+        return set() if self._gm_id is None else {self._gm_id}
+
+    async def notify(self, character_id: UUID, owner_id: UUID | None, seat_affected: bool) -> None:
+        """Diffuse le changement, et l'état de la table si un siège l'affiche (US-009 · CA1).
+
+        Un PNJ n'a pas de propriétaire : seul le MJ est prévenu.
+        """
+        recipients = set() if owner_id is None else {owner_id}
+        recipients |= await self.gm_recipients()
         await self._broadcaster.character_changed(character_id, recipients)
         if seat_affected:
             await self._refresh_table()

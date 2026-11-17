@@ -9,6 +9,7 @@
 import { createContext, type ReactNode, useContext, useState } from "react";
 
 import type { Character, Sheet } from "@/features/characters/model";
+import type { NpcCategory } from "@/features/npcs/api";
 import { labels } from "@/shared/i18n";
 import { ConfirmDialog } from "@/shared/ui/ConfirmDialog";
 
@@ -21,6 +22,8 @@ interface SheetContextValue {
   /** M2 : la fiche est en cours de modification. */
   readonly editing: boolean;
   readonly run: RunAction;
+  /** Catégories de PNJ, pour la fiche d'un PNJ (07, Q04c-1) ; vide pour un personnage joueur. */
+  readonly npcCategories: readonly NpcCategory[];
 }
 
 const SheetContext = createContext<SheetContextValue | null>(null);

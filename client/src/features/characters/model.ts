@@ -134,9 +134,24 @@ export interface Experience {
   readonly balance: number;
 }
 
+/** Modèle d'un PNJ, choisi à la création (RM-021, Q07-2). */
+export type NpcModel = "full" | "simplified";
+
+/** Données propres à une feuille de PNJ (07), lues par le MJ seul. */
+export interface NpcProfile {
+  readonly model: NpcModel;
+  readonly category_id: string | null;
+  readonly notes: string;
+  /** Puissance, Finesse, Résilience : de 1 à 10 en simplifié, `null` en complet (RM-022). */
+  readonly power: number | null;
+  readonly finesse: number | null;
+  readonly resilience: number | null;
+}
+
 export interface Character {
   readonly id: string;
-  readonly owner_id: string;
+  /** Propriétaire du personnage joueur ; `null` pour un PNJ. */
+  readonly owner_id: string | null;
   readonly owner_name: string;
   readonly is_played: boolean;
   readonly can_manage_notes: boolean;
@@ -151,11 +166,26 @@ export interface Character {
   readonly awakened?: true;
   /** Présent uniquement pour le MJ : date de l'éveil, ou `null` (05, ÉVEIL V5). */
   readonly awakened_at?: string | null;
+  /** Profil du PNJ ; `null` ou absent pour un personnage joueur. */
+  readonly npc?: NpcProfile | null;
+}
+
+/** Profil du PNJ, ou `null` pour un personnage joueur. */
+export function npcProfile(character: Character): NpcProfile | null {
+  return character.npc ?? null;
+}
+
+/** PNJ simplifié : ni attributs, ni compétences, ni base calculée (RM-022, C08). */
+export function isSimplifiedNpc(character: Character): boolean {
+  return character.npc?.model === "simplified";
 }
 
 /** Plafond des attributs de ce personnage, d'après ce que le serveur en dit au lecteur. */
 export function attributeMax(character: Character): number {
-  return character.awakened === true || typeof character.awakened_at === "string"
+  // Un PNJ a des points libres (US-039 · CA2) : attributs jusqu'à 10, comme après l'éveil.
+  return character.awakened === true ||
+    typeof character.awakened_at === "string" ||
+    character.npc != null
     ? ATTRIBUTE_MAX_AWAKENED
     : ATTRIBUTE_MAX;
 }
@@ -202,7 +232,7 @@ export function parseCharacter(data: unknown): Character {
   if (
     isRecord(data) &&
     typeof data.id === "string" &&
-    typeof data.owner_id === "string" &&
+    (typeof data.owner_id === "string" || data.owner_id === null) &&
     typeof data.owner_name === "string" &&
     typeof data.is_played === "boolean" &&
     typeof data.can_manage_notes === "boolean" &&

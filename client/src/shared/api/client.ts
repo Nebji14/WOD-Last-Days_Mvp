@@ -101,7 +101,11 @@ export async function uploadFile<T>(
 }
 
 /** `fetch` ne rapporte pas la progression d'un envoi : XMLHttpRequest le fait. */
-function sendFile(path: string, file: Blob, onProgress: (ratio: number) => void): Promise<Response> {
+function sendFile(
+  path: string,
+  file: Blob,
+  onProgress: (ratio: number) => void,
+): Promise<Response> {
   return new Promise((resolve, reject) => {
     const request = new XMLHttpRequest();
     request.open("POST", path);

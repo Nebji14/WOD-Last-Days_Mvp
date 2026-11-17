@@ -8,14 +8,14 @@
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import type { RealtimeClient, RealtimeStatus } from "@/shared/realtime/client";
+import type { RealtimeClient } from "@/shared/realtime/client";
 
 import { fetchScene, type TableScene } from "./api";
 
 const LINK_REFRESH_MS = 30 * 60 * 1000;
 const EMPTY_SCENE: TableScene = { shown: null, pile: [] };
 
-export function useTableImages(realtime: RealtimeClient | null, status: RealtimeStatus): TableScene {
+export function useTableImages(realtime: RealtimeClient | null): TableScene {
   const [scene, setScene] = useState<TableScene>(EMPTY_SCENE);
   const mountedRef = useRef(true);
 
@@ -42,14 +42,18 @@ export function useTableImages(realtime: RealtimeClient | null, status: Realtime
     if (realtime === null) {
       return;
     }
-    return realtime.on("images.changed", () => void reload());
+    const unsubscribeEvent = realtime.on("images.changed", () => void reload());
+    // Chaque (re)connexion rattrape ce qui a pu être manqué pendant la coupure.
+    const unsubscribeStatus = realtime.onStatus((next) => {
+      if (next === "online") {
+        void reload();
+      }
+    });
+    return () => {
+      unsubscribeEvent();
+      unsubscribeStatus();
+    };
   }, [realtime, reload]);
-
-  useEffect(() => {
-    if (status === "online") {
-      void reload();
-    }
-  }, [status, reload]);
 
   useEffect(() => {
     const timer = window.setInterval(() => void reload(), LINK_REFRESH_MS);

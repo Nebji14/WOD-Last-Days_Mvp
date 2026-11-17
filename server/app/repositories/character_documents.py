@@ -20,6 +20,7 @@ from app.domain.character import (
     Sheet,
     Tactic,
 )
+from app.domain.npc_profile import NpcModel, NpcProfile
 from app.domain.sheet_fields import NUMBER_FIELDS, TEXT_FIELDS
 from app.domain.traits import ATTRIBUTE_NAMES, SKILL_NAMES
 
@@ -28,7 +29,12 @@ SELECT_DOCUMENT = """
     select jsonb_build_object(
         'id', c.id,
         'owner_id', c.owner_id,
-        'owner_name', a.display_name,
+        'owner_name', coalesce(a.display_name, ''),
+        'npc', (
+            select jsonb_build_object(
+                'model', p.model, 'category_id', p.category_id, 'notes', p.notes,
+                'power', p.power, 'finesse', p.finesse, 'resilience', p.resilience)
+            from npc_profile p where p.character_id = c.id),
         'awakened_at', c.awakened_at,
         'supernatural_level', c.supernatural_level,
         'supernatural_name', c.supernatural_name,
@@ -67,7 +73,7 @@ SELECT_DOCUMENT = """
             from character_note n where n.character_id = c.id)
     ) as document
     from character c
-    join account a on a.id = c.owner_id
+    left join account a on a.id = c.owner_id
 """
 
 
@@ -77,7 +83,7 @@ def to_character(raw: str) -> Character:
     awakened_at = document["awakened_at"]
     return Character(
         id=UUID(document["id"]),
-        owner_id=UUID(document["owner_id"]),
+        owner_id=UUID(document["owner_id"]) if document["owner_id"] else None,
         owner_name=document["owner_name"],
         awakened_at=datetime.fromisoformat(awakened_at) if awakened_at else None,
         supernatural_level=document["supernatural_level"],
@@ -105,6 +111,20 @@ def to_character(raw: str) -> Character:
             )
             for note in document["notes"]
         ],
+        npc=to_npc_profile(document["npc"]) if document["npc"] else None,
+    )
+
+
+def to_npc_profile(raw: dict[str, Any]) -> NpcProfile:
+    """Convertit le profil de PNJ lu en JSON (ou en ligne de base) en objet du domaine."""
+    category_id = raw["category_id"]
+    return NpcProfile(
+        model=NpcModel(raw["model"]),
+        category_id=UUID(str(category_id)) if category_id else None,
+        notes=raw["notes"],
+        power=raw["power"],
+        finesse=raw["finesse"],
+        resilience=raw["resilience"],
     )
 
 

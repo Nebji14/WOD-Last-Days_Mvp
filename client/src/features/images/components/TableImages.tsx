@@ -5,7 +5,7 @@
  * et image affichée en grand, partie en pause. Les actions du MJ (reposer,
  * retirer) sont revérifiées par le serveur.
  */
-import type { RealtimeClient, RealtimeStatus } from "@/shared/realtime/client";
+import type { RealtimeClient } from "@/shared/realtime/client";
 
 import { putDownImage, removeFromTable } from "../api";
 import { useTableImages } from "../useTableImages";
@@ -14,7 +14,6 @@ import { TableImagePile } from "./TableImagePile";
 
 interface TableImagesProps {
   readonly realtime: RealtimeClient | null;
-  readonly status: RealtimeStatus;
   readonly isGm: boolean;
   readonly gmName: string;
 }
@@ -24,8 +23,8 @@ function report(error: unknown): void {
   console.warn("Action sur les images de la table refusée", error);
 }
 
-export function TableImages({ realtime, status, isGm, gmName }: TableImagesProps) {
-  const scene = useTableImages(realtime, status);
+export function TableImages({ realtime, isGm, gmName }: TableImagesProps) {
+  const scene = useTableImages(realtime);
 
   return (
     <>

@@ -5,16 +5,16 @@ from uuid import uuid4
 
 import pytest
 
+from app.domain.hierarchy import would_create_cycle
 from app.domain.images import (
     IMAGE_NAME_MAX,
     Image,
     ImageType,
-    clean_name,
     detect_image_type,
     image_name_from_filename,
     table_pile,
-    would_create_cycle,
 )
+from app.domain.names import clean_name
 
 PNG_HEAD = b"\x89PNG\r\n\x1a\n\x00\x00\x00\x0d"
 
@@ -59,9 +59,7 @@ def test_a_folder_cannot_move_under_itself_or_a_descendant() -> None:
 
 
 def _image(on_table_at: datetime | None) -> Image:
-    return Image(
-        uuid4(), "x", None, "a.png", "image/png", 1, False, on_table_at, datetime.now(UTC)
-    )
+    return Image(uuid4(), "x", None, "a.png", "image/png", 1, False, on_table_at, datetime.now(UTC))
 
 
 def test_pile_shows_the_most_recent_image_first() -> None:

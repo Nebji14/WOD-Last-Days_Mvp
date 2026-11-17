@@ -44,7 +44,7 @@ class PgImageRepository:
         status = await self._pool.execute(
             "update image_folder set name = $2 where id = $1", folder_id, name
         )
-        return status.endswith(" 1")
+        return str(status).endswith(" 1")
 
     async def move_folder(self, folder_id: UUID, parent_id: UUID | None) -> None:
         """Range un dossier sous un autre, ou à la racine."""

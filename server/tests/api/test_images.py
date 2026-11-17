@@ -11,9 +11,7 @@ PNG = b"\x89PNG\r\n\x1a\n" + b"\x00" * 64
 
 
 def upload(gm: Actor, filename: str = "Quai de nuit.png", **params: Any) -> Response:
-    return gm.request(
-        "POST", "/api/images", params={"filename": filename, **params}, content=PNG
-    )
+    return gm.request("POST", "/api/images", params={"filename": filename, **params}, content=PNG)
 
 
 def uploaded(gm: Actor, filename: str = "Quai de nuit.png", **params: Any) -> dict[str, Any]:
@@ -43,7 +41,8 @@ def test_upload_keeps_the_file_name_and_regenerates_the_stored_name(ctx: TestCon
 
     assert image["name"] == "Quai de nuit"
     [stored] = ctx.storage.files
-    assert "Quai" not in stored and stored.endswith(".png")
+    assert "Quai" not in stored
+    assert stored.endswith(".png")
     assert library(gm)["images"][0]["url"].startswith("https://storage.test/")
 
 
@@ -92,7 +91,9 @@ def test_rename_and_move_an_image(ctx: TestContext) -> None:
     image_id = uploaded(gm)["id"]
     folder_id = gm.request("POST", "/api/image-folders", json={"name": "Les docks"}).json()["id"]
 
-    assert gm.request("PATCH", f"/api/images/{image_id}", json={"name": " Quai "}).status_code == 204
+    assert (
+        gm.request("PATCH", f"/api/images/{image_id}", json={"name": " Quai "}).status_code == 204
+    )
     moved = gm.request("PUT", f"/api/images/{image_id}/folder", json={"folder_id": folder_id})
 
     assert moved.status_code == 204

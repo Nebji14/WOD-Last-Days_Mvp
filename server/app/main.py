@@ -10,7 +10,17 @@ import httpx
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import auth, characters, chat, health, images, players, realtime, sheet_items
+from app.api import (
+    auth,
+    characters,
+    chat,
+    health,
+    images,
+    npcs,
+    players,
+    realtime,
+    sheet_items,
+)
 from app.api.deps import Container
 from app.core.config import Settings, get_settings
 from app.core.database import create_pool
@@ -28,6 +38,7 @@ from app.repositories.accounts import PgAccountRepository
 from app.repositories.characters import PgCharacterRepository
 from app.repositories.chat import PgChatRepository
 from app.repositories.images import PgImageRepository
+from app.repositories.npcs import PgNpcRepository
 from app.repositories.players import PgPlayerRepository
 from app.repositories.sheet_items import PgSheetItemRepository
 from app.services.auth import AuthService
@@ -37,6 +48,7 @@ from app.services.characters import CharacterService
 from app.services.chat import ChatService
 from app.services.image_table import ImageTableService
 from app.services.images import ImageService
+from app.services.npcs import NpcService
 from app.services.players import PlayerService
 from app.services.sheet_items import SheetItemService
 from app.services.table import TableService
@@ -90,6 +102,7 @@ def create_app(settings: Settings | None = None, container: Container | None = N
                 awakening_service=AwakeningService(character_repository, access),
                 image_service=ImageService(image_repository, storage, hub),
                 image_table_service=ImageTableService(image_repository, storage, hub),
+                npc_service=NpcService(PgNpcRepository(pool), character_repository, access, hub),
             )
             try:
                 yield
@@ -119,6 +132,7 @@ def create_app(settings: Settings | None = None, container: Container | None = N
     app.include_router(sheet_items.router)
     app.include_router(players.router)
     app.include_router(images.router)
+    app.include_router(npcs.router)
     app.include_router(realtime.router)
     app.include_router(realtime_endpoint.router)
     return app

@@ -7,7 +7,7 @@
 import type { ReactNode } from "react";
 
 import { labels } from "@/shared/i18n";
-import { openImagesTool, openPlayersTool } from "@/shared/windows/detached";
+import { openImagesTool, openNpcsTool, openPlayersTool } from "@/shared/windows/detached";
 
 interface ToolProps {
   readonly label: string;
@@ -17,7 +17,6 @@ interface ToolProps {
   readonly children: ReactNode;
 }
 
-// TODO(US-040) : ouvrir la fenêtre détachable de l'outil PNJ (04c).
 function Tool({ label, hint, onOpen, children }: ToolProps) {
   const ready = onOpen !== undefined;
   return (
@@ -68,7 +67,7 @@ export function GmTools() {
           stroke="none"
         />
       </Tool>
-      <Tool label={text.npcs} hint={text.npcsHint}>
+      <Tool label={text.npcs} hint={text.npcsHint} onOpen={openNpcsTool}>
         <rect x="5" y="0.75" width="15" height="18.5" rx="1.5" />
         <circle cx="12.5" cy="5.5" r="2.5" strokeWidth="1.3" />
         <path d="M8.5 12.5c0-1.7 1.8-2.6 4-2.6s4 .9 4 2.6" strokeWidth="1.3" />

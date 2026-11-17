@@ -21,6 +21,7 @@ from app.domain.character import (
     Sheet,
     Tactic,
 )
+from app.domain.npc_profile import NpcProfile
 from app.domain.sheet_fields import NUMBER_FIELDS, TEXT_FIELDS
 from app.domain.traits import ATTRIBUTE_NAMES, SKILL_NAMES
 from app.repositories.characters import NewCharacter
@@ -77,7 +78,8 @@ class FakeCharacterStore:
         sheets = [
             replace(s, tactics=[self._tactics[t.id] for t in s.tactics]) for s in character.sheets
         ]
-        played = self._played.get(character.owner_id) == character.id
+        owner = character.owner_id
+        played = owner is not None and self._played.get(owner) == character.id
         return copy.deepcopy(replace(character, sheets=sheets, is_played=played))
 
     async def list_for_owner(self, owner_id: UUID) -> list[Character]:
@@ -85,6 +87,21 @@ class FakeCharacterStore:
         return [c for c in [await self.get(cid) for cid in owned] if c is not None]
 
     async def create(self, owner_id: UUID, new: NewCharacter) -> UUID:
+        character = self._build(owner_id, new, npc=None)
+        self._played[owner_id] = character.id
+        return character.id
+
+    def add_npc(self, new: NewCharacter, profile: NpcProfile) -> UUID:
+        """Crée un PNJ sans propriétaire (doublure de ``PgNpcRepository.create_npc``)."""
+        return self._build(None, new, npc=profile).id
+
+    def set_npc(self, character_id: UUID, profile: NpcProfile) -> None:
+        self._put(replace(self._characters[character_id], npc=profile))
+
+    def npcs(self) -> list[Character]:
+        return [c for c in self._characters.values() if c.npc is not None]
+
+    def _build(self, owner_id: UUID | None, new: NewCharacter, npc: NpcProfile | None) -> Character:
         values = dict(new.values)
         specialties: dict[str, list[str]] = {}
         for specialty in new.specialties:
@@ -94,7 +111,10 @@ class FakeCharacterStore:
             is_main=True,
             form_name=str(values["form_name"]),
             texts={f: str(values.get(f, "")) for f in TEXT_FIELDS if f != "form_name"},
-            traits={n: int(values[n]) for n in (*ATTRIBUTE_NAMES, *SKILL_NAMES)},
+            traits={
+                n: int(values.get(n, 1 if n in ATTRIBUTE_NAMES else 0))
+                for n in (*ATTRIBUTE_NAMES, *SKILL_NAMES)
+            },
             numbers={f: int(values.get(f, 7)) for f in NUMBER_FIELDS},
             wound_track="",
             specialties=specialties,
@@ -105,7 +125,7 @@ class FakeCharacterStore:
         character = Character(
             id=uuid4(),
             owner_id=owner_id,
-            owner_name=self._accounts.accounts[owner_id].display_name,
+            owner_name="" if owner_id is None else self._accounts.accounts[owner_id].display_name,
             awakened_at=None,
             supernatural_level=1,
             supernatural_name="",
@@ -115,15 +135,16 @@ class FakeCharacterStore:
             sheets=[sheet],
             expenses=[],
             notes=[],
+            npc=npc,
         )
         self._put(character)
-        self._played[owner_id] = character.id
-        return character.id
+        return character
 
     async def delete(self, character_id: UUID) -> None:
         character = self._characters.pop(character_id)
-        if self._played.get(character.owner_id) == character_id:
-            del self._played[character.owner_id]
+        owner = character.owner_id
+        if owner is not None and self._played.get(owner) == character_id:
+            del self._played[owner]
 
     async def set_played(self, owner_id: UUID, character_id: UUID) -> None:
         self._played[owner_id] = character_id

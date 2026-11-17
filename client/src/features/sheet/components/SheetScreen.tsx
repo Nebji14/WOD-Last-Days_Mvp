@@ -11,8 +11,10 @@
 import { useEffect, useState } from "react";
 
 import { mainSheet } from "@/features/characters/model";
+import { categoryLabel } from "@/features/npcs/categories";
 import { labels } from "@/shared/i18n";
 
+import { useNpcCategories } from "../useNpcCategories";
 import { useSheetController } from "../useSheetController";
 import { FormTabs } from "./FormTabs";
 import { NotesFace } from "./NotesFace";
@@ -36,6 +38,8 @@ export function SheetScreen({ characterId, initialEditing = false }: SheetScreen
   const [activeId, setActiveId] = useState<string | null>(null);
 
   const main = character === null ? null : mainSheet(character);
+  const npc = character?.npc ?? null;
+  const npcCategories = useNpcCategories(npc !== null, npc?.category_id ?? null);
   const sheet = character?.sheets.find((candidate) => candidate.id === activeId) ?? main;
   const title = main?.texts.name ?? "";
 
@@ -51,23 +55,30 @@ export function SheetScreen({ characterId, initialEditing = false }: SheetScreen
   }
 
   return (
-    <SheetProvider value={{ character, sheet, editing, run }}>
+    <SheetProvider value={{ character, sheet, editing, run, npcCategories }}>
       <div className="bg-night text-ink flex h-screen flex-col">
         <SheetTitleBar
           name={title}
           owner={character.owner_name}
+          npc={
+            npc === null
+              ? null
+              : { model: npc.model, category: categoryLabel(npcCategories, npc.category_id) }
+          }
           face={face}
           onFace={setFace}
           editing={editing}
           onEditing={setEditing}
         />
-        <FormTabs
-          character={character}
-          activeId={sheet.id}
-          onSelect={setActiveId}
-          editing={editing}
-          run={run}
-        />
+        {npc === null && (
+          <FormTabs
+            character={character}
+            activeId={sheet.id}
+            onSelect={setActiveId}
+            editing={editing}
+            run={run}
+          />
+        )}
         {notice !== null && (
           <div
             role={notice.kind === "refused" ? "alert" : "status"}

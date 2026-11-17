@@ -9,11 +9,11 @@
  * pour l'y ranger (04b-I10).
  */
 import { labels } from "@/shared/i18n";
+import { InlineName } from "@/shared/ui/InlineName";
 import { SignedImage } from "@/shared/ui/SignedImage";
 
 import type { LibraryImage } from "../api";
 import { startDrag } from "./dragData";
-import { InlineName } from "./InlineName";
 
 const IMAGE_NAME_MAX = 120;
 const OVERLAY_BUTTON =

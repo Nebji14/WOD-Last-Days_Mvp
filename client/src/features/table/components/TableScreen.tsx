@@ -62,7 +62,6 @@ export function TableScreen() {
         <ChatPanel viewerId={account.id} viewerIsGm={isGm} />
         <TableImages
           realtime={session.realtime}
-          status={session.status}
           isGm={isGm}
           gmName={table?.gm.displayName ?? labels.table.gm.unknownName}
         />

@@ -21,6 +21,7 @@ from app.domain.creation import (
     specialty_violations,
 )
 from app.domain.derived import BASE_SIZE, base_values
+from app.domain.npcs import check_npc_sheet_field
 from app.domain.sheet_fields import (
     NUMBER_FIELDS,
     TEXT_FIELDS,
@@ -36,6 +37,7 @@ from app.services.character_access import (
     CharacterAccess,
     edit_conflict,
     not_found,
+    require_player_character,
     rule_violation,
 )
 
@@ -235,6 +237,8 @@ class CharacterService:
         character = await self._access.editable(actor, character_id)
         if field not in CHARACTER_FIELDS:
             raise rule_violation(FieldRule.UNKNOWN_FIELD.value, field)
+        if field.startswith("xp_"):
+            require_player_character(character, field)
         if field == "supernatural_name":
             if not isinstance(value, str) or not isinstance(expected, str):
                 raise rule_violation(FieldRule.TYPE.value, field)
@@ -275,7 +279,10 @@ class CharacterService:
         character = await self._for_sheet(actor, sheet_id)
         sheet = self._access.sheet_of(character, sheet_id)
         try:
-            checked = validate_field(sheet, field, value, character.is_awakened)
+            check_npc_sheet_field(character.npc, field)
+            # Un PNJ a des points libres (US-039 · CA2) : attributs jusqu'à 10.
+            uncapped = character.is_awakened or character.is_npc
+            checked = validate_field(sheet, field, value, uncapped)
             if type(expected) is not type(current_value(sheet, field)):
                 raise FieldRuleError(FieldRule.TYPE)
         except FieldRuleError as error:
@@ -322,8 +329,8 @@ class CharacterService:
         return await self._access.changed(character.id)
 
     async def add_form(self, actor: Account, character_id: UUID, form_name: str) -> Character:
-        """Ajoute une forme, copie de la forme principale (05-F2, Q05-7)."""
-        await self._access.editable(actor, character_id)
+        """Ajoute une forme, copie de la forme principale (05-F2, Q05-7). Jamais pour un PNJ."""
+        require_player_character(await self._access.editable(actor, character_id), "form")
         await self._characters.add_form(character_id, form_name)
         return await self._access.changed(character_id)
 

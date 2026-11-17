@@ -41,7 +41,14 @@ interface LibraryPanelProps extends Omit<ImageLibraryState, "library" | "scene" 
   readonly onLocalError: (code: string) => void;
 }
 
-export function LibraryPanel({ library, act, upload, uploads, dismissUpload, onLocalError }: LibraryPanelProps) {
+export function LibraryPanel({
+  library,
+  act,
+  upload,
+  uploads,
+  dismissUpload,
+  onLocalError,
+}: LibraryPanelProps) {
   const text = labels.imagesTool;
   const { folders, images } = library;
   const fileInput = useRef<HTMLInputElement>(null);
@@ -55,12 +62,16 @@ export function LibraryPanel({ library, act, upload, uploads, dismissUpload, onL
 
   const openFolder = folders.find((folder) => folder.id === openId) ?? null;
   const searching = query.trim() !== "";
-  const shown = searching ? searchImages(images, folders, query) : imagesIn(images, openFolder?.id ?? null);
+  const shown = searching
+    ? searchImages(images, folders, query)
+    : imagesIn(images, openFolder?.id ?? null);
 
   /** Ouvre un dossier et déplie ses parents, pour qu'il soit visible dans l'arborescence. */
   const reveal = (folderId: string | null) => {
     setOpenId(folderId);
-    const parents = folderPath(folders, folderId).slice(0, -1).map((f) => f.id);
+    const parents = folderPath(folders, folderId)
+      .slice(0, -1)
+      .map((f) => f.id);
     setExpanded((current) => new Set([...current, ...parents]));
   };
 
@@ -115,7 +126,10 @@ export function LibraryPanel({ library, act, upload, uploads, dismissUpload, onL
   };
 
   return (
-    <section aria-label={text.library} className="border-line bg-panel flex min-h-0 flex-col gap-4 rounded-xs border p-4">
+    <section
+      aria-label={text.library}
+      className="border-line bg-panel flex min-h-0 flex-col gap-4 rounded-xs border p-4"
+    >
       <div className="flex items-center justify-between gap-4">
         <h2 className="font-display text-gold flex items-baseline gap-3 text-[13px] font-bold tracking-[3px]">
           {text.library}
@@ -153,7 +167,9 @@ export function LibraryPanel({ library, act, upload, uploads, dismissUpload, onL
       </div>
 
       <label className="border-line-strong flex h-10 shrink-0 items-center gap-3 rounded-xs border px-3">
-        <span aria-hidden="true" className="text-ink-muted">⌕</span>
+        <span aria-hidden="true" className="text-ink-muted">
+          ⌕
+        </span>
         <span className="sr-only">{text.searchLabel}</span>
         <input
           type="search"
@@ -163,7 +179,9 @@ export function LibraryPanel({ library, act, upload, uploads, dismissUpload, onL
           onKeyDown={(event) => event.key === "Escape" && setQuery("")}
           className="text-ink placeholder:text-ink-faint min-w-0 flex-1 bg-transparent text-[17px] outline-none placeholder:italic"
         />
-        <span className="font-display text-ink-muted text-[9px] font-bold tracking-[2px]">{text.searchScope}</span>
+        <span className="font-display text-ink-muted text-[9px] font-bold tracking-[2px]">
+          {text.searchScope}
+        </span>
       </label>
 
       <div className="grid min-h-0 flex-1 grid-cols-[180px_minmax(0,1fr)] gap-4">

@@ -20,11 +20,13 @@ from app.services.characters import CharacterService
 from app.services.chat import ChatService
 from app.services.image_table import ImageTableService
 from app.services.images import ImageService
+from app.services.npcs import NpcService
 from app.services.players import PlayerService
 from app.services.sheet_items import SheetItemService
 from app.services.table import TableService
 from tests.fake_characters import FakeCharacterStore
 from tests.fake_images import FakeFileStorage, FakeImageStore
+from tests.fake_npcs import FakeNpcStore
 from tests.fake_players import FakePlayerStore
 from tests.fakes import (
     FakeAccountStore,
@@ -93,6 +95,7 @@ def ctx(settings: Settings) -> Iterator[TestContext]:
         awakening_service=AwakeningService(characters, access),
         image_service=ImageService(images, storage, hub),
         image_table_service=ImageTableService(images, storage, hub),
+        npc_service=NpcService(FakeNpcStore(characters), characters, access, hub),
     )
     with TestClient(create_app(settings, container), headers={"Origin": ORIGIN}) as client:
         yield TestContext(client, accounts, identity, auth_service, characters, images, storage)

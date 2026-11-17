@@ -1,35 +1,23 @@
 /**
- * Arborescence des dossiers et recherche de la bibliothèque d'images (04b).
- *
- * Fonctions pures : le serveur reste seul garant des règles (dossier sans
- * cycle), le client les reflète pour l'ergonomie.
+ * Contenu des dossiers et recherche de la bibliothèque d'images (04b).
+ * L'arborescence elle-même vient de `@/shared/tree`.
  */
+import { byName, nodePath } from "@/shared/tree";
+
 import type { ImageFolder, LibraryImage } from "./api";
 
-/** Comparaison de noms sans tenir compte de la casse ni des accents. */
+/** Comparaison de textes sans tenir compte de la casse ni des accents. */
 function normalize(text: string): string {
   return text
     .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
+    .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase();
 }
 
-const byName = (left: { name: string }, right: { name: string }): number =>
-  left.name.localeCompare(right.name, "fr", { sensitivity: "base" });
-
-/** Sous-dossiers directs d'un dossier (`null` : racine), par nom. */
-export function childrenOf(
-  folders: readonly ImageFolder[],
-  parentId: string | null,
-): ImageFolder[] {
-  return folders.filter((folder) => folder.parentId === parentId).sort(byName);
-}
+export { childrenOf, nodePath as folderPath, isWithin } from "@/shared/tree";
 
 /** Images rangées directement dans ce dossier ; `null` : toutes les images. */
-export function imagesIn(
-  images: readonly LibraryImage[],
-  folderId: string | null,
-): LibraryImage[] {
+export function imagesIn(images: readonly LibraryImage[], folderId: string | null): LibraryImage[] {
   const shown = folderId === null ? [...images] : images.filter((i) => i.folderId === folderId);
   return shown.sort(byName);
 }
@@ -43,27 +31,6 @@ export function imageCounts(images: readonly LibraryImage[]): Map<string, number
     }
   }
   return counts;
-}
-
-/** Chemin d'un dossier, de la racine jusqu'à lui ([Fil d'Ariane]). */
-export function folderPath(folders: readonly ImageFolder[], folderId: string | null): ImageFolder[] {
-  const byId = new Map(folders.map((folder) => [folder.id, folder]));
-  const path: ImageFolder[] = [];
-  let current = folderId === null ? undefined : byId.get(folderId);
-  while (current !== undefined && !path.includes(current)) {
-    path.unshift(current);
-    current = current.parentId === null ? undefined : byId.get(current.parentId);
-  }
-  return path;
-}
-
-/** Indique si `candidateId` est `folderId` lui-même ou l'un de ses descendants (04b-I10). */
-export function isWithin(
-  folders: readonly ImageFolder[],
-  folderId: string,
-  candidateId: string | null,
-): boolean {
-  return folderPath(folders, candidateId).some((folder) => folder.id === folderId);
 }
 
 /**
@@ -81,7 +48,7 @@ export function searchImages(
   }
   return images
     .filter((image) => {
-      const names = [image.name, ...folderPath(folders, image.folderId).map((f) => f.name)];
+      const names = [image.name, ...nodePath(folders, image.folderId).map((f) => f.name)];
       return names.some((name) => normalize(name).includes(wanted));
     })
     .sort(byName);

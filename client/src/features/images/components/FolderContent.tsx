@@ -12,7 +12,8 @@ import type { ImageFolder, LibraryImage } from "../api";
 import { folderPath } from "../tree";
 import { ImageCard } from "./ImageCard";
 
-const ACTION = "font-display text-copper cursor-pointer text-[10px] font-bold tracking-[2px] hover:brightness-125";
+const ACTION =
+  "font-display text-copper cursor-pointer text-[10px] font-bold tracking-[2px] hover:brightness-125";
 
 interface FolderContentProps {
   readonly folders: readonly ImageFolder[];
@@ -44,8 +45,15 @@ export function FolderContent(props: FolderContentProps) {
     <div className="flex min-h-0 flex-col gap-3">
       {!searching && (
         <div className="flex items-center justify-between gap-4">
-          <nav aria-label={text.folders} className="text-ink flex min-w-0 items-center gap-2 text-[17px]">
-            <button type="button" onClick={() => props.onOpen(null)} className="cursor-pointer hover:underline">
+          <nav
+            aria-label={text.folders}
+            className="text-ink flex min-w-0 items-center gap-2 text-[17px]"
+          >
+            <button
+              type="button"
+              onClick={() => props.onOpen(null)}
+              className="cursor-pointer hover:underline"
+            >
               {text.allImages}
             </button>
             {crumbs.map((folder) => (
@@ -66,12 +74,20 @@ export function FolderContent(props: FolderContentProps) {
               <button type="button" onClick={props.onSubFolder} className={ACTION}>
                 {text.subFolder}
               </button>
-              <span aria-hidden="true" className="text-ink-faint">·</span>
+              <span aria-hidden="true" className="text-ink-faint">
+                ·
+              </span>
               <button type="button" onClick={props.onRenameFolder} className={ACTION}>
                 {text.rename}
               </button>
-              <span aria-hidden="true" className="text-ink-faint">·</span>
-              <button type="button" onClick={props.onDeleteFolder} className={`${ACTION} text-danger`}>
+              <span aria-hidden="true" className="text-ink-faint">
+                ·
+              </span>
+              <button
+                type="button"
+                onClick={props.onDeleteFolder}
+                className={`${ACTION} text-danger`}
+              >
                 {text.delete}
               </button>
             </div>

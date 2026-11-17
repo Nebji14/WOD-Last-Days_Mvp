@@ -23,6 +23,7 @@ EVENT_TABLE_STATE = "table.state"
 EVENT_CHAT_MESSAGE = "chat.message"
 EVENT_CHARACTER_CHANGED = "character.changed"
 EVENT_IMAGES_CHANGED = "images.changed"
+EVENT_NPCS_CHANGED = "npcs.changed"
 
 # Codes de fermeture applicatifs (plage 4000-4999 réservée aux applications).
 CLOSE_UNAUTHENTICATED = 4401
@@ -78,6 +79,15 @@ class ConnectionHub:
         qui produit des liens de lecture signés (03-A2, 04b).
         """
         await self._broadcast(EVENT_IMAGES_CHANGED, {})
+
+    async def npcs_changed(self, recipients: set[UUID]) -> None:
+        """Signale au MJ un changement de la liste des PNJ ou des catégories (04c).
+
+        L'événement ne porte aucune donnée : l'outil PNJ relit la liste par l'API.
+        """
+        payload: dict[str, Any] = {"type": EVENT_NPCS_CHANGED, "data": {}}
+        targets = [ws for ws, owner in self._connections.items() if owner in recipients]
+        await asyncio.gather(*(self._send(ws, payload) for ws in targets))
 
     async def close_account(self, account_id: UUID, code: int) -> None:
         """Ferme toutes les connexions d'un compte (déconnexion, US-003 et T3)."""

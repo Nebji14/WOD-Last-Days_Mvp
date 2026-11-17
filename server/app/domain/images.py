@@ -4,7 +4,6 @@ Aucun accès réseau ni base : type réel d'un fichier, noms, dossiers et pile
 de la table.
 """
 
-from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import datetime
 from enum import StrEnum
@@ -71,37 +70,6 @@ def image_name_from_filename(filename: str) -> str:
         stem = stem.rsplit(".", 1)[0]
     cleaned = " ".join(stem.split())[:IMAGE_NAME_MAX].strip()
     return cleaned or DEFAULT_IMAGE_NAME
-
-
-def clean_name(name: str, limit: int) -> str | None:
-    """Nom saisi, sans espaces superflus ; ``None`` s'il est vide ou trop long."""
-    cleaned = " ".join(name.split())
-    if not cleaned or len(cleaned) > limit:
-        return None
-    return cleaned
-
-
-def would_create_cycle(
-    parents: Mapping[UUID, UUID | None], folder_id: UUID, new_parent_id: UUID | None
-) -> bool:
-    """Indique si ranger ``folder_id`` sous ``new_parent_id`` créerait un cycle (04b-I10).
-
-    Args:
-        parents: parent de chaque dossier existant.
-        folder_id: dossier déplacé.
-        new_parent_id: futur parent, ``None`` pour la racine.
-
-    Returns:
-        ``True`` si le futur parent est le dossier lui-même ou l'un de ses descendants.
-    """
-    current = new_parent_id
-    visited: set[UUID] = set()
-    while current is not None and current not in visited:
-        if current == folder_id:
-            return True
-        visited.add(current)
-        current = parents.get(current)
-    return False
 
 
 @dataclass(frozen=True, slots=True)

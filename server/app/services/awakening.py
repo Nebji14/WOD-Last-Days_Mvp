@@ -43,6 +43,8 @@ class AwakeningService:
         if actor.role is not Role.GM:
             raise not_found()
         character = await self._access.readable(actor, character_id)
+        if character.is_npc:
+            raise not_found()
         if character.is_awakened:
             return character
         await self._store.mark_awakened(character_id)

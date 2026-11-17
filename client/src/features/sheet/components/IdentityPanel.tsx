@@ -1,9 +1,13 @@
 "use client";
 
-/** [Panneau — Identité] : nom, joueur, concept, profession, vertu, vice, compact. */
+/**
+ * [Panneau — Identité] : nom, joueur, concept, profession, vertu, vice, compact.
+ * Pour un PNJ, la ligne du joueur devient la catégorie (07, Q04c-1).
+ */
 import { setSheetField } from "@/features/characters/api";
 import { labels } from "@/shared/i18n";
 
+import { NpcCategoryLine } from "./NpcPanels";
 import { PANEL, SMALL_LABEL, TextValue, useSheet } from "./primitives";
 
 const FIELDS = ["concept", "profession", "virtue", "vice", "compact"] as const;
@@ -25,9 +29,13 @@ export function IdentityPanel() {
           maxLength={80}
           className="text-ink-bright block truncate text-[40px] leading-[48px] font-bold [text-shadow:0_0_14px_rgb(255_90_20/0.25)]"
         />
-        <p className="text-ink-muted pl-0.5 text-[15px] font-medium italic">
-          {text.ownerLine} {character.owner_name}
-        </p>
+        {character.npc == null ? (
+          <p className="text-ink-muted pl-0.5 text-[15px] font-medium italic">
+            {text.ownerLine} {character.owner_name}
+          </p>
+        ) : (
+          <NpcCategoryLine character={character} />
+        )}
       </div>
       <dl className="grid flex-1 grid-cols-[1.2fr_1.2fr_0.8fr_0.8fr_1.4fr] gap-x-5">
         {FIELDS.map((field) => (

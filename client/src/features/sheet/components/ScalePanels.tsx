@@ -180,7 +180,7 @@ export function MoralityPanel() {
         <p className="font-display text-ink-muted text-[8px] font-bold tracking-[2px]">
           {text.notes}
         </p>
-        {editing && open === null && (
+        {open === null && (
           <button type="button" onClick={() => setOpen("new")} className={LINK_ACTION}>
             {text.addNote}
           </button>
@@ -194,7 +194,7 @@ export function MoralityPanel() {
           <li key={note.id}>{noteLine(note)}</li>
         ))}
       </ul>
-      {open === "new" && editing && (
+      {open === "new" && (
         <NoteForm
           initial={{ level: sheet.morality, body: "" }}
           onCancel={() => setOpen(null)}

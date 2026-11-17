@@ -151,7 +151,6 @@ export function TacticsPanel() {
     <Panel
       title={text.title}
       aside={
-        editing &&
         open === null && (
           <button type="button" onClick={() => setOpen("new")} className={LINK_ACTION}>
             {text.add}
@@ -210,7 +209,7 @@ export function TacticsPanel() {
       {sheet.tactics.length === 0 && open !== "new" && (
         <p className="text-ink-faint text-[15px] font-medium italic">{text.empty}</p>
       )}
-      {open === "new" && editing && <TacticPicker onClose={() => setOpen(null)} />}
+      {open === "new" && <TacticPicker onClose={() => setOpen(null)} />}
     </Panel>
   );
 }

@@ -5,8 +5,9 @@
  * armures et objets.
  *
  * Un même composant sert les six listes ; chaque type déclare ses colonnes
- * (RM-014 pour une arme). En modification (05-I7) : « + Ajouter » ouvre une
- * ligne de saisie, ✎ modifie sur place, ✕ supprime après confirmation (T1).
+ * (RM-014 pour une arme). « + Ajouter » ouvre une ligne de saisie dans les deux
+ * modes : créer ne demande pas de passer en modification. En modification
+ * (05-I7), ✎ modifie sur place et ✕ supprime après confirmation (T1).
  * Liste vide : « Aucun … pour l'instant. » (05-E1).
  */
 import { type FormEvent, useState } from "react";
@@ -140,7 +141,6 @@ export function EntryPanel({ kind }: { readonly kind: EntryKind }) {
     <Panel
       title={text.title}
       aside={
-        editing &&
         open === null && (
           <button type="button" onClick={() => setOpen("new")} className={LINK_ACTION}>
             {text.add}
@@ -216,7 +216,7 @@ export function EntryPanel({ kind }: { readonly kind: EntryKind }) {
       {entries.length === 0 && open !== "new" && (
         <p className="text-ink-faint text-[15px] font-medium italic">{text.empty}</p>
       )}
-      {open === "new" && editing && (
+      {open === "new" && (
         <div className="mt-1.5">
           <EntryForm
             layout={layout}

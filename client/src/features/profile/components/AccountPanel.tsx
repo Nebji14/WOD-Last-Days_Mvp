@@ -3,18 +3,33 @@
  *
  * Consultation seule : la modification du compte viendra après le MVP, le
  * bouton est donc grisé. Les méthodes de connexion sont listées avec leur
- * état ; Google n'est pas encore activé.
+ * état, lu auprès du serveur.
  */
 import type { Account } from "@/features/auth/api";
 import { initials } from "@/features/table/seatLayout";
 import { labels } from "@/shared/i18n";
 
+import { useLoginMethods } from "../useLoginMethods";
+
 const SECTION_TITLE = "font-display text-gold text-[11px] font-bold tracking-[3px]";
 const ROW = "flex items-baseline justify-between gap-4 text-[17px]";
+
+/** Ligne d'une méthode de connexion ; sans état tant qu'il n'est pas connu. */
+function MethodRow({ label, linked }: { readonly label: string; readonly linked?: boolean }) {
+  const text = labels.profile.methods;
+  return (
+    <li className={ROW}>
+      <span className="text-ink">{label}</span>
+      {linked === true && <span className="text-valid italic">✓ {text.enabled}</span>}
+      {linked === false && <span className="text-ink-faint italic">{text.notLinked}</span>}
+    </li>
+  );
+}
 
 export function AccountPanel({ account }: { readonly account: Account }) {
   const text = labels.profile;
   const isGm = account.role === "gm";
+  const methods = useLoginMethods();
 
   return (
     <section
@@ -53,14 +68,8 @@ export function AccountPanel({ account }: { readonly account: Account }) {
 
       <h3 className={`${SECTION_TITLE} mt-7 mb-4`}>{text.methods.title}</h3>
       <ul className="flex flex-col gap-2.5">
-        <li className={ROW}>
-          <span className="text-ink">{text.methods.password}</span>
-          <span className="text-valid italic">✓ {text.methods.enabled}</span>
-        </li>
-        <li className={ROW}>
-          <span className="text-ink">{text.methods.google}</span>
-          <span className="text-ink-faint italic">{text.methods.notLinked}</span>
-        </li>
+        <MethodRow label={text.methods.password} linked={methods?.password} />
+        <MethodRow label={text.methods.google} linked={methods?.google} />
       </ul>
 
       <button

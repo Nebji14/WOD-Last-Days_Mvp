@@ -16,6 +16,7 @@ from app.realtime.tickets import TicketStore
 from app.services.auth import AuthService
 from app.services.awakening import AwakeningService
 from app.services.characters import CharacterService
+from app.services.google_auth import GoogleAuthService
 from app.services.chat import ChatService
 from app.services.image_table import ImageTableService
 from app.services.images import ImageService
@@ -31,6 +32,7 @@ class Container:
 
     settings: Settings
     auth_service: AuthService
+    google_auth_service: GoogleAuthService
     token_verifier: TokenVerifier
     rate_limiter: RateLimiter
     chat_service: ChatService

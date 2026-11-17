@@ -21,7 +21,6 @@ export const fr = {
     showPassword: "Afficher",
     hidePassword: "Masquer",
     or: "ou",
-    googleSoon: "Connexion Google bientôt disponible",
     login: {
       heading: "Connexion",
       subtitle: "Reprends la traque là où tu l'as laissée.",
@@ -148,6 +147,7 @@ export const fr = {
     username_taken: "Ce nom de chasseur est déjà pris.",
     username_invalid:
       "Le nom doit contenir de 3 à 24 caractères : lettres sans accent, chiffres, point, tiret.",
+    google_failed: "La connexion avec Google n'a pas abouti. Réessaie.",
     password_mismatch: "Les deux mots de passe sont différents.",
     password_too_weak: "Le mot de passe ne respecte pas les règles de sécurité.",
     rate_limited: "Trop de tentatives. Patiente quelques minutes avant de réessayer.",

@@ -5,6 +5,9 @@ voyagent dans des cookies ``HttpOnly``.
 """
 
 import asyncio
+import base64
+import hashlib
+import secrets
 from dataclasses import dataclass
 from typing import Protocol
 from uuid import UUID
@@ -24,6 +27,11 @@ _JWKS_CACHE_SECONDS = 3600
 # Supabase peut avancer de quelques fractions de seconde sur celle du serveur,
 # ce qui ferait refuser un jeton tout juste émis.
 _JWT_CLOCK_LEEWAY_SECONDS = 5
+
+
+# Longueur du vérificateur PKCE : 64 octets aléatoires donnent 86 caractères,
+# dans la plage de 43 à 128 imposée par OAuth.
+_PKCE_VERIFIER_BYTES = 64
 
 
 class InvalidTokenError(Exception):
@@ -122,3 +130,14 @@ def clear_session_cookies(response: Response, settings: Settings) -> None:
         response.delete_cookie(
             name, path="/", httponly=True, secure=settings.is_production, samesite="lax"
         )
+
+
+def new_pkce_verifier() -> str:
+    """Tire un secret à usage unique qui lie la connexion externe à ce navigateur."""
+    return secrets.token_urlsafe(_PKCE_VERIFIER_BYTES)
+
+
+def pkce_challenge(verifier: str) -> str:
+    """Empreinte SHA-256 du vérificateur, envoyée au fournisseur au départ de la connexion."""
+    digest = hashlib.sha256(verifier.encode("ascii")).digest()
+    return base64.urlsafe_b64encode(digest).rstrip(b"=").decode("ascii")

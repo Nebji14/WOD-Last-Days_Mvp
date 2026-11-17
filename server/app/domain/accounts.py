@@ -4,6 +4,7 @@ Module pur : aucun accès réseau ni base de données.
 """
 
 import re
+import unicodedata
 from dataclasses import dataclass
 from enum import StrEnum
 from uuid import UUID
@@ -11,6 +12,10 @@ from uuid import UUID
 USERNAME_MIN_LENGTH = 3
 USERNAME_MAX_LENGTH = 24
 _USERNAME_PATTERN = re.compile(r"[A-Za-z0-9._-]{3,24}")
+_USERNAME_FORBIDDEN = re.compile(r"[^A-Za-z0-9._-]+")
+# Place laissée en fin de nom pour un numéro quand le nom proposé est déjà pris.
+_NUMBER_ROOM = 4
+_FALLBACK_USERNAME = "chasseur"
 
 PASSWORD_MIN_LENGTH = 10
 # bcrypt, utilisé par le fournisseur d'identité, ignore les octets au-delà de 72.
@@ -98,3 +103,25 @@ def technical_email(username: str, domain: str) -> str:
     l'unicité insensible à la casse du nom d'utilisateur.
     """
     return f"{username.lower()}@{domain}"
+
+
+def username_from_identity(full_name: str | None, email: str) -> str:
+    """Propose un nom d'utilisateur valide pour un compte créé avec Google.
+
+    Part du nom du compte Google, sinon de la partie de l'adresse avant « @ » :
+    accents retirés, espaces remplacés par des points, autres caractères
+    interdits supprimés. Le nom est raccourci pour laisser la place d'un numéro.
+    """
+    for source in (full_name or "", email.split("@", 1)[0]):
+        ascii_text = unicodedata.normalize("NFKD", source).encode("ascii", "ignore").decode()
+        dotted = re.sub(r"\s+", ".", ascii_text.strip())
+        candidate = _USERNAME_FORBIDDEN.sub("", dotted).strip("._-")
+        candidate = candidate[: USERNAME_MAX_LENGTH - _NUMBER_ROOM]
+        if len(candidate) >= USERNAME_MIN_LENGTH:
+            return candidate
+    return _FALLBACK_USERNAME
+
+
+def numbered_username(base: str, number: int) -> str:
+    """Variante d'un nom déjà pris : ``lea`` puis ``lea2``, ``lea3``…"""
+    return base if number <= 1 else f"{base}{number}"

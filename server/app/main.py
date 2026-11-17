@@ -14,6 +14,7 @@ from app.api import (
     auth,
     characters,
     chat,
+    google_auth,
     health,
     images,
     npcs,
@@ -22,6 +23,7 @@ from app.api import (
     sheet_items,
 )
 from app.api.deps import Container
+from app.api.google_auth import google_callback_url
 from app.core.config import Settings, get_settings
 from app.core.database import create_pool
 from app.core.errors import register_error_handlers
@@ -42,6 +44,7 @@ from app.repositories.npcs import PgNpcRepository
 from app.repositories.players import PgPlayerRepository
 from app.repositories.sheet_items import PgSheetItemRepository
 from app.services.auth import AuthService
+from app.services.google_auth import GoogleAuthService
 from app.services.awakening import AwakeningService
 from app.services.character_access import CharacterAccess
 from app.services.characters import CharacterService
@@ -82,12 +85,19 @@ def create_app(settings: Settings | None = None, container: Container | None = N
         image_repository = PgImageRepository(pool)
         async with httpx.AsyncClient() as http_client:
             storage = SupabaseStorageGateway(settings, http_client)
+            identity = SupabaseAuthGateway(settings, http_client)
             app.state.container = Container(
                 settings=settings,
                 auth_service=AuthService(
                     accounts=accounts,
-                    identity=SupabaseAuthGateway(settings, http_client),
+                    identity=identity,
                     technical_email_domain=settings.technical_email_domain,
+                    gm_access_path=settings.gm_access_path,
+                ),
+                google_auth_service=GoogleAuthService(
+                    accounts=accounts,
+                    identity=identity,
+                    redirect_url=google_callback_url(settings),
                     gm_access_path=settings.gm_access_path,
                 ),
                 token_verifier=SupabaseTokenVerifier(settings.supabase_url),
@@ -127,6 +137,7 @@ def create_app(settings: Settings | None = None, container: Container | None = N
     register_error_handlers(app)
     app.include_router(health.router)
     app.include_router(auth.router)
+    app.include_router(google_auth.router)
     app.include_router(chat.router)
     app.include_router(characters.router)
     app.include_router(sheet_items.router)

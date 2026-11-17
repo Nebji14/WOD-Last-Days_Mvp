@@ -52,6 +52,31 @@ export function login(credentials: Credentials, portal: Role): Promise<Account> 
   });
 }
 
+/**
+ * Adresse de départ de la connexion Google. Le serveur y redirige le
+ * navigateur vers Google, puis le ramène sur la table une fois connecté.
+ */
+export function googleStartUrl(portal: Role): string {
+  return `/api/auth/google/start?portal=${portal}`;
+}
+
+export interface LoginMethods {
+  readonly password: boolean;
+  readonly google: boolean;
+}
+
+function parseLoginMethods(data: unknown): LoginMethods {
+  if (isRecord(data) && typeof data.password === "boolean" && typeof data.google === "boolean") {
+    return { password: data.password, google: data.google };
+  }
+  throw new ApiError(502, "internal_error");
+}
+
+/** Méthodes de connexion rattachées au compte de la session. */
+export function fetchLoginMethods(): Promise<LoginMethods> {
+  return apiRequest("/api/auth/methods", { parse: parseLoginMethods });
+}
+
 /** Ferme la session. */
 export function logout(): Promise<void> {
   return apiRequest("/api/auth/logout", { method: "POST" });

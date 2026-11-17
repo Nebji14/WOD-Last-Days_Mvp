@@ -16,7 +16,7 @@ import { setFlashForNextPage } from "@/shared/ui/flash";
 import { PrimaryButton } from "@/shared/ui/PrimaryButton";
 import { TextField } from "@/shared/ui/TextField";
 
-import { register } from "../api";
+import { googleStartUrl, register } from "../api";
 import { PLAYER_LOGIN_PATH } from "../routes";
 import {
   isPasswordRule,
@@ -144,7 +144,7 @@ export function RegisterForm() {
         {text.register.submit}
       </PrimaryButton>
       <OrSeparator />
-      <GoogleButton label={text.register.google} />
+      <GoogleButton label={text.register.google} href={googleStartUrl("player")} />
       <FooterLink
         prompt={text.register.hasAccount}
         label={text.register.toLogin}

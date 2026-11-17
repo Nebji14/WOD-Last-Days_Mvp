@@ -4,7 +4,8 @@
  * Formulaire de connexion, pour les joueurs comme pour le MJ.
  *
  * Gère les identifiants incorrects, l'envoi en cours, la coupure réseau (les
- * valeurs saisies sont conservées) et le compte saisi sur la mauvaise page.
+ * valeurs saisies sont conservées) et le compte saisi sur la mauvaise page,
+ * y compris quand l'erreur revient d'une connexion Google.
  */
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
@@ -14,7 +15,8 @@ import { errorLabel, labels } from "@/shared/i18n";
 import { PrimaryButton } from "@/shared/ui/PrimaryButton";
 import { TextField } from "@/shared/ui/TextField";
 
-import { login } from "../api";
+import { googleStartUrl, login } from "../api";
+import { googleReturnError, type SearchParams } from "../googleReturn";
 import {
   gmLoginPath,
   PLAYER_LOGIN_PATH,
@@ -25,8 +27,13 @@ import {
 import { FooterLink, FormError, GoogleButton, OrSeparator } from "./FormParts";
 import { WrongPortalMessage } from "./WrongPortalMessage";
 
-type LoginFormProps =
-  { readonly portal: "player" } | { readonly portal: "gm"; readonly gmBasePath: string };
+type LoginFormProps = (
+  | { readonly portal: "player" }
+  | { readonly portal: "gm"; readonly gmBasePath: string }
+) & {
+  /** Paramètres de l'adresse : portent l'erreur d'une connexion Google. */
+  readonly searchParams?: SearchParams;
+};
 
 const WRONG_PORTAL_CODES = ["wrong_portal_gm", "wrong_portal_player"];
 
@@ -44,7 +51,9 @@ export function LoginForm(props: LoginFormProps) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<ApiError | null>(null);
+  const [error, setError] = useState<ApiError | null>(() =>
+    googleReturnError(props.searchParams ?? {}),
+  );
   const isGm = props.portal === "gm";
   const text = labels.auth;
 
@@ -103,7 +112,11 @@ export function LoginForm(props: LoginFormProps) {
         {text.login.submit}
       </PrimaryButton>
       <OrSeparator />
-      <GoogleButton label={text.login.google} />
+      <GoogleButton
+        label={text.login.google}
+        href={googleStartUrl(props.portal)}
+        onLeave={props.portal === "gm" ? () => rememberGmBasePath(props.gmBasePath) : undefined}
+      />
 
       {isGm ? (
         <p className="text-ink-muted pt-1.5 text-center text-[17px] leading-[21px] font-medium">

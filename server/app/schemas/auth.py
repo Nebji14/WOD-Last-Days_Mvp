@@ -32,6 +32,13 @@ class LoginRequest(BaseModel):
     password: str = Field(min_length=1, max_length=_MAX_PASSWORD_INPUT)
 
 
+class LoginMethodsResponse(BaseModel):
+    """Méthodes de connexion rattachées à un compte."""
+
+    password: bool
+    google: bool
+
+
 class AccountResponse(BaseModel):
     """Compte tel qu'il est exposé au client. N'inclut aucune donnée interne."""
 

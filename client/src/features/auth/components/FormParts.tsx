@@ -25,18 +25,23 @@ export function OrSeparator() {
   );
 }
 
+interface GoogleButtonProps {
+  readonly label: string;
+  readonly href: string;
+  /** Appelé juste avant de quitter la page pour Google. */
+  readonly onLeave?: () => void;
+}
+
 /**
- * Bouton de connexion Google.
- *
- * Désactivé tant que le fournisseur Google n'est pas branché.
+ * Bouton de connexion Google : un simple lien, car toute la page part chez
+ * Google puis revient par le serveur.
  */
-export function GoogleButton({ label }: { readonly label: string }) {
+export function GoogleButton({ label, href, onLeave }: GoogleButtonProps) {
   return (
-    <button
-      type="button"
-      disabled
-      title={labels.auth.googleSoon}
-      className="border-line bg-panel text-ink flex h-12 w-full items-center justify-center gap-3 rounded-xs border text-[19px] font-semibold disabled:cursor-not-allowed disabled:opacity-50"
+    <a
+      href={href}
+      onClick={onLeave}
+      className="border-line bg-panel text-ink hover:border-line-strong flex h-12 w-full items-center justify-center gap-3 rounded-xs border text-[19px] font-semibold"
     >
       <span
         aria-hidden="true"
@@ -45,7 +50,7 @@ export function GoogleButton({ label }: { readonly label: string }) {
         G
       </span>
       {label}
-    </button>
+    </a>
   );
 }
 

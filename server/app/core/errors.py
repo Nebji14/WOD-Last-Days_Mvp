@@ -32,6 +32,7 @@ class ErrorCode(StrEnum):
     FORBIDDEN_ORIGIN = "forbidden_origin"
     WRONG_PORTAL_GM = "wrong_portal_gm"
     WRONG_PORTAL_PLAYER = "wrong_portal_player"
+    GOOGLE_FAILED = "google_failed"
     USERNAME_TAKEN = "username_taken"
     USERNAME_INVALID = "username_invalid"
     PASSWORD_MISMATCH = "password_mismatch"

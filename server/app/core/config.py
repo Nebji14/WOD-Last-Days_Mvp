@@ -26,6 +26,8 @@ class Settings(BaseSettings):
         session_idle_seconds: durée d'inactivité avant expiration.
         technical_email_domain: domaine des adresses techniques associées aux
             noms d'utilisateur des joueurs.
+        public_app_url: adresse publique du client, sans barre oblique finale.
+            Google y ramène le navigateur après la connexion.
         gm_access_path: chemin réservé de l'accès du MJ côté client, sans barre
             oblique. Communiqué uniquement à qui présente les
             identifiants valides du MJ sur l'accès joueur.
@@ -41,6 +43,7 @@ class Settings(BaseSettings):
     allowed_origins: Annotated[list[str], NoDecode] = Field(default_factory=list)
     session_idle_seconds: int = Field(default=7200, ge=300, le=86400)
     technical_email_domain: str = "users.hunter.local"
+    public_app_url: str = "http://localhost:3000"
     gm_access_path: str = Field(default="", pattern=r"^[A-Za-z0-9-]{0,64}$")
 
     @field_validator("allowed_origins", mode="before")
@@ -51,7 +54,7 @@ class Settings(BaseSettings):
             return [origin.strip().rstrip("/") for origin in value.split(",") if origin.strip()]
         return value
 
-    @field_validator("supabase_url")
+    @field_validator("supabase_url", "public_app_url")
     @classmethod
     def _strip_trailing_slash(cls, value: str) -> str:
         return value.rstrip("/")

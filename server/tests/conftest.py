@@ -18,6 +18,7 @@ from app.services.awakening import AwakeningService
 from app.services.character_access import CharacterAccess
 from app.services.characters import CharacterService
 from app.services.chat import ChatService
+from app.services.google_auth import GoogleAuthService
 from app.services.image_table import ImageTableService
 from app.services.images import ImageService
 from app.services.npcs import NpcService
@@ -63,6 +64,7 @@ def settings() -> Settings:
         supabase_secret_key=SecretStr("secret"),
         database_url=SecretStr("postgresql://unused"),
         allowed_origins=[ORIGIN],
+        gm_access_path="mj-test",
         _env_file=None,
     )
 
@@ -83,6 +85,9 @@ def ctx(settings: Settings) -> Iterator[TestContext]:
     container = Container(
         settings=settings,
         auth_service=auth_service,
+        google_auth_service=GoogleAuthService(
+            accounts, identity, f"{ORIGIN}/api/auth/google/callback", gm_access_path="mj-test"
+        ),
         token_verifier=FakeTokenVerifier(identity),
         rate_limiter=RateLimiter(),
         chat_service=ChatService(FakeMessageStore(accounts), hub),

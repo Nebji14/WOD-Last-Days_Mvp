@@ -52,6 +52,8 @@ class IdentityProvider(Protocol):
 
     async def sign_out(self, access_token: str) -> None: ...
 
+    async def get_providers(self, user_id: UUID) -> list[str]: ...
+
 
 def _invalid_credentials() -> AppError:
     """Erreur unique pour tout échec de connexion : aucune énumération des comptes."""
@@ -66,12 +68,28 @@ def _username_taken() -> AppError:
     )
 
 
-def _unavailable() -> AppError:
+def unavailable_error() -> AppError:
+    """Erreur renvoyée quand le fournisseur d'identité ne répond pas."""
     return AppError(
         ErrorCode.SERVICE_UNAVAILABLE,
         "Le service d'authentification est momentanément indisponible.",
         status_code=503,
     )
+
+
+def wrong_portal_error(account_role: Role, gm_access_path: str) -> AppError:
+    """Compte valide présenté sur la mauvaise page de connexion.
+
+    Le chemin de la page du MJ n'est donné qu'au MJ lui-même.
+    """
+    if account_role is Role.GM:
+        return AppError(
+            ErrorCode.WRONG_PORTAL_GM,
+            "Ce compte se connecte par l'accès du MJ.",
+            403,
+            details=[{"gm_access_path": f"/{gm_access_path}"}] if gm_access_path else None,
+        )
+    return AppError(ErrorCode.WRONG_PORTAL_PLAYER, "Cet accès est réservé au maître du jeu.", 403)
 
 
 class AuthService:
@@ -176,24 +194,11 @@ class AuthService:
         except InvalidCredentialsError:
             raise _invalid_credentials() from None
         except IdentityProviderError:
-            raise _unavailable() from None
+            raise unavailable_error() from None
 
         if account.role is not portal:
             await self._discard_session(tokens)
-            if account.role is Role.GM:
-                raise AppError(
-                    ErrorCode.WRONG_PORTAL_GM,
-                    "Ce compte se connecte par l'accès du MJ.",
-                    403,
-                    details=(
-                        [{"gm_access_path": f"/{self._gm_access_path}"}]
-                        if self._gm_access_path
-                        else None
-                    ),
-                )
-            raise AppError(
-                ErrorCode.WRONG_PORTAL_PLAYER, "Cet accès est réservé au maître du jeu.", 403
-            )
+            raise wrong_portal_error(account.role, self._gm_access_path)
         return account, tokens
 
     async def refresh(self, refresh_token: str) -> SessionTokens:
@@ -209,7 +214,7 @@ class AuthService:
                 ErrorCode.NOT_AUTHENTICATED, "La session a expiré.", status_code=401
             ) from None
         except IdentityProviderError:
-            raise _unavailable() from None
+            raise unavailable_error() from None
 
     async def logout(self, access_token: str | None) -> None:
         """Ferme la session. N'échoue jamais : les cookies sont supprimés par la route."""
@@ -221,6 +226,19 @@ class AuthService:
             logger.warning(
                 "Révocation de session impossible ; les cookies sont tout de même retirés"
             )
+
+    async def login_methods(self, account_id: UUID) -> list[str]:
+        """Méthodes de connexion du compte : ``password`` et/ou ``google``.
+
+        Raises:
+            AppError: ``service_unavailable`` si le fournisseur ne répond pas.
+        """
+        try:
+            providers = await self._identity.get_providers(account_id)
+        except IdentityProviderError:
+            raise unavailable_error() from None
+        names = {"email": "password", "google": "google"}
+        return sorted({names[provider] for provider in providers if provider in names})
 
     async def get_active_account(self, account_id: UUID) -> Account | None:
         """Retourne le compte s'il existe et s'il est actif."""
@@ -236,7 +254,7 @@ class AuthService:
         except IdentityAlreadyExistsError:
             raise _username_taken() from None
         except IdentityProviderError:
-            raise _unavailable() from None
+            raise unavailable_error() from None
         try:
             return await self._accounts.create(
                 account_id=user_id,

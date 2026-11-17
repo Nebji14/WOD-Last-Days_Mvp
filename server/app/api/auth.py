@@ -17,7 +17,12 @@ from app.core.security import (
 )
 from app.domain.accounts import Role
 from app.realtime.hub import CLOSE_UNAUTHENTICATED
-from app.schemas.auth import AccountResponse, LoginRequest, RegisterRequest
+from app.schemas.auth import (
+    AccountResponse,
+    LoginMethodsResponse,
+    LoginRequest,
+    RegisterRequest,
+)
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
@@ -100,6 +105,13 @@ async def logout(request: Request, container: ContainerDep) -> Response:
 async def me(account: CurrentAccount) -> AccountResponse:
     """Retourne le compte de la session en cours."""
     return AccountResponse.from_account(account)
+
+
+@router.get("/methods")
+async def login_methods(account: CurrentAccount, container: ContainerDep) -> LoginMethodsResponse:
+    """Méthodes de connexion rattachées au compte, affichées dans le profil."""
+    methods = await container.auth_service.login_methods(account.id)
+    return LoginMethodsResponse(password="password" in methods, google="google" in methods)
 
 
 async def _login(

@@ -5,10 +5,14 @@ from dataclasses import dataclass, field, replace
 from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
-from app.core.security import InvalidTokenError, SessionTokens, TokenClaims
+from app.core.security import InvalidTokenError, SessionTokens, TokenClaims, pkce_challenge
 from app.domain.accounts import Account, AccountStatus, Role
 from app.domain.chat import ChatMessage
-from app.gateways.supabase_auth import IdentityAlreadyExistsError, InvalidCredentialsError
+from app.gateways.supabase_auth import (
+    ExternalIdentity,
+    IdentityAlreadyExistsError,
+    InvalidCredentialsError,
+)
 from app.repositories.accounts import UsernameAlreadyExistsError
 
 
@@ -60,6 +64,11 @@ class FakeIdentityProvider:
     sessions: dict[str, UUID] = field(default_factory=dict)
     refresh_tokens: dict[str, UUID] = field(default_factory=dict)
     deleted: list[UUID] = field(default_factory=list)
+    # Connexion Google : empreintes PKCE reçues au départ, codes délivrés au retour.
+    challenges: set[str] = field(default_factory=set)
+    google_codes: dict[str, ExternalIdentity] = field(default_factory=dict)
+    google_users: set[UUID] = field(default_factory=set)
+    google_identities: dict[str, ExternalIdentity] = field(default_factory=dict)
 
     async def create_user(self, email: str, password: str) -> UUID:
         if email in self.users:
@@ -86,6 +95,28 @@ class FakeIdentityProvider:
 
     async def sign_out(self, access_token: str) -> None:
         self.sessions.pop(access_token, None)
+
+    async def get_providers(self, user_id: UUID) -> list[str]:
+        providers = ["google"] if user_id in self.google_users else []
+        if any(user[0] == user_id for user in self.users.values()):
+            providers.append("email")
+        return providers
+
+    def authorize_url(self, provider: str, redirect_to: str, code_challenge: str) -> str:
+        self.challenges.add(code_challenge)
+        return f"https://example.supabase.co/auth/v1/authorize?provider={provider}"
+
+    async def exchange_code(self, auth_code: str, code_verifier: str) -> SessionTokens:
+        identity = self.google_codes.pop(auth_code, None)
+        if identity is None or pkce_challenge(code_verifier) not in self.challenges:
+            raise InvalidCredentialsError
+        self.google_users.add(identity.user_id)
+        tokens = self._open_session(identity.user_id)
+        self.google_identities[tokens.access_token] = identity
+        return tokens
+
+    async def get_user(self, access_token: str) -> ExternalIdentity:
+        return self.google_identities[access_token]
 
     def _open_session(self, user_id: UUID) -> SessionTokens:
         access, refresh = f"access-{uuid4().hex}", f"refresh-{uuid4().hex}"

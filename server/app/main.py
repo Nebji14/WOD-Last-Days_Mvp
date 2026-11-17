@@ -44,11 +44,11 @@ from app.repositories.npcs import PgNpcRepository
 from app.repositories.players import PgPlayerRepository
 from app.repositories.sheet_items import PgSheetItemRepository
 from app.services.auth import AuthService
-from app.services.google_auth import GoogleAuthService
 from app.services.awakening import AwakeningService
 from app.services.character_access import CharacterAccess
 from app.services.characters import CharacterService
 from app.services.chat import ChatService
+from app.services.google_auth import GoogleAuthService
 from app.services.image_table import ImageTableService
 from app.services.images import ImageService
 from app.services.npcs import NpcService

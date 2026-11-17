@@ -28,8 +28,7 @@ import { FooterLink, FormError, GoogleButton, OrSeparator } from "./FormParts";
 import { WrongPortalMessage } from "./WrongPortalMessage";
 
 type LoginFormProps = (
-  | { readonly portal: "player" }
-  | { readonly portal: "gm"; readonly gmBasePath: string }
+  { readonly portal: "player" } | { readonly portal: "gm"; readonly gmBasePath: string }
 ) & {
   /** Paramètres de l'adresse : portent l'erreur d'une connexion Google. */
   readonly searchParams?: SearchParams;

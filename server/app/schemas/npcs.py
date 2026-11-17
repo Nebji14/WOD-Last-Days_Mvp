@@ -21,7 +21,7 @@ class NpcCategoryResponse(BaseModel):
 
 
 class NpcSummaryResponse(BaseModel):
-    """PNJ de la liste : complet = santé et volonté ; simplifié = Puissance, Finesse, Résilience en plus."""
+    """PNJ de la liste : santé et volonté, plus Puissance, Finesse et Résilience en simplifié."""
 
     id: UUID
     name: str

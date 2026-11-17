@@ -135,14 +135,14 @@ class CharacterService:
     async def create(self, actor: Account, creation: CreationInput) -> Character:
         """Crée un personnage à partir de l'assistant.
 
-        L'état initial suit l'étape 5 : piste de blessures vide,
-        volonté disponible égale à la volonté maximale, moralité à 7
-       , expérience à zéro.
+         L'état initial suit l'étape 5 : piste de blessures vide,
+         volonté disponible égale à la volonté maximale, moralité à 7
+        , expérience à zéro.
 
-        Raises:
-            AppError: ``forbidden`` pour le MJ, qui n'a pas de personnage ;
-                ``rule_violation`` si la répartition des points ou les
-                spécialités sont incorrectes, ou si une valeur est hors bornes.
+         Raises:
+             AppError: ``forbidden`` pour le MJ, qui n'a pas de personnage ;
+                 ``rule_violation`` si la répartition des points ou les
+                 spécialités sont incorrectes, ou si une valeur est hors bornes.
         """
         if actor.role is not Role.PLAYER:
             raise AppError(

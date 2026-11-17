@@ -235,9 +235,7 @@ def test_values_outside_the_rules_are_refused(ctx: TestContext) -> None:
         "attribut sous 1": patch_sheet(lea, sheet_id, "strength", 0, 2),
         "compétence au-dessus de 5": patch_sheet(lea, sheet_id, "firearms", 6, 3),
         "moralité hors de 1 à 10": patch_sheet(lea, sheet_id, "morality", 11, 7),
-        "volonté au-dessus du maximum": patch_sheet(
-            lea, sheet_id, "willpower_current", 5, 4
-        ),
+        "volonté au-dessus du maximum": patch_sheet(lea, sheet_id, "willpower_current", 5, 4),
         "volonté maximale sous la volonté disponible": patch_sheet(
             lea, sheet_id, "willpower_max", 3, 4
         ),

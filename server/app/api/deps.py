@@ -16,8 +16,8 @@ from app.realtime.tickets import TicketStore
 from app.services.auth import AuthService
 from app.services.awakening import AwakeningService
 from app.services.characters import CharacterService
-from app.services.google_auth import GoogleAuthService
 from app.services.chat import ChatService
+from app.services.google_auth import GoogleAuthService
 from app.services.image_table import ImageTableService
 from app.services.images import ImageService
 from app.services.npcs import NpcService

@@ -17,4 +17,20 @@
     outline: 1px solid var(--color-gold);
     outline-offset: 2px;
   }
+
+  /*
+   * Remplissage automatique du navigateur (identifiants enregistrés) : Chrome
+   * et Opera imposent leur propre fond, que `background` ne peut pas remplacer.
+   * Une ombre intérieure aux couleurs du champ le recouvre, et la transition
+   * quasi infinie empêche le fond imposé d'apparaître.
+   */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active {
+    -webkit-text-fill-color: var(--color-ink);
+    caret-color: var(--color-ink);
+    box-shadow: 0 0 0 1000px var(--color-panel) inset;
+    transition: background-color 9999s ease-out 0s;
+  }
 }

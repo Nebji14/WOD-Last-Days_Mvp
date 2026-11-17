@@ -3,10 +3,15 @@
 /**
  * [Panneau — Santé] et [Panneau — Volonté] du recto (05a).
  *
- * Santé : autant de cases que la santé maximale effective. En modification,
- * des boutons ajoutent, soignent ou aggravent une blessure (Q05-4) ; le serveur
- * garde la piste rangée et sans trou (RM-008) et refuse tout dépassement
- * (RM-011).
+ * Santé et volonté distinguent deux natures de valeurs :
+ * - valeurs de jeu, qui bougent pendant la partie (blessures, volonté
+ *   disponible) : modifiables à tout moment, sans passer en mode modification ;
+ * - maximums effectifs, qui ne changent qu'avec la progression du personnage :
+ *   modifiables seulement en mode modification (M2).
+ *
+ * Santé : autant de cases que la santé maximale effective. Des boutons
+ * ajoutent, soignent ou aggravent une blessure (Q05-4) ; le serveur garde la
+ * piste rangée et sans trou (RM-008) et refuse tout dépassement (RM-011).
  * Volonté : points disponibles sur la volonté maximale effective (RM-011).
  */
 import { changeWounds, setSheetField, type WoundSymbol } from "@/features/characters/api";
@@ -82,35 +87,33 @@ export function HealthPanel() {
         {text.track} {wounds ? wounds.split("").join(" ") : text.empty} ·{" "}
         {freeBoxesLabel(capacity - wounds.length)}
       </p>
-      {editing && (
-        <div className="mt-2.5 flex flex-wrap gap-1.5">
-          <button type="button" onClick={act("add", "/")} className={ACTION}>
-            {text.addBashing}
-          </button>
-          <button type="button" onClick={act("add", "X")} className={ACTION}>
-            {text.addLethal}
-          </button>
-          <button type="button" onClick={act("add", "*")} className={ACTION}>
-            {text.addAggravated}
-          </button>
-          <button
-            type="button"
-            onClick={act("heal", null)}
-            disabled={wounds === ""}
-            className={`${ACTION} disabled:cursor-not-allowed disabled:opacity-40`}
-          >
-            {text.heal}
-          </button>
-          <button
-            type="button"
-            onClick={act("worsen", worsenable)}
-            disabled={worsenable === null}
-            className={`${ACTION} disabled:cursor-not-allowed disabled:opacity-40`}
-          >
-            {text.worsen}
-          </button>
-        </div>
-      )}
+      <div className="mt-2.5 flex flex-wrap gap-1.5">
+        <button type="button" onClick={act("add", "/")} className={ACTION}>
+          {text.addBashing}
+        </button>
+        <button type="button" onClick={act("add", "X")} className={ACTION}>
+          {text.addLethal}
+        </button>
+        <button type="button" onClick={act("add", "*")} className={ACTION}>
+          {text.addAggravated}
+        </button>
+        <button
+          type="button"
+          onClick={act("heal", null)}
+          disabled={wounds === ""}
+          className={`${ACTION} disabled:cursor-not-allowed disabled:opacity-40`}
+        >
+          {text.heal}
+        </button>
+        <button
+          type="button"
+          onClick={act("worsen", worsenable)}
+          disabled={worsenable === null}
+          className={`${ACTION} disabled:cursor-not-allowed disabled:opacity-40`}
+        >
+          {text.worsen}
+        </button>
+      </div>
     </Panel>
   );
 }
@@ -144,7 +147,7 @@ export function WillpowerPanel() {
     >
       <div className="flex items-center justify-between gap-4">
         <span
-          role={editing ? "group" : "img"}
+          role="group"
           aria-label={fill(text.available, { current, max })}
           className="flex flex-wrap gap-1.5"
         >
@@ -152,7 +155,7 @@ export function WillpowerPanel() {
             const dot = `size-[18px] rounded-full ${
               rank <= current ? "bg-gold" : "border-gold/70 border-[1.5px]"
             }`;
-            return editing ? (
+            return (
               <button
                 key={rank}
                 type="button"
@@ -160,8 +163,6 @@ export function WillpowerPanel() {
                 onClick={setCurrent(rank === current ? rank - 1 : rank)}
                 className={`${dot} cursor-pointer hover:brightness-150`}
               />
-            ) : (
-              <span key={rank} aria-hidden="true" className={dot} />
             );
           })}
         </span>

@@ -5,16 +5,20 @@
  *
  * - Nom du MJ en cuivre, nom d'un joueur en or (RÈGLES DU CHAT, 03-MJ-I4).
  * - Message modifié : mention « (modifié) » (US-030 · CA4).
- * - Message supprimé : une trace reste à sa place (US-030 · CA5).
+ * - Message supprimé pendant que le chat est affiché : une trace prend sa place
+ *   pendant {@link DELETED_TRACE_MS} ms, puis disparaît pour ne pas encombrer
+ *   le chat (US-030 · CA5, ajusté par le développeur le 2026-11-17). Un message
+ *   déjà supprimé au chargement de l'historique n'est pas affiché.
  * - Actions « Modifier » et « Supprimer » au survol ou au clavier : sur ses
  *   propres messages pour un joueur, sur tous pour le MJ (US-013 · CA6 à CA8,
  *   US-030 · CA1, CA2). Le serveur revérifie ce droit.
- * - La suppression demande une confirmation (règle T1).
+ * - La suppression demande une confirmation dans une fenêtre modale (règle T1).
  */
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useEffect, useState } from "react";
 
 import { ApiError } from "@/shared/api/client";
 import { errorLabel, labels } from "@/shared/i18n";
+import { ConfirmDialog } from "@/shared/ui/ConfirmDialog";
 
 import { type ChatMessage, deleteMessage, editMessage, MESSAGE_MAX_LENGTH } from "../api";
 import { useChatStore } from "../store";
@@ -28,6 +32,9 @@ interface MessageRowProps {
 }
 
 type Mode = "idle" | "editing" | "confirming";
+
+/** Durée d'affichage de la trace d'un message supprimé. */
+const DELETED_TRACE_MS = 5000;
 
 const ACTION =
   "font-display cursor-pointer text-[9px] font-bold tracking-[1.5px] hover:brightness-125";
@@ -46,8 +53,22 @@ export function MessageRow({ message, canModerate, interactive }: MessageRowProp
   const [draft, setDraft] = useState("");
   const [busy, setBusy] = useState(false);
   const [errorCode, setErrorCode] = useState<string | null>(null);
+  const isDeleted = message.deletedBy !== null;
+  const [deletedOnArrival] = useState(isDeleted);
+  const [traceExpired, setTraceExpired] = useState(false);
 
-  if (message.deletedBy !== null) {
+  useEffect(() => {
+    if (!isDeleted || deletedOnArrival) {
+      return;
+    }
+    const timer = window.setTimeout(() => setTraceExpired(true), DELETED_TRACE_MS);
+    return () => window.clearTimeout(timer);
+  }, [isDeleted, deletedOnArrival]);
+
+  if (isDeleted) {
+    if (deletedOnArrival || traceExpired) {
+      return null;
+    }
     return (
       <p className="text-ink-faint text-sm leading-[17px] font-medium italic">
         ⊘ {message.deletedBy === "gm" ? text.deletedByGm : text.deleted}
@@ -150,26 +171,18 @@ export function MessageRow({ message, canModerate, interactive }: MessageRowProp
           </button>
         </div>
       )}
-      {mode === "confirming" && (
-        <div
-          role="alertdialog"
-          aria-label={text.confirmDelete}
-          className="mt-1.5 flex items-center justify-end gap-[18px]"
-        >
-          <span className="text-ink-muted text-sm italic">{text.confirmDelete}</span>
-          <button
-            type="button"
-            disabled={busy}
-            autoFocus
-            onClick={() => void run(() => deleteMessage(message.id))}
-            className={`${ACTION} text-danger`}
-          >
-            {text.confirm}
-          </button>
-          <button type="button" onClick={cancel} className={`${ACTION} text-ink-muted`}>
-            {text.cancel}
-          </button>
-        </div>
+      {showActions && (
+        <ConfirmDialog
+          open={mode === "confirming"}
+          title={text.confirmDeleteTitle}
+          question={text.confirmDelete}
+          confirmLabel={text.delete}
+          cancelLabel={text.cancel}
+          onConfirm={() => {
+            if (!busy) void run(() => deleteMessage(message.id));
+          }}
+          onCancel={cancel}
+        />
       )}
     </div>
   );

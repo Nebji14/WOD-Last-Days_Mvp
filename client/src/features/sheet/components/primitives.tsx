@@ -10,6 +10,7 @@ import { createContext, type ReactNode, useContext, useState } from "react";
 
 import type { Character, Sheet } from "@/features/characters/model";
 import { labels } from "@/shared/i18n";
+import { ConfirmDialog } from "@/shared/ui/ConfirmDialog";
 
 import type { RunAction } from "../useSheetController";
 
@@ -220,13 +221,16 @@ interface ConfirmDeleteProps {
   readonly trigger?: string;
 }
 
-/** Suppression en deux temps : toute suppression demande une confirmation (règle T1). */
+/**
+ * Suppression en deux temps (règle T1) : le déclencheur ouvre une fenêtre de
+ * confirmation modale ; rien n'est supprimé avant « SUPPRIMER ».
+ */
 export function ConfirmDelete({ label, onConfirm, question, trigger }: ConfirmDeleteProps) {
   const [asking, setAsking] = useState(false);
   const text = labels.sheet;
 
-  if (!asking) {
-    return (
+  return (
+    <>
       <button
         type="button"
         aria-label={label}
@@ -238,29 +242,18 @@ export function ConfirmDelete({ label, onConfirm, question, trigger }: ConfirmDe
       >
         {trigger ?? "✕"}
       </button>
-    );
-  }
-  return (
-    <span role="alertdialog" aria-label={label} className="flex items-center gap-2.5">
-      <span className="text-ink-muted text-sm italic">{question ?? text.confirmDelete}</span>
-      <button
-        type="button"
-        autoFocus
-        onClick={() => {
+      <ConfirmDialog
+        open={asking}
+        title={text.confirmDeleteTitle}
+        question={question ?? text.confirmDelete}
+        confirmLabel={text.deleteAction}
+        cancelLabel={text.cancel}
+        onConfirm={() => {
           setAsking(false);
           onConfirm();
         }}
-        className="font-display text-danger cursor-pointer text-[9px] font-bold tracking-[1.5px]"
-      >
-        {text.confirm}
-      </button>
-      <button
-        type="button"
-        onClick={() => setAsking(false)}
-        className="font-display text-ink-muted cursor-pointer text-[9px] font-bold tracking-[1.5px]"
-      >
-        {text.cancel}
-      </button>
-    </span>
+        onCancel={() => setAsking(false)}
+      />
+    </>
   );
 }

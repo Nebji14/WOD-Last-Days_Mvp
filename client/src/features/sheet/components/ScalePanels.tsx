@@ -7,7 +7,8 @@
  * Moralité (RM-013, 05-I5) : annotations libres, chacune liée au niveau où
  * elle a été acquise.
  * Avantage surnaturel (05-I10) : commun à toutes les formes, la graduation 1
- * est toujours remplie, nom libre et facultatif.
+ * est toujours remplie, nom libre et facultatif. Il ne progresse qu'avec
+ * l'accord du MJ : modifiable seulement en mode modification (M2).
  */
 import { type FormEvent, useState } from "react";
 
@@ -35,7 +36,7 @@ interface ScaleProps {
   readonly onChange?: (value: number) => void;
 }
 
-/** Jauge graduée de 1 à 10 ; en modification, cliquer une graduation fixe la valeur. */
+/** Jauge graduée de 1 à 10 ; si `onChange` est fourni, cliquer une graduation fixe la valeur. */
 function Scale({ label, value, onChange }: ScaleProps) {
   const box = (level: number): string =>
     `font-display flex h-6 w-[29px] items-center justify-center border text-[10px] font-bold ${
@@ -124,8 +125,12 @@ function NoteForm({ initial, onSubmit, onCancel }: NoteFormProps) {
   );
 }
 
+/**
+ * [Panneau — Moralité] (RM-013) : valeur de jeu, modifiable à tout moment
+ * sur indication du MJ, comme ses annotations, sans passer en mode modification.
+ */
 export function MoralityPanel() {
-  const { sheet, editing, run } = useSheet();
+  const { sheet, run } = useSheet();
   const text = labels.sheet.morality;
   /** Annotation en cours de saisie : `"new"`, l'identifiant d'une annotation, ou aucune. */
   const [open, setOpen] = useState<string | null>(null);
@@ -145,23 +150,19 @@ export function MoralityPanel() {
         <span className="text-ink text-base font-semibold">
           {text.level} {note.level} — {note.body}
         </span>
-        {editing && (
-          <>
-            <button
-              type="button"
-              aria-label={labels.sheet.editItem}
-              title={labels.sheet.editItem}
-              onClick={() => setOpen(note.id)}
-              className="text-gold cursor-pointer px-1 text-sm"
-            >
-              ✎
-            </button>
-            <ConfirmDelete
-              label={labels.sheet.deleteItem}
-              onConfirm={() => void run(() => deleteMoralityNote(note.id))}
-            />
-          </>
-        )}
+        <button
+          type="button"
+          aria-label={labels.sheet.editItem}
+          title={labels.sheet.editItem}
+          onClick={() => setOpen(note.id)}
+          className="text-gold cursor-pointer px-1 text-sm"
+        >
+          ✎
+        </button>
+        <ConfirmDelete
+          label={labels.sheet.deleteItem}
+          onConfirm={() => void run(() => deleteMoralityNote(note.id))}
+        />
       </span>
     );
 
@@ -170,10 +171,8 @@ export function MoralityPanel() {
       <Scale
         label={text.title}
         value={sheet.morality}
-        onChange={
-          editing
-            ? (value) => void run(() => setSheetField(sheet.id, "morality", value, sheet.morality))
-            : undefined
+        onChange={(value) =>
+          void run(() => setSheetField(sheet.id, "morality", value, sheet.morality))
         }
       />
       <div className="mt-3.5 mb-1.5 flex items-center justify-between">

@@ -6,8 +6,11 @@
  *
  * Un même composant sert les six listes ; chaque type déclare ses colonnes
  * (RM-014 pour une arme). « + Ajouter » ouvre une ligne de saisie dans les deux
- * modes : créer ne demande pas de passer en modification. En modification
- * (05-I7), ✎ modifie sur place et ✕ supprime après confirmation (T1).
+ * modes : créer ne demande pas de passer en modification. ✎ modifie sur place
+ * et ✕ supprime après confirmation (05-I7, T1) : à tout moment pour
+ * l'équipement (armes, armures, objets), qui change en cours de partie ; en
+ * mode modification seulement pour les atouts, handicaps et pouvoirs, qui ne
+ * progressent qu'avec l'accord du MJ.
  * Liste vide : « Aucun … pour l'instant. » (05-E1).
  */
 import { type FormEvent, useState } from "react";
@@ -17,6 +20,9 @@ import type { Entry, EntryKind, EntryNumberField } from "@/features/characters/m
 import { labels } from "@/shared/i18n";
 
 import { COLUMN_LABEL, ConfirmDelete, LINK_ACTION, Panel, useSheet } from "./primitives";
+
+/** Listes d'équipement, modifiables sans passer en mode modification. */
+const EQUIPMENT: ReadonlySet<EntryKind> = new Set<EntryKind>(["weapon", "armor", "item"]);
 
 type TextColumn = "name" | "description" | "range";
 type Column = TextColumn | EntryNumberField;
@@ -134,6 +140,7 @@ export function EntryPanel({ kind }: { readonly kind: EntryKind }) {
   const text = labels.sheet.entries[kind];
   const layout = LAYOUTS[kind];
   const entries = sheet.entries.filter((entry) => entry.kind === kind);
+  const changeable = editing || EQUIPMENT.has(kind);
   /** Ligne en cours de saisie : `"new"`, l'identifiant d'un élément, ou aucune. */
   const [open, setOpen] = useState<string | null>(null);
 
@@ -159,7 +166,7 @@ export function EntryPanel({ kind }: { readonly kind: EntryKind }) {
       )}
       <ul className="flex flex-col gap-1.5">
         {entries.map((entry) =>
-          open === entry.id && editing ? (
+          open === entry.id && changeable ? (
             <li key={entry.id}>
               <EntryForm
                 layout={layout}
@@ -192,7 +199,7 @@ export function EntryPanel({ kind }: { readonly kind: EntryKind }) {
                   </span>
                 ))}
               </div>
-              {editing && (
+              {changeable && (
                 <span className="ml-2 flex shrink-0 items-center gap-1">
                   <button
                     type="button"

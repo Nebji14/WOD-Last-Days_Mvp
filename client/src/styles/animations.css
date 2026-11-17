@@ -3,6 +3,7 @@
  * Écran titre : A1 (ouverture), A2 (reflets et halo), A4 (invite), I1 (sortie).
  * Table de jeu : 03-A6 (arrivée d'un siège), 03-A4 (déroulé du chat).
  * Fiche : court fondu au changement de face (Q05-1).
+ * Images du MJ : voile de pause et image qui grandit depuis le centre (03-A2, 08a).
  * La préférence « réduire les animations » (01-I2) les neutralise en fin de fichier.
  */
 @theme {
@@ -21,6 +22,20 @@
   --animate-seat-in: appear 0.6s ease-out;
   --animate-chat-content: chat-content 0.4s ease-out 0.08s both;
   --animate-face-in: fade-in 0.18s ease-out both;
+  --animate-pause-veil: fade-in 0.5s ease-out both;
+  --animate-image-grow: image-grow 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) 0.1s both;
+}
+
+/* 08a : l'image affichée en grand grandit depuis le centre de la table. */
+@keyframes image-grow {
+  from {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 @keyframes fade-in {
@@ -140,7 +155,8 @@
   .animate-title-smoke,
   .animate-title-halo,
   .animate-title-sub,
-  .animate-title-prompt {
+  .animate-title-prompt,
+  .animate-image-grow {
     animation: fade-in 0.6s ease-out both;
   }
 

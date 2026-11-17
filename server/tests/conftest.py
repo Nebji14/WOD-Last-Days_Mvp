@@ -18,10 +18,13 @@ from app.services.awakening import AwakeningService
 from app.services.character_access import CharacterAccess
 from app.services.characters import CharacterService
 from app.services.chat import ChatService
+from app.services.image_table import ImageTableService
+from app.services.images import ImageService
 from app.services.players import PlayerService
 from app.services.sheet_items import SheetItemService
 from app.services.table import TableService
 from tests.fake_characters import FakeCharacterStore
+from tests.fake_images import FakeFileStorage, FakeImageStore
 from tests.fake_players import FakePlayerStore
 from tests.fakes import (
     FakeAccountStore,
@@ -45,6 +48,8 @@ class TestContext:
     identity: FakeIdentityProvider
     auth_service: AuthService
     characters: FakeCharacterStore
+    images: FakeImageStore
+    storage: FakeFileStorage
 
 
 @pytest.fixture
@@ -68,6 +73,8 @@ def ctx(settings: Settings) -> Iterator[TestContext]:
     characters = FakeCharacterStore(accounts)
     table_service = TableService(accounts, characters, hub)
     access = CharacterAccess(characters, accounts, hub, table_service.refresh)
+    images = FakeImageStore()
+    storage = FakeFileStorage()
     auth_service = AuthService(
         accounts, identity, settings.technical_email_domain, gm_access_path="mj-test"
     )
@@ -84,6 +91,8 @@ def ctx(settings: Settings) -> Iterator[TestContext]:
         sheet_item_service=SheetItemService(characters, access),
         player_service=PlayerService(FakePlayerStore(accounts, characters), table_service),
         awakening_service=AwakeningService(characters, access),
+        image_service=ImageService(images, storage, hub),
+        image_table_service=ImageTableService(images, storage, hub),
     )
     with TestClient(create_app(settings, container), headers={"Origin": ORIGIN}) as client:
-        yield TestContext(client, accounts, identity, auth_service, characters)
+        yield TestContext(client, accounts, identity, auth_service, characters, images, storage)

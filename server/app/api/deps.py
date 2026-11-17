@@ -17,6 +17,8 @@ from app.services.auth import AuthService
 from app.services.awakening import AwakeningService
 from app.services.characters import CharacterService
 from app.services.chat import ChatService
+from app.services.image_table import ImageTableService
+from app.services.images import ImageService
 from app.services.players import PlayerService
 from app.services.sheet_items import SheetItemService
 from app.services.table import TableService
@@ -38,6 +40,8 @@ class Container:
     sheet_item_service: SheetItemService
     player_service: PlayerService
     awakening_service: AwakeningService
+    image_service: ImageService
+    image_table_service: ImageTableService
 
 
 def get_container(request: Request) -> Container:

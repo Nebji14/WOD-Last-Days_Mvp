@@ -153,6 +153,9 @@ export const fr = {
     rate_limited: "Trop de tentatives. Patiente quelques minutes avant de réessayer.",
     not_found: "Élément introuvable.",
     message_deleted: "Ce message a déjà été supprimé.",
+    unsupported_image: "Format non accepté : seules les images PNG, JPEG, WebP et GIF le sont.",
+    image_too_large: "Image trop lourde : 8 Mo au maximum.",
+    folder_cycle: "Un dossier ne peut pas être rangé dans l'un de ses sous-dossiers.",
     service_unavailable: "Le service est momentanément indisponible. Réessaie dans un instant.",
     internal_error: "Une erreur est survenue. Réessaie dans un instant.",
     network_error:

@@ -41,6 +41,9 @@ class ErrorCode(StrEnum):
     MESSAGE_DELETED = "message_deleted"
     RULE_VIOLATION = "rule_violation"
     EDIT_CONFLICT = "edit_conflict"
+    UNSUPPORTED_IMAGE = "unsupported_image"
+    IMAGE_TOO_LARGE = "image_too_large"
+    FOLDER_CYCLE = "folder_cycle"
     SERVICE_UNAVAILABLE = "service_unavailable"
     INTERNAL_ERROR = "internal_error"
 

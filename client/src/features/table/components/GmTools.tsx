@@ -7,7 +7,7 @@
 import type { ReactNode } from "react";
 
 import { labels } from "@/shared/i18n";
-import { openPlayersTool } from "@/shared/windows/detached";
+import { openImagesTool, openPlayersTool } from "@/shared/windows/detached";
 
 interface ToolProps {
   readonly label: string;
@@ -17,7 +17,7 @@ interface ToolProps {
   readonly children: ReactNode;
 }
 
-// TODO(US-031, US-040) : ouvrir la fenêtre détachable des outils Images et PNJ (04b, 04c).
+// TODO(US-040) : ouvrir la fenêtre détachable de l'outil PNJ (04c).
 function Tool({ label, hint, onOpen, children }: ToolProps) {
   const ready = onOpen !== undefined;
   return (
@@ -56,7 +56,7 @@ export function GmTools() {
         <circle cx="18" cy="6" r="3" className="text-ink-muted" stroke="currentColor" />
         <path d="M16 12c3.6-.6 7 1.6 7 6" className="text-ink-muted" stroke="currentColor" />
       </Tool>
-      <Tool label={text.images} hint={text.imagesHint}>
+      <Tool label={text.images} hint={text.imagesHint} onOpen={openImagesTool}>
         <rect x="1" y="2" width="22" height="16" rx="1.5" />
         <path d="M4 15l5-6 4 4 3-3 4 5" />
         <circle

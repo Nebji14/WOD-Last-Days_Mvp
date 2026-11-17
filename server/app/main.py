@@ -10,7 +10,7 @@ import httpx
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import auth, characters, chat, health, players, realtime, sheet_items
+from app.api import auth, characters, chat, health, images, players, realtime, sheet_items
 from app.api.deps import Container
 from app.core.config import Settings, get_settings
 from app.core.database import create_pool
@@ -20,12 +20,14 @@ from app.core.middleware import register_middlewares
 from app.core.rate_limit import RateLimiter
 from app.core.security import SupabaseTokenVerifier
 from app.gateways.supabase_auth import SupabaseAuthGateway
+from app.gateways.supabase_storage import SupabaseStorageGateway
 from app.realtime import endpoint as realtime_endpoint
 from app.realtime.hub import ConnectionHub
 from app.realtime.tickets import TicketStore
 from app.repositories.accounts import PgAccountRepository
 from app.repositories.characters import PgCharacterRepository
 from app.repositories.chat import PgChatRepository
+from app.repositories.images import PgImageRepository
 from app.repositories.players import PgPlayerRepository
 from app.repositories.sheet_items import PgSheetItemRepository
 from app.services.auth import AuthService
@@ -33,6 +35,8 @@ from app.services.awakening import AwakeningService
 from app.services.character_access import CharacterAccess
 from app.services.characters import CharacterService
 from app.services.chat import ChatService
+from app.services.image_table import ImageTableService
+from app.services.images import ImageService
 from app.services.players import PlayerService
 from app.services.sheet_items import SheetItemService
 from app.services.table import TableService
@@ -63,7 +67,9 @@ def create_app(settings: Settings | None = None, container: Container | None = N
         item_repository = PgSheetItemRepository(pool)
         table_service = TableService(accounts, character_repository, hub)
         access = CharacterAccess(character_repository, accounts, hub, table_service.refresh)
+        image_repository = PgImageRepository(pool)
         async with httpx.AsyncClient() as http_client:
+            storage = SupabaseStorageGateway(settings, http_client)
             app.state.container = Container(
                 settings=settings,
                 auth_service=AuthService(
@@ -82,6 +88,8 @@ def create_app(settings: Settings | None = None, container: Container | None = N
                 sheet_item_service=SheetItemService(item_repository, access),
                 player_service=PlayerService(PgPlayerRepository(pool), table_service),
                 awakening_service=AwakeningService(character_repository, access),
+                image_service=ImageService(image_repository, storage, hub),
+                image_table_service=ImageTableService(image_repository, storage, hub),
             )
             try:
                 yield
@@ -110,6 +118,7 @@ def create_app(settings: Settings | None = None, container: Container | None = N
     app.include_router(characters.router)
     app.include_router(sheet_items.router)
     app.include_router(players.router)
+    app.include_router(images.router)
     app.include_router(realtime.router)
     app.include_router(realtime_endpoint.router)
     return app

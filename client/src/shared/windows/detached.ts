@@ -28,6 +28,7 @@ export function sheetPath(characterId: string): string {
 export const CREATION_PATH = "/creation";
 export const PROFILE_PATH = "/profil";
 export const PLAYERS_TOOL_PATH = "/outils/joueurs";
+export const IMAGES_TOOL_PATH = "/outils/images";
 /** Paramètre d'adresse qui ouvre une fiche directement en mode modification (04a-I3). */
 export const EDIT_MODE_PARAM = "mode";
 export const EDIT_MODE_VALUE = "modification";
@@ -81,6 +82,11 @@ export function openProfile(): void {
 /** Outil Joueurs du MJ (04a) : une fenêtre par outil (T2). */
 export function openPlayersTool(): void {
   openDetached("hunter-outil-joueurs", PLAYERS_TOOL_PATH, TOOL_WINDOW);
+}
+
+/** Outil Images du MJ (04b). */
+export function openImagesTool(): void {
+  openDetached("hunter-outil-images", IMAGES_TOOL_PATH, TOOL_WINDOW);
 }
 
 /** Ferme toutes les fenêtres détachées ouvertes depuis cette fenêtre (T3). */

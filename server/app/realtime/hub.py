@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 EVENT_TABLE_STATE = "table.state"
 EVENT_CHAT_MESSAGE = "chat.message"
 EVENT_CHARACTER_CHANGED = "character.changed"
+EVENT_IMAGES_CHANGED = "images.changed"
 
 # Codes de fermeture applicatifs (plage 4000-4999 réservée aux applications).
 CLOSE_UNAUTHENTICATED = 4401
@@ -69,6 +70,14 @@ class ConnectionHub:
         payload = {"type": EVENT_CHARACTER_CHANGED, "data": {"character_id": str(character_id)}}
         targets = [ws for ws, owner in self._connections.items() if owner in recipients]
         await asyncio.gather(*(self._send(ws, payload) for ws in targets))
+
+    async def images_changed(self) -> None:
+        """Signale à tous un changement des images de la table ou de la bibliothèque.
+
+        L'événement ne porte aucune donnée : chacun relit la scène par l'API,
+        qui produit des liens de lecture signés (03-A2, 04b).
+        """
+        await self._broadcast(EVENT_IMAGES_CHANGED, {})
 
     async def close_account(self, account_id: UUID, code: int) -> None:
         """Ferme toutes les connexions d'un compte (déconnexion, US-003 et T3)."""

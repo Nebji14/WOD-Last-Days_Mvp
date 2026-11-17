@@ -6,9 +6,11 @@
  * Les deux vues partagent la table, les sièges et le chat. La vue MJ n'a pas
  * de « mon siège » et porte les outils du MJ dans l'en-tête (03-MJ-D1 à D5).
  * La table et le chat restent accessibles sans partie en cours (RM-018, 03-E1).
+ * Les images du MJ se posent sur la pile ou s'affichent en grand (03-A2, 08a).
  */
 import { ChatPanel } from "@/features/chat/components/ChatPanel";
 import { useChatSync } from "@/features/chat/useChatSync";
+import { TableImages } from "@/features/images/components/TableImages";
 import { labels } from "@/shared/i18n";
 import { EmberParticles } from "@/shared/ui/EmberParticles";
 import { ScaledStage } from "@/shared/ui/ScaledStage";
@@ -58,6 +60,12 @@ export function TableScreen() {
           <PlayerSeat key={placed.seat.accountId} {...placed} />
         ))}
         <ChatPanel viewerId={account.id} viewerIsGm={isGm} />
+        <TableImages
+          realtime={session.realtime}
+          status={session.status}
+          isGm={isGm}
+          gmName={table?.gm.displayName ?? labels.table.gm.unknownName}
+        />
         <ConnectionNotice status={session.status} />
       </main>
     </ScaledStage>

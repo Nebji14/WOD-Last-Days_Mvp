@@ -76,6 +76,50 @@ async function send<T>(path: string, options: RequestOptions<T>): Promise<Respon
   }
 }
 
+/**
+ * Envoie un fichier brut et retourne la réponse validée, en rapportant la
+ * progression de l'envoi (04b-I1). Même renouvellement de session que
+ * `apiRequest`.
+ *
+ * @param onProgress reçoit la part envoyée, de 0 à 1.
+ * @throws {ApiError} si l'API répond en erreur ou si le réseau est coupé.
+ */
+export async function uploadFile<T>(
+  path: string,
+  file: Blob,
+  onProgress: (ratio: number) => void,
+  parse: (data: unknown) => T,
+): Promise<T> {
+  let response = await sendFile(path, file, onProgress);
+  if ((await isExpiredSession(response, path)) && (await refreshSession())) {
+    response = await sendFile(path, file, onProgress);
+  }
+  if (!response.ok) {
+    throw await toApiError(response);
+  }
+  return parse(await response.json());
+}
+
+/** `fetch` ne rapporte pas la progression d'un envoi : XMLHttpRequest le fait. */
+function sendFile(path: string, file: Blob, onProgress: (ratio: number) => void): Promise<Response> {
+  return new Promise((resolve, reject) => {
+    const request = new XMLHttpRequest();
+    request.open("POST", path);
+    request.setRequestHeader("Content-Type", "application/octet-stream");
+    request.upload.onprogress = (event) => {
+      if (event.lengthComputable) {
+        onProgress(event.loaded / event.total);
+      }
+    };
+    request.onload = () => {
+      const body = request.status === 204 ? null : request.responseText;
+      resolve(new Response(body, { status: request.status }));
+    };
+    request.onerror = () => reject(new ApiError(0, "network_error"));
+    request.send(file);
+  });
+}
+
 /** Les routes d'authentification gèrent elles-mêmes leurs erreurs 401. */
 async function isExpiredSession(response: Response, path: string): Promise<boolean> {
   if (response.status !== 401 || path.startsWith(AUTH_PREFIX)) {

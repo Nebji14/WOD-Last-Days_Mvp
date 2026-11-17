@@ -1,0 +1,112 @@
+/** Libellés français de l'assistant de création de personnage (écran 06). */
+export const frCreation = {
+  creation: {
+    windowTitle: "CRÉATION DE PERSONNAGE",
+    subtitle: "Joueur : {player} · étape {step} sur 5",
+    close: "FERMER",
+    abandon: "Abandonner la création ? Rien ne sera conservé.",
+    abandonConfirm: "ABANDONNER",
+    abandonCancel: "CONTINUER",
+    previous: "PRÉCÉDENT",
+    next: "SUIVANT",
+    create: "CRÉER LE PERSONNAGE",
+    creating: "Création en cours…",
+    steps: {
+      identity: "IDENTITÉ",
+      attributes: "ATTRIBUTS",
+      skills: "COMPÉTENCES",
+      specialties: "SPÉCIALITÉS",
+      summary: "RÉCAPITULATIF",
+    },
+    stepsLabel: "Étapes de la création",
+    identity: {
+      title: "Qui est ton personnage ?",
+      hint: "Seul le nom est obligatoire. La description et l'histoire se complètent plus tard sur la fiche.",
+    },
+    attributes: {
+      title: "Répartis tes attributs",
+      hint: "Classe les trois catégories par priorité, puis répartis tes points. Chaque attribut a déjà un point gratuit (grisé).",
+      footer: "Point grisé = point gratuit (non décompté) · clic sur un point pour fixer la valeur",
+      alert: "{trait} à {value} : à discuter avec le MJ avant de jouer. Il peut la refuser.",
+    },
+    skills: {
+      title: "Répartis tes compétences",
+      hint: "Classe les trois catégories par priorité, indépendamment des attributs, puis répartis tes points. Aucune compétence n'est gratuite.",
+      footer: "Clic sur un point pour fixer la valeur",
+    },
+    specialties: {
+      title: "Choisis trois spécialités",
+      hint: "Chaque spécialité précise une compétence où ton personnage a au moins 1 point.",
+      skill: "COMPÉTENCE",
+      label: "SPÉCIALITÉ",
+      choose: "Choisir une compétence",
+      placeholder: "Ex. Fusil, Pistage, Interrogatoire",
+      number: "Spécialité {number}",
+    },
+    summary: {
+      title: "Récapitulatif",
+      hint: "Vérifie ton personnage. Les valeurs effectives reprennent la base calculée : tu peux les ajuster.",
+      initial: "ÉTAT INITIAL",
+      initialLines: [
+        "Piste de blessures vide · volonté disponible = volonté maximale",
+        "Moralité 7, sans annotation",
+        "Expérience générale 0 / 0 · expérience tactique 0 / 0",
+      ],
+      later:
+        "Atouts, handicaps, pouvoirs, armes, armures, objets et protection globale s'ajoutent ensuite sur la fiche, qui s'ouvre dès la création.",
+      stats: "CARACTÉRISTIQUES",
+      healthMax: "Santé maximale",
+      willpowerMax: "Volonté maximale",
+    },
+    priority: "{rank}e · +{points}",
+    firstPriority: "1re · +{points}",
+    priorityLabel: "Priorité de la catégorie {category}",
+    count: "{spent} sur {budget} répartis",
+    countMissing: "{spent} sur {budget} répartis · reste {left}",
+    trimmed: "Priorités échangées : les points en trop ont été retirés en {categories}.",
+    blockers: {
+      name: "Le nom du personnage est obligatoire.",
+      remaining: "Il reste {left} points à répartir en {category}.",
+      remainingOne: "Il reste 1 point à répartir en {category}.",
+      specialty:
+        "La spécialité {number} doit porter sur une compétence à 1 point ou plus et avoir un texte, sans virgule.",
+    },
+    rules: {
+      title: "RÈGLES DE L'ÉTAPE",
+      identity: [
+        "Le nom est obligatoire.",
+        "Concept, profession, vertu, vice et compact sont facultatifs.",
+      ],
+      attributes: [
+        "Chaque attribut commence à 1 (point gratuit).",
+        "Catégorie 1re : +5 points ; 2e : +4 ; 3e : +3.",
+        "Chaque catégorie a une priorité différente.",
+        "Une valeur de 4 ou 5 doit être discutée avec le MJ.",
+      ],
+      skills: [
+        "Catégorie 1re : 11 points ; 2e : 7 ; 3e : 4.",
+        "Classement indépendant de celui des attributs.",
+        "Aucune compétence gratuite.",
+      ],
+      specialties: [
+        "Exactement trois spécialités.",
+        "Chacune sur une compétence à 1 point ou plus.",
+        "Texte libre, sans virgule.",
+      ],
+      summary: [
+        "Base = référence calculée, jamais stockée.",
+        "Effective = valeur retenue, modifiable ensuite sur la fiche.",
+      ],
+    },
+    preview: {
+      title: "APERÇU CALCULÉ",
+      health: "Santé (Taille + Vigueur)",
+      willpower: "Volonté (Résolution + Calme)",
+      initiative: "Initiative (Dextérité + Calme)",
+      speed: "Vitesse (Force + Dextérité + 5)",
+      defense: "Défense",
+      defensePending: "étape 3",
+      note: "Valeurs de base, recalculées à chaque point. La Défense dépend de Sports (étape 3).",
+    },
+  },
+} as const;

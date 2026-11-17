@@ -47,8 +47,13 @@ export function openDetached(name: string, path: string, size: WindowSize): void
   }
 }
 
+/** Nom de la fenêtre d'une fiche : un seul nom par personnage (T2). */
+export function sheetWindowName(characterId: string): string {
+  return `hunter-fiche-${characterId}`;
+}
+
 export function openSheet(characterId: string): void {
-  openDetached(`hunter-fiche-${characterId}`, sheetPath(characterId), SHEET_WINDOW);
+  openDetached(sheetWindowName(characterId), sheetPath(characterId), SHEET_WINDOW);
 }
 
 export function openCreation(): void {

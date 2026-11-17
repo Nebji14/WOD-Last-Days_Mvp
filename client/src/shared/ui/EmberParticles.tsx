@@ -2,11 +2,10 @@
 
 /**
  * Particules d'arrière-plan : braises cuivrées qui montent en ondulant, avec
- * quelques cendres grises (01-A3, 03-A5, palette T4).
+ * quelques cendres grises.
  *
- * Rendu sur un canvas, sans bibliothèque externe. Avec la préférence système
- * « réduire les animations », les particules sont dessinées une fois et restent
- * figées (01-I2).
+ * Rendu sur un canvas, sans bibliothèque externe. Si l'utilisateur a demandé
+ * moins d'animations, les particules sont dessinées une fois et restent figées.
  */
 import { useEffect, useRef } from "react";
 
@@ -64,7 +63,7 @@ function drawParticle(context: CanvasRenderingContext2D, particle: Particle, tim
 interface EmberParticlesProps {
   /** Classes de positionnement et d'opacité du canvas. */
   readonly className?: string;
-  /** `sparse` : braises discrètes de la table de jeu (03-A5). */
+  /** `sparse` : braises discrètes de la table de jeu. */
   readonly density?: keyof typeof AREA_PER_PARTICLE;
 }
 

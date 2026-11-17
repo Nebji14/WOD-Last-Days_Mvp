@@ -1,4 +1,4 @@
-"""Règles de la bibliothèque d'images (04b) : type réel, noms, dossiers, pile."""
+"""Règles de la bibliothèque d'images : type réel, noms, dossiers, pile."""
 
 from datetime import UTC, datetime
 from uuid import uuid4

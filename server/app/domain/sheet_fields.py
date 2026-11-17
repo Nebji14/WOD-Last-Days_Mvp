@@ -1,8 +1,8 @@
-"""Champs modifiables d'une feuille et contrôle de leurs valeurs (US-009 · CA3).
+"""Champs modifiables d'une feuille et contrôle de leurs valeurs.
 
 Chaque champ est enregistré seul, dès sa saisie. Ce module dit quels champs
 existent, leur type, leurs bornes, et les règles métier qui lient un champ aux
-autres valeurs de la feuille (RM-011, RM-013).
+autres valeurs de la feuille.
 
 Les noms de champs servent aussi de noms de colonnes : la liste fermée de ce
 module est la seule source acceptée par le dépôt.
@@ -46,7 +46,7 @@ TEXT_FIELDS: dict[str, int] = {
 # Champs de texte qui ne peuvent pas être vides.
 REQUIRED_TEXT_FIELDS = frozenset({"form_name", "name"})
 
-# Bornes des valeurs effectives saisies (RM-005) et des jauges.
+# Bornes des valeurs effectives saisies et des jauges.
 NUMBER_FIELDS: dict[str, tuple[int, int]] = {
     "size": (0, 99),
     "speed": (0, 99),
@@ -69,9 +69,9 @@ class FieldRule(StrEnum):
     REQUIRED = "required"
     LENGTH = "length"
     RANGE = "range"
-    # RM-011 : pas plus de blessures que de cases de santé.
+    # Pas plus de blessures que de cases de santé.
     HEALTH_BELOW_WOUNDS = "health_below_wounds"
-    # RM-011 : la volonté disponible reste entre zéro et la volonté maximale.
+    # La volonté disponible reste entre zéro et la volonté maximale.
     WILLPOWER_ABOVE_MAX = "willpower_above_max"
 
 
@@ -79,7 +79,7 @@ class FieldRuleError(Exception):
     """La valeur proposée pour un champ est refusée.
 
     Attributs:
-        rule: règle en cause, transmise au client pour qu'il l'explique (05-E2).
+        rule: règle en cause, transmise au client pour qu'il l'explique.
     """
 
     def __init__(self, rule: FieldRule) -> None:

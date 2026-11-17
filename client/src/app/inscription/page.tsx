@@ -2,7 +2,7 @@ import { AuthScreen } from "@/features/auth/components/AuthScreen";
 import { RegisterForm } from "@/features/auth/components/RegisterForm";
 import { labels } from "@/shared/i18n";
 
-/** Écran 02b — Inscription (joueur). */
+/** Inscription d'un joueur. */
 export default function RegisterPage() {
   return (
     <AuthScreen

@@ -1,19 +1,13 @@
 "use client";
 
 /**
- * [Panneau — Santé] et [Panneau — Volonté] du recto (05a).
+ * Panneaux Santé et Volonté du recto.
  *
- * Santé et volonté distinguent deux natures de valeurs :
- * - valeurs de jeu, qui bougent pendant la partie (blessures, volonté
- *   disponible) : modifiables à tout moment, sans passer en mode modification ;
- * - maximums effectifs, qui ne changent qu'avec la progression du personnage :
- *   modifiables seulement en mode modification (M2).
- *
- * Santé : autant de cases que la santé maximale effective. Des boutons
- * ajoutent, soignent ou aggravent une blessure (Q05-4) ; le serveur garde la
- * piste rangée et sans trou (RM-008) et refuse tout dépassement (RM-011).
- * Volonté : points disponibles sur la volonté maximale effective (RM-011).
- * PNJ : maximums « fixés par le MJ », sans base (07-D7, RM-023).
+ * Les blessures et la volonté disponible bougent pendant la partie : elles se
+ * modifient à tout moment. Les maximums ne changent qu'avec la progression du
+ * personnage : ils se modifient en mode modification. Le serveur garde la
+ * piste de blessures rangée par gravité et refuse tout dépassement. Pour un
+ * PNJ, les maximums sont « fixés par le MJ », sans base calculée.
  */
 import { changeWounds, setSheetField, type WoundSymbol } from "@/features/characters/api";
 import { fill, labels } from "@/shared/i18n";

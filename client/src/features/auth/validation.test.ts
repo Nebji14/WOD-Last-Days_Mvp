@@ -12,7 +12,7 @@ describe("isValidUsername", () => {
   });
 });
 
-describe("passwordViolations (02b-V3)", () => {
+describe("passwordViolations", () => {
   it("ne signale rien pour un mot de passe conforme", () => {
     expect(passwordViolations("chasseur-2026")).toEqual([]);
   });

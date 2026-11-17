@@ -1,4 +1,4 @@
-"""Création du compte MJ (décision T-5).
+"""Création du compte MJ.
 
 À exécuter une seule fois, depuis le dossier ``server`` ::
 

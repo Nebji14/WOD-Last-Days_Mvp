@@ -1,13 +1,11 @@
 "use client";
 
 /**
- * [Barre de titre] de la fiche (05).
+ * Barre de titre de la fiche.
  *
- * Nom du personnage et joueur propriétaire (PNJ : nom, catégorie et badge du
- * modèle, 07-D1), [Bouton — Lancer les dés] (placé
- * mais inactif, US-014 après le MVP, 05-L3), [Bascule — Recto / Verso] à trois
- * faces (deux pour un PNJ, 07-D2), [Bouton — Modifier] ou [Badge — Mode modification] + [Bouton —
- * Terminer] (05-I2), [Bouton — Fermer] (05-I8 : tout est déjà enregistré).
+ * Nom du personnage et de son joueur (pour un PNJ : catégorie et modèle),
+ * bouton des dés (inactif, prévu après le MVP), choix de la face, bouton
+ * Modifier / Terminer et bouton Fermer (tout est déjà enregistré).
  */
 import type { NpcModel } from "@/features/characters/model";
 import { fill, labels } from "@/shared/i18n";

@@ -1,4 +1,4 @@
-"""Liens de lecture des images : URL signées à durée limitée (bucket privé, US-031)."""
+"""Liens de lecture des images : URL signées à durée limitée (bucket privé)."""
 
 from typing import Protocol
 

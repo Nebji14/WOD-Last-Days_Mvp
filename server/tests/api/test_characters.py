@@ -1,4 +1,4 @@
-"""Routes des personnages : US-007 à US-010, US-026, US-027, droits et secret de l'éveil."""
+"""Routes des personnages : création, lecture, modification, droits et secret de l'éveil."""
 
 from typing import Any
 from uuid import UUID, uuid4
@@ -11,7 +11,7 @@ from tests.conftest import TestContext
 
 
 def creation_payload(**overrides: Any) -> dict[str, Any]:
-    """Saisie valide de l'assistant : RM-001 (5/4/3), RM-003 (11/7/4), RM-004."""
+    """Saisie valide de l'assistant : attributs 5/4/3, compétences 11/7/4, 3 spécialités."""
     payload: dict[str, Any] = {
         "identity": {"name": "Isaac Thorne", "concept": "Chasseur de primes"},
         "attribute_priorities": {"mental": 1, "physical": 2, "social": 3},
@@ -54,7 +54,7 @@ def rule(response: Response) -> str:
     return str(response.json()["error"]["details"][0]["rule"])
 
 
-# --- US-007 : création ------------------------------------------------------------------
+# --- Création ------------------------------------------------------------------------
 
 
 def test_created_character_starts_in_the_initial_state(ctx: TestContext) -> None:
@@ -67,12 +67,12 @@ def test_created_character_starts_in_the_initial_state(ctx: TestContext) -> None
     assert character["is_played"] is True
     assert sheet["is_main"] is True
     assert sheet["texts"]["name"] == "Isaac Thorne"
-    # RM-006, RM-007, RM-010 : la base calculée est proposée comme valeur effective.
+    # La base calculée est proposée comme valeur effective.
     assert sheet["base"] == {
         "size": 5, "speed": 10, "defense": 5, "initiative": 5, "health_max": 7, "willpower_max": 4
     }  # fmt: skip
     assert sheet["effective"] == sheet["base"]
-    # RM-008, RM-011, RM-013, RM-015.
+    # Piste vide, volonté pleine, moralité à 7, expérience à zéro.
     assert sheet["wound_track"] == ""
     assert sheet["willpower_current"] == 4
     assert sheet["morality"] == 7
@@ -128,7 +128,7 @@ def test_gm_has_no_character(ctx: TestContext) -> None:
     assert response.status_code == 403
 
 
-# --- US-008, US-026 : consultation et droits --------------------------------------------
+# --- Consultation et droits ---------------------------------------------------------
 
 
 def test_owner_and_gm_read_the_sheet_but_not_another_player(ctx: TestContext) -> None:
@@ -185,7 +185,7 @@ def test_another_player_cannot_modify_the_sheet(ctx: TestContext) -> None:
     assert untouched["sheets"][0] == character["sheets"][0]
 
 
-# --- US-009, US-027 : modification champ par champ --------------------------------------
+# --- Modification champ par champ ---------------------------------------------------
 
 
 def test_field_is_saved_alone_and_base_values_follow(ctx: TestContext) -> None:
@@ -195,7 +195,7 @@ def test_field_is_saved_alone_and_base_values_follow(ctx: TestContext) -> None:
     updated = patch_sheet(lea, sheet["id"], "strength", 4, 2).json()["sheets"][0]
 
     assert updated["attributes"]["strength"] == 4
-    # RM-005 : la base est recalculée, la valeur effective saisie ne bouge pas.
+    # La base est recalculée, la valeur effective saisie ne bouge pas.
     assert updated["base"]["speed"] == 12
     assert updated["effective"]["speed"] == 10
 
@@ -234,8 +234,8 @@ def test_values_outside_the_rules_are_refused(ctx: TestContext) -> None:
         "attribut au-dessus de 5": patch_sheet(lea, sheet_id, "strength", 6, 2),
         "attribut sous 1": patch_sheet(lea, sheet_id, "strength", 0, 2),
         "compétence au-dessus de 5": patch_sheet(lea, sheet_id, "firearms", 6, 3),
-        "moralité hors de 1 à 10 (RM-013)": patch_sheet(lea, sheet_id, "morality", 11, 7),
-        "volonté au-dessus du maximum (RM-011)": patch_sheet(
+        "moralité hors de 1 à 10": patch_sheet(lea, sheet_id, "morality", 11, 7),
+        "volonté au-dessus du maximum": patch_sheet(
             lea, sheet_id, "willpower_current", 5, 4
         ),
         "volonté maximale sous la volonté disponible": patch_sheet(
@@ -250,11 +250,11 @@ def test_values_outside_the_rules_are_refused(ctx: TestContext) -> None:
         assert response.status_code == 422, label
         assert error_code(response) == "rule_violation", label
     assert rule(refusals["attribut au-dessus de 5"]) == "range"
-    assert rule(refusals["volonté au-dessus du maximum (RM-011)"]) == "willpower_above_max"
+    assert rule(refusals["volonté au-dessus du maximum"]) == "willpower_above_max"
     assert rule(refusals["champ inconnu"]) == "unknown_field"
 
 
-# --- RM-008, RM-009, RM-011 : piste de blessures ----------------------------------------
+# --- Piste de blessures -------------------------------------------------------------
 
 
 def _wound(actor: Actor, sheet_id: str, action: str, wound: str | None, expected: str) -> Response:
@@ -301,7 +301,7 @@ def test_wound_change_on_a_stale_track_is_a_conflict(ctx: TestContext) -> None:
     assert _wound(lea, sheet_id, "add", "/", "").status_code == 409
 
 
-# --- Éveil : secret du MJ (maquette 05, ÉVEIL V1 à V5) ----------------------------------
+# --- Éveil : secret du MJ ----------------------------------
 
 
 def test_nothing_about_the_awakening_reaches_the_player_before_it_happens(
@@ -337,7 +337,7 @@ def test_awakening_raises_the_attribute_cap_to_ten_for_that_character(ctx: TestC
     assert patch_sheet(lea, sheet_id, "firearms", 6, 3).status_code == 422
 
 
-# --- Avantage surnaturel (05-I10) -------------------------------------------------------
+# --- Avantage surnaturel -------------------------------------------------------
 
 
 def test_supernatural_advantage_stays_between_one_and_ten(ctx: TestContext) -> None:
@@ -360,7 +360,7 @@ def test_supernatural_advantage_stays_between_one_and_ten(ctx: TestContext) -> N
     assert emptied.status_code == 422
 
 
-# --- Formes du personnage (05-F1 à F5) --------------------------------------------------
+# --- Formes du personnage --------------------------------------------------
 
 
 def test_new_form_copies_the_main_one_and_lives_its_own_life(ctx: TestContext) -> None:
@@ -398,7 +398,7 @@ def test_main_form_cannot_be_deleted_but_another_can(ctx: TestContext) -> None:
     assert [sheet["id"] for sheet in removed.json()["sheets"]] == [main_id]
 
 
-# --- US-010, 09 : suppression et personnage joué ----------------------------------------
+# --- Suppression et personnage joué ------------------------------------------------
 
 
 def test_owner_deletes_a_character_for_good(ctx: TestContext) -> None:

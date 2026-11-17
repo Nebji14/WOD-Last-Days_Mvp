@@ -1,5 +1,5 @@
 /**
- * Message « mauvaise page » (02a-E6 et 02c-E6) : des identifiants valides ont
+ * Message « mauvaise page » : des identifiants valides ont
  * été saisis sur l'accès de l'autre rôle. Aucune session n'est ouverte.
  */
 import Link from "next/link";
@@ -7,7 +7,7 @@ import Link from "next/link";
 import { labels } from "@/shared/i18n";
 
 interface WrongPortalMessageProps {
-  /** Rôle du compte saisi : `gm` sur l'accès joueur (02a), `player` sur l'accès MJ (02c). */
+  /** Rôle du compte saisi : `gm` sur la page des joueurs, `player` sur celle du MJ. */
   readonly accountRole: "gm" | "player";
   /** Écran de connexion du bon accès ; `null` si le serveur ne l'a pas communiqué. */
   readonly href: string | null;

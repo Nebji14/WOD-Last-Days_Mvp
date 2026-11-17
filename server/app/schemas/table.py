@@ -15,7 +15,7 @@ class GmPresence(BaseModel):
 
 
 class SeatCharacterResponse(BaseModel):
-    """Personnage affiché sur un siège : nom, concept, santé et volonté (Q03-3)."""
+    """Personnage affiché sur un siège : nom, concept, santé et volonté."""
 
     id: UUID
     name: str
@@ -30,7 +30,7 @@ class SeatResponse(BaseModel):
     """Place d'un joueur autour de la table.
 
     Attributs:
-        character: personnage joué, ``None`` si le joueur n'en a pas (03-E4).
+        character: personnage joué, ``None`` si le joueur n'en a pas.
     """
 
     position: int
@@ -41,7 +41,7 @@ class SeatResponse(BaseModel):
 
 
 class TableStateResponse(BaseModel):
-    """État de présence de la table (US-012 · CA2, US-028 · CA1)."""
+    """État de présence de la table."""
 
     gm: GmPresence
     seats: list[SeatResponse]

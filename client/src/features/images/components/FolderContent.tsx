@@ -1,10 +1,9 @@
 "use client";
 
 /**
- * Contenu du dossier ouvert (04b) : [Fil d'Ariane — dossier ouvert],
- * [Actions — dossier ouvert (CRUD)] et [Grille d'images], 3 colonnes.
- * En recherche, la grille montre les résultats de tous les dossiers, chacun
- * avec son chemin (04b-I8).
+ * Contenu du dossier ouvert : fil d'Ariane, actions sur le dossier et grille
+ * d'images sur trois colonnes. En recherche, la grille montre les résultats de
+ * tous les dossiers, chacun avec son chemin.
  */
 import { labels } from "@/shared/i18n";
 

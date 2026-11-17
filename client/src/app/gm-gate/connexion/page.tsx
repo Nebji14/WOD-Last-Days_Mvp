@@ -3,7 +3,7 @@ import { LoginForm } from "@/features/auth/components/LoginForm";
 import { requireGmBasePath } from "@/features/auth/requireGmBasePath";
 import { labels } from "@/shared/i18n";
 
-/** Écran 02c — Connexion du MJ (adresse dédiée). */
+/** Connexion du MJ, servie par sa page secrète. */
 export default function GmLoginPage() {
   const gmBasePath = requireGmBasePath();
 

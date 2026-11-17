@@ -1,17 +1,15 @@
 /**
- * Répartition des sièges autour de la table (écrans 03 et 03-MJ).
+ * Répartition des sièges autour de la table.
  *
- * La maquette prévoit neuf emplacements : trois à gauche, trois à droite et
- * trois en bas. Un emplacement vide n'affiche rien (03-E3).
+ * Neuf emplacements : trois à gauche, trois à droite, trois en bas. Un
+ * emplacement vide n'affiche rien.
  *
- * - Vue joueur : mon siège est toujours en bas au centre ; les autres joueurs
+ * - Côté joueur : mon siège est toujours en bas au centre, les autres joueurs
  *   remplissent les huit emplacements restants.
- * - Vue MJ : pas de « mon siège » ; le bas au centre est une place comme les
- *   autres (03-MJ-D3).
+ * - Côté MJ : le bas au centre est une place comme les autres.
  *
- * Les emplacements sont remplis dans l'ordre des places attribuées par le
- * serveur : un joueur garde donc le même emplacement tant que le serveur lui
- * garde sa place (Q03-7).
+ * Les emplacements suivent l'ordre des places attribuées par le serveur : un
+ * joueur garde le même emplacement tant qu'il garde sa place.
  */
 import type { Seat } from "./state";
 

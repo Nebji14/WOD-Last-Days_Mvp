@@ -1,6 +1,6 @@
 """Modèles de sortie des personnages.
 
-Secret de l'éveil (maquette 05, ÉVEIL V3) : tant qu'il n'est pas déclenché, la
+Secret de l'éveil : tant qu'il n'est pas déclenché, la
 réponse faite à un joueur ne contient aucun champ qui s'y rapporte. Trois
 modèles portent cette règle : ``CharacterResponse`` (joueur, non éveillé),
 ``AwakenedCharacterResponse`` (joueur, éveillé) et ``GmCharacterResponse`` (MJ).
@@ -71,9 +71,9 @@ class SheetResponse(BaseModel):
     """Forme d'un personnage.
 
     Attributs:
-        effective: valeurs saisies et stockées (RM-005).
+        effective: valeurs saisies et stockées.
         base: valeurs de référence, recalculées à chaque lecture, jamais
-            stockées (RM-005 à RM-007, RM-010).
+            stockées.
     """
 
     id: UUID
@@ -147,14 +147,14 @@ class SheetResponse(BaseModel):
 
 
 class ExperienceResponse(BaseModel):
-    """Total acquis et solde d'un type d'expérience, toujours distincts (RM-017)."""
+    """Total acquis et solde d'un type d'expérience, toujours distincts."""
 
     total: int
     balance: int
 
 
 class NpcProfileResponse(BaseModel):
-    """Données propres à une feuille de PNJ (07), lues par le MJ seul."""
+    """Données propres à une feuille de PNJ, lues par le MJ seul."""
 
     model: NpcModel
     category_id: UUID | None
@@ -179,7 +179,7 @@ class CharacterResponse(BaseModel):
     """Personnage tel qu'il est exposé à un joueur dont le personnage n'est pas éveillé.
 
     ``owner_id`` et ``npc`` distinguent un PNJ (sans propriétaire), que seul le
-    MJ lit (US-041).
+    MJ lit.
     """
 
     id: UUID
@@ -198,13 +198,13 @@ class CharacterResponse(BaseModel):
 
 
 class AwakenedCharacterResponse(CharacterResponse):
-    """Personnage éveillé vu par son joueur : les attributs vont jusqu'à 10 (ÉVEIL V4)."""
+    """Personnage éveillé vu par son joueur : les attributs vont jusqu'à 10."""
 
     awakened: Literal[True] = True
 
 
 class GmCharacterResponse(CharacterResponse):
-    """Personnage vu par le MJ, avec l'état de l'éveil (ÉVEIL V5)."""
+    """Personnage vu par le MJ, avec l'état de l'éveil."""
 
     awakened_at: datetime | None
 
@@ -261,7 +261,7 @@ class TacticListResponse(BaseModel):
 
 
 class NoteCreatedResponse(BaseModel):
-    """Personnage à jour et identifiant de la note créée, à sélectionner (05c-N4)."""
+    """Personnage à jour et identifiant de la note créée, à sélectionner."""
 
     character: AnyCharacterResponse
     note_id: UUID

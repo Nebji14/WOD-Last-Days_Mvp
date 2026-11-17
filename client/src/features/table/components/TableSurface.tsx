@@ -1,12 +1,8 @@
 /**
- * Table ovale au centre de l'écran : [Table — rebord], [Table — tapis] et
- * [Table — cercle intérieur].
+ * Table ovale au centre de l'écran : rebord, tapis et cercle intérieur.
  *
- * La table est plus grande que sur la maquette (demande du chef de projet,
- * 2026-11-16) : son rebord passe derrière les sièges des côtés.
- *
- * Le centre du tapis reste vide : il est réservé aux dés (03-A3) et à
- * l'affichage des images du MJ (03-A2).
+ * Son rebord passe derrière les sièges des côtés. Le centre du tapis reste vide :
+ * il est réservé aux dés et aux images du MJ.
  */
 export function TableSurface() {
   return (

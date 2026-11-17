@@ -1,12 +1,11 @@
 "use client";
 
 /**
- * Table de jeu : écran 03 (joueur, US-012) et écran 03-MJ (MJ, US-028).
+ * Table de jeu, côté joueur et côté MJ.
  *
- * Les deux vues partagent la table, les sièges et le chat. La vue MJ n'a pas
- * de « mon siège » et porte les outils du MJ dans l'en-tête (03-MJ-D1 à D5).
- * La table et le chat restent accessibles sans partie en cours (RM-018, 03-E1).
- * Les images du MJ se posent sur la pile ou s'affichent en grand (03-A2, 08a).
+ * Les deux vues partagent la table, les sièges, le chat et les images du MJ. Le
+ * MJ n'a pas de siège à lui et dispose de ses outils dans l'en-tête. La table et
+ * le chat restent accessibles même sans partie en cours.
  */
 import { ChatPanel } from "@/features/chat/components/ChatPanel";
 import { useChatSync } from "@/features/chat/useChatSync";

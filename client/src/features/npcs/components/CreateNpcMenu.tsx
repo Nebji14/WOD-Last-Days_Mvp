@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * [Bouton — Créer un PNJ] et [Menu — Choix du modèle] (04c-I3, RM-021).
+ * Bouton « Créer un PNJ » et menu du choix du modèle (complet ou simplifié).
  * Le choix crée une feuille vierge, rangée dans la catégorie sélectionnée.
  */
 import { useState } from "react";

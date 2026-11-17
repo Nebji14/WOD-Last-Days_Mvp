@@ -1,13 +1,11 @@
 "use client";
 
 /**
- * Écran 01 — Écran titre.
+ * Écran titre, commun aux joueurs et au MJ : seule la destination change selon
+ * l'adresse utilisée.
  *
- * Porte d'entrée commune aux joueurs et au MJ, sans différence visuelle : seule
- * la destination change selon l'adresse utilisée (01-I1).
- *
- * La scène garde les proportions de la maquette (1440 × 900) : positions en
- * pourcentage et tailles en unités de conteneur (`cqw`).
+ * La scène garde ses proportions (1440 × 900) : positions en pourcentage et
+ * tailles en unités de conteneur (`cqw`).
  */
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -16,7 +14,7 @@ import { labels } from "@/shared/i18n";
 import { EmberParticles } from "@/shared/ui/EmberParticles";
 
 interface TitleScreenProps {
-  /** Écran de connexion de l'adresse utilisée : 02a (joueur) ou 02c (MJ). */
+  /** Page de connexion de l'adresse utilisée : celle des joueurs ou celle du MJ. */
   readonly loginHref: string;
 }
 

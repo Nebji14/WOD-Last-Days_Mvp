@@ -1,8 +1,8 @@
 /**
- * Raison qui empêche de passer à l'étape suivante (06, [Blocage — raison]).
+ * Raison qui empêche de passer à l'étape suivante de la création.
  *
- * US-007 · CA2 : l'interface empêche une feuille incohérente ; le bouton
- * « Suivant » reste désactivé tant qu'une raison est renvoyée.
+ * Le bouton « Suivant » reste désactivé tant qu'une raison est renvoyée : on ne
+ * peut pas créer une fiche incohérente.
  */
 import { fill, labels } from "@/shared/i18n";
 

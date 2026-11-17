@@ -40,7 +40,7 @@ class PgAccountRepository:
         return _to_account(row) if row else None
 
     async def get_gm(self) -> Account | None:
-        """Retourne le compte du MJ (unique, C01), ou ``None`` s'il n'est pas créé."""
+        """Retourne le compte du MJ (il n'y en a qu'un), ou ``None`` s'il n'est pas créé."""
         row = await self._pool.fetchrow(
             f"select {_COLUMNS} from account where role = 'gm'"  # noqa: S608
         )
@@ -59,7 +59,7 @@ class PgAccountRepository:
 
         Raises:
             UsernameAlreadyExistsError: si le nom d'utilisateur ou l'adresse est
-                déjà pris, ou si un compte MJ existe déjà (C01).
+                déjà pris, ou si un compte MJ existe déjà.
         """
         try:
             row = await self._pool.fetchrow(

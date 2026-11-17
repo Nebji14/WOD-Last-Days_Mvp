@@ -1,6 +1,6 @@
 "use client";
 
-/** Étape 1 de la création : identité, seul le nom est obligatoire (06-É1). */
+/** Étape « Identité » de la création : seul le nom est obligatoire. */
 import type { Dispatch } from "react";
 
 import { labels } from "@/shared/i18n";

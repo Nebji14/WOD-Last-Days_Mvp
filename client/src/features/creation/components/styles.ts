@@ -1,4 +1,4 @@
-/** Classes communes aux panneaux de l'assistant de création (06). */
+/** Classes communes aux panneaux de l'assistant de création. */
 export const CARD = "bg-seat border-line rounded-md border";
 export const STEP_TITLE = "text-ink-bright text-[26px] font-semibold";
 export const STEP_HINT = "text-ink-muted mt-1 text-[15px] italic";

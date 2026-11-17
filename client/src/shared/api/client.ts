@@ -78,7 +78,7 @@ async function send<T>(path: string, options: RequestOptions<T>): Promise<Respon
 
 /**
  * Envoie un fichier brut et retourne la réponse validée, en rapportant la
- * progression de l'envoi (04b-I1). Même renouvellement de session que
+ * progression de l'envoi. Même renouvellement de session que
  * `apiRequest`.
  *
  * @param onProgress reçoit la part envoyée, de 0 à 1.

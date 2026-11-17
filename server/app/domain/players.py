@@ -1,4 +1,4 @@
-"""Joueurs vus par le MJ dans l'outil Joueurs (écran 04a, US-025).
+"""Joueurs vus par le MJ dans l'outil Joueurs.
 
 Règles pures, sans accès réseau ni base.
 """
@@ -15,7 +15,7 @@ class PlayerRecord:
 
     Attributs:
         character_names: nom de chaque personnage, du plus ancien au plus récent ;
-            vide pour un joueur sans personnage (US-025 · CA1).
+            vide pour un joueur sans personnage.
     """
 
     account: Account
@@ -24,14 +24,14 @@ class PlayerRecord:
 
 @dataclass(frozen=True, slots=True)
 class PlayerSummary:
-    """Ligne de la liste des joueurs : compte, personnages et présence (US-025 · CA2)."""
+    """Ligne de la liste des joueurs : compte, personnages et présence."""
 
     record: PlayerRecord
     online: bool
 
 
 def order_players(players: Iterable[PlayerSummary]) -> list[PlayerSummary]:
-    """Range les joueurs : connectés d'abord, puis par nom affiché (Q04a-2).
+    """Range les joueurs : connectés d'abord, puis par nom affiché.
 
     L'ordre alphabétique ignore la casse ; le nom d'utilisateur départage deux
     noms affichés identiques, pour un ordre stable.

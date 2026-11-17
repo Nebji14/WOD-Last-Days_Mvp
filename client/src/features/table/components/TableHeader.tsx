@@ -1,8 +1,6 @@
 /**
- * [En-tête] de la table (écrans 03 et 03-MJ).
- *
- * Vue joueur : [Statut de la partie] au centre. Vue MJ : le statut passe à
- * gauche et les [Outils MJ (icônes)] prennent le centre (03-MJ-D1).
+ * En-tête de la table : logo, statut de la partie, déconnexion et profil.
+ * Côté MJ, le statut passe à gauche et les outils du MJ prennent le centre.
  */
 import type { Account } from "@/features/auth/api";
 import { labels } from "@/shared/i18n";
@@ -17,7 +15,7 @@ interface TableHeaderProps {
   readonly onLogout: () => void;
 }
 
-/** Q03-2 : démarrer et arrêter la partie sont hors MVP, le statut est donc fixe (03-E1). */
+/** Démarrer et arrêter la partie viendront après le MVP : le statut est donc fixe. */
 function GameStatus({ className }: { readonly className: string }) {
   return (
     <p

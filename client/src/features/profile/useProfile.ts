@@ -1,13 +1,13 @@
 "use client";
 
 /**
- * État de la fenêtre du profil (écran 09).
+ * État de la fenêtre du profil.
  *
  * - Le compte et la liste des personnages se rechargent à chaque changement
  *   signalé par le serveur : création depuis une autre fenêtre, personnage
- *   joué ou supprimé (09-I3, 09-I4).
+ *   joué ou supprimé.
  * - Le compte MJ n'a pas de personnage : la liste n'est pas demandée.
- * - Sans session, la fenêtre se ferme (T3).
+ * - Sans session, la fenêtre se ferme.
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 

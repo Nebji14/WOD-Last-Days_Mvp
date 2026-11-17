@@ -1,8 +1,6 @@
 /**
- * [Panneau — Mes personnages] du profil (09, US-007, US-008, US-010).
- *
- * Le personnage à la table vient en premier. [Bouton — Créer un personnage]
- * ouvre la création (06) dans sa fenêtre détachée (09-I2).
+ * Panneau « Mes personnages » du profil : le personnage joué en premier, puis
+ * les autres. « Créer un personnage » ouvre l'assistant dans sa fenêtre.
  */
 import type { Character } from "@/features/characters/model";
 import { errorLabel, fill, labels } from "@/shared/i18n";

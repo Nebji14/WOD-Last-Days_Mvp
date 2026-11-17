@@ -1,9 +1,6 @@
 /**
- * [Siège — Maître du jeu (informatif)] : nom du MJ, présence et nombre de
- * joueurs connectés (US-012 · CA2). Aucune action.
- *
- * En vue MJ, le siège porte [Étiquette — VOUS] et une bordure cuivre renforcée
- * (03-MJ-D2).
+ * Siège du MJ, en haut de la table : nom, présence et nombre de joueurs
+ * connectés. Aucune action. Vu par le MJ, il porte l'étiquette « VOUS ».
  */
 import { labels } from "@/shared/i18n";
 

@@ -1,11 +1,10 @@
 "use client";
 
 /**
- * [Éveil du personnage (visible par le MJ uniquement)] (04a, notes 05 ÉVEIL).
+ * Bloc « Éveil » d'un personnage, visible par le MJ uniquement.
  *
- * Cadre en pointillés : élément réservé au MJ. [Bouton — Déclencher l'éveil]
- * demande une confirmation (04a-I5), puis disparaît : l'éveil n'est pas
- * réversible au MVP (Q05-13).
+ * Il indique si l'éveil est déclenché. Le bouton « Déclencher l'éveil » demande
+ * une confirmation puis disparaît : l'éveil est définitif.
  */
 import { useState } from "react";
 

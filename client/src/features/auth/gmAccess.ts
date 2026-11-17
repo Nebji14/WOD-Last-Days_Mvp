@@ -1,11 +1,10 @@
 /**
- * Accès dédié du MJ (US-023, décision T-4), côté serveur du client uniquement.
+ * Page de connexion réservée au MJ, côté serveur du client uniquement.
  *
- * Le MJ ouvre l'application par un chemin réservé, défini par la variable
- * `GM_ACCESS_PATH`. Le proxy (src/proxy.ts) réécrit ce chemin vers le segment
- * interne `INTERNAL_GM_SEGMENT`, lui-même inaccessible directement.
- *
- * Ce module ne dépend pas de Next.js : il est aussi chargé par le proxy.
+ * Le MJ ouvre l'application par un chemin secret (`GM_ACCESS_PATH`). Le proxy
+ * réécrit ce chemin vers le segment interne `INTERNAL_GM_SEGMENT`, qui n'est
+ * pas accessible directement. Ce module ne dépend pas de Next.js : le proxy le
+ * charge aussi.
  */
 export const INTERNAL_GM_SEGMENT = "gm-gate";
 

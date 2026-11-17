@@ -1,4 +1,4 @@
-"""Arborescences sans cycle : dossiers d'images (04b) et catégories de PNJ (C07, 04c).
+"""Arborescences sans cycle : dossiers d'images et catégories de PNJ.
 
 Règle pure, sans accès réseau ni base.
 """
@@ -10,7 +10,7 @@ from uuid import UUID
 def would_create_cycle(
     parents: Mapping[UUID, UUID | None], node_id: UUID, new_parent_id: UUID | None
 ) -> bool:
-    """Indique si ranger ``node_id`` sous ``new_parent_id`` créerait un cycle (04b-I10, C07).
+    """Indique si ranger ``node_id`` sous ``new_parent_id`` créerait un cycle.
 
     Args:
         parents: parent de chaque nœud existant.

@@ -1,8 +1,7 @@
 """Cas d'usage des personnages : création, consultation, modification, suppression.
 
-Couvre US-007 (créer), US-008 et US-026 (consulter), US-009 et US-027
-(modifier), US-010 (supprimer), ainsi que les formes du personnage et le choix
-du personnage joué (maquettes 05, 06 et 09).
+Le joueur gère ses personnages ; le MJ consulte et modifie ceux de tous les
+joueurs. Gère aussi les formes du personnage et le personnage joué à la table.
 """
 
 from collections.abc import Mapping, Sequence
@@ -54,12 +53,12 @@ _SUPERNATURAL_NAME_MAX = 60
 
 @dataclass(frozen=True, slots=True)
 class CreationInput:
-    """Saisie de l'assistant de création (écran 06, étapes 1 à 5).
+    """Saisie complète de l'assistant de création.
 
     Attributs:
         identity: nom (obligatoire), concept, profession, vertu, vice, compact.
         effective: valeurs effectives retenues à l'étape 5 ; une valeur absente
-            reprend la valeur de base calculée (RM-005).
+            reprend la valeur de base calculée.
     """
 
     identity: Mapping[str, str]
@@ -130,20 +129,20 @@ class CharacterService:
         return await self._characters.list_for_owner(owner_id)
 
     async def get(self, actor: Account, character_id: UUID) -> Character:
-        """Retourne un personnage consultable par ``actor`` (US-008, US-026)."""
+        """Retourne un personnage consultable par ``actor``."""
         return await self._access.readable(actor, character_id)
 
     async def create(self, actor: Account, creation: CreationInput) -> Character:
-        """Crée un personnage à partir de l'assistant (US-007).
+        """Crée un personnage à partir de l'assistant.
 
-        L'état initial suit l'étape 5 : piste de blessures vide (RM-008),
-        volonté disponible égale à la volonté maximale (RM-011), moralité à 7
-        (RM-013), expérience à zéro (RM-015).
+        L'état initial suit l'étape 5 : piste de blessures vide,
+        volonté disponible égale à la volonté maximale, moralité à 7
+       , expérience à zéro.
 
         Raises:
             AppError: ``forbidden`` pour le MJ, qui n'a pas de personnage ;
-                ``rule_violation`` si la saisie enfreint RM-001, RM-003 ou
-                RM-004, ou si une valeur est hors bornes.
+                ``rule_violation`` si la répartition des points ou les
+                spécialités sont incorrectes, ou si une valeur est hors bornes.
         """
         if actor.role is not Role.PLAYER:
             raise AppError(
@@ -201,7 +200,7 @@ class CharacterService:
         return values
 
     async def delete(self, actor: Account, character_id: UUID) -> None:
-        """Supprime définitivement un personnage (US-010). Réservé à son propriétaire."""
+        """Supprime définitivement un personnage. Réservé à son propriétaire."""
         character = await self._access.readable(actor, character_id)
         if character.owner_id != actor.id:
             raise AppError(
@@ -213,7 +212,7 @@ class CharacterService:
         await self._access.notify(character_id, character.owner_id, character.is_played)
 
     async def play(self, actor: Account, character_id: UUID) -> Character:
-        """Désigne le personnage joué à la table (09-I4). Réservé à son propriétaire."""
+        """Désigne le personnage joué à la table. Réservé à son propriétaire."""
         character = await self._access.readable(actor, character_id)
         if character.owner_id != actor.id:
             raise AppError(
@@ -229,7 +228,7 @@ class CharacterService:
         """Modifie un champ commun à toutes les formes : avantage surnaturel ou total d'expérience.
 
         Un total d'expérience ne descend pas sous les points déjà dépensés
-        (RM-017 : le solde ne devient jamais négatif).
+        (le solde ne devient jamais négatif).
 
         Raises:
             AppError: ``rule_violation`` ou ``edit_conflict``.
@@ -267,20 +266,20 @@ class CharacterService:
     async def set_sheet_field(
         self, actor: Account, sheet_id: UUID, field: str, value: object, expected: object
     ) -> Character:
-        """Modifie un champ d'une forme, enregistré seul et aussitôt (US-009 · CA1).
+        """Modifie un champ d'une forme, enregistré seul et aussitôt.
 
         Args:
             expected: valeur que l'acteur avait sous les yeux. Si elle n'est
-                plus celle de la base, rien n'est écrit (05-E3).
+                plus celle de la base, rien n'est écrit.
 
         Raises:
-            AppError: ``rule_violation`` (05-E2) ou ``edit_conflict`` (05-E3).
+            AppError: ``rule_violation`` ou ``edit_conflict``.
         """
         character = await self._for_sheet(actor, sheet_id)
         sheet = self._access.sheet_of(character, sheet_id)
         try:
             check_npc_sheet_field(character.npc, field)
-            # Un PNJ a des points libres (US-039 · CA2) : attributs jusqu'à 10.
+            # Un PNJ a des points libres : attributs jusqu'à 10.
             uncapped = character.is_awakened or character.is_npc
             checked = validate_field(sheet, field, value, uncapped)
             if type(expected) is not type(current_value(sheet, field)):
@@ -295,10 +294,10 @@ class CharacterService:
     async def change_wounds(
         self, actor: Account, sheet_id: UUID, action: str, wound: Wound | None, expected: str
     ) -> Character:
-        """Ajoute, soigne ou aggrave une blessure (05-I4, Q05-4).
+        """Ajoute, soigne ou aggrave une blessure.
 
-        La piste reste rangée et sans trou (RM-008) et ne dépasse jamais la
-        santé maximale (RM-011).
+        La piste reste rangée et sans trou et ne dépasse jamais la
+        santé maximale.
 
         Args:
             action: ``add``, ``heal`` ou ``worsen``.
@@ -329,13 +328,13 @@ class CharacterService:
         return await self._access.changed(character.id)
 
     async def add_form(self, actor: Account, character_id: UUID, form_name: str) -> Character:
-        """Ajoute une forme, copie de la forme principale (05-F2, Q05-7). Jamais pour un PNJ."""
+        """Ajoute une forme, copie de la forme principale. Jamais pour un PNJ."""
         require_player_character(await self._access.editable(actor, character_id), "form")
         await self._characters.add_form(character_id, form_name)
         return await self._access.changed(character_id)
 
     async def delete_form(self, actor: Account, sheet_id: UUID) -> Character:
-        """Supprime une forme alternative (05-F3).
+        """Supprime une forme alternative.
 
         Raises:
             AppError: ``rule_violation`` pour la forme principale, jamais supprimable.

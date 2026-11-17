@@ -1,9 +1,9 @@
 "use client";
 
 /**
- * Champ de saisie avec libellé (gabarit des écrans 02a, 02b et 02c).
+ * Champ de saisie avec libellé, pour les écrans de connexion et d'inscription.
  *
- * États : actif → bordure or (E1) ; en erreur → bordure rouge (E2). Un champ de
+ * États : actif → bordure or ; en erreur → bordure rouge. Un champ de
  * type mot de passe propose la bascule « Afficher / Masquer ».
  */
 import { useId, useState } from "react";

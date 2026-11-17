@@ -1,9 +1,9 @@
 /**
- * [Panneau — Mon compte] du profil (09, US-012 · CA1).
+ * Panneau « Mon compte » du profil.
  *
- * Consultation seule au MVP : le bouton de modification est grisé et inactif
- * (US-004, après le MVP). Les méthodes de connexion sont listées ensemble,
- * chacune avec son état (US-001 · CA3, CA4) ; Google n'est pas encore activé.
+ * Consultation seule : la modification du compte viendra après le MVP, le
+ * bouton est donc grisé. Les méthodes de connexion sont listées avec leur
+ * état ; Google n'est pas encore activé.
  */
 import type { Account } from "@/features/auth/api";
 import { initials } from "@/features/table/seatLayout";

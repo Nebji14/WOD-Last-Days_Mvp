@@ -33,7 +33,7 @@ export interface TableSession {
   /** Dernier état de présence reçu, `null` avant le premier. */
   readonly table: TableState | null;
   readonly loggingOut: boolean;
-  /** Ferme la session puis revient à l'écran de connexion (US-003, 03-I4). */
+  /** Ferme la session puis revient à l'écran de connexion. */
   logOut(): void;
 }
 
@@ -95,7 +95,7 @@ export function useTableSession(): TableSession {
     };
   }, [account, realtime, router]);
 
-  // T3 : fermer la fenêtre principale ferme aussi les fenêtres détachées.
+  // Fermer la fenêtre principale ferme aussi les fenêtres détachées.
   useEffect(() => {
     window.addEventListener("pagehide", closeAllDetached);
     return () => window.removeEventListener("pagehide", closeAllDetached);

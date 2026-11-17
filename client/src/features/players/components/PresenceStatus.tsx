@@ -1,4 +1,4 @@
-/** Pastille et libellé de présence d'un joueur : « En ligne » / « Hors ligne » (US-025 · CA2). */
+/** Pastille et libellé de présence d'un joueur : « En ligne » / « Hors ligne ». */
 import { labels } from "@/shared/i18n";
 
 interface PresenceStatusProps {

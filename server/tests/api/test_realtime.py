@@ -80,7 +80,7 @@ def test_ticket_is_single_use(ctx: TestContext, connect: Connect) -> None:
             assert _closing_code(second) == 4401
 
 
-# --- US-012 · CA2, US-028 · CA1 : présence ----------------------------------------------
+# --- Présence autour de la table -------------------------------------------------------
 
 
 def _summary(state: dict[str, Any]) -> list[tuple[int, str, bool]]:
@@ -106,7 +106,7 @@ def test_arrivals_and_departures_are_broadcast(ctx: TestContext, connect: Connec
     ]
 
     lea_socket.close()
-    # 03-E2, Q03-7 : le siège reste affiché, hors ligne, à la même place.
+    # Le siège reste affiché, hors ligne, à la même place.
     assert _summary(_next(gm_socket, "table.state")) == [
         (0, "lea.vale", False),
         (1, "ben.ard", True),
@@ -152,7 +152,7 @@ def test_tenth_player_finds_the_table_full(ctx: TestContext, connect: Connect) -
     assert _closing_code(extra) == 4409
 
 
-# --- US-003, T3 : la déconnexion ferme le temps réel ------------------------------------
+# --- La déconnexion ferme le temps réel -------------------------------------------
 
 
 def test_logout_closes_the_realtime_connections_of_the_account(
@@ -167,7 +167,7 @@ def test_logout_closes_the_realtime_connections_of_the_account(
     assert _closing_code(socket) == 4401
 
 
-# --- US-013 · CA3, US-030 · CA3 : diffusion du chat -------------------------------------
+# --- Diffusion du chat --------------------------------------------------------------
 
 
 def test_chat_changes_are_broadcast_to_everyone(ctx: TestContext, connect: Connect) -> None:

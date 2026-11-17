@@ -6,7 +6,7 @@
  * client ne fait que recevoir des événements ; toute action passe par l'API.
  *
  * En cas de coupure, la connexion est rouverte automatiquement, à intervalles
- * croissants (CDC 12.3, 03-E7).
+ * croissants.
  */
 import { ApiError } from "@/shared/api/client";
 

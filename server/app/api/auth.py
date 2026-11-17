@@ -1,4 +1,4 @@
-"""Routes d'authentification (US-001, US-002, US-003, US-023).
+"""Routes d'authentification.
 
 Les routes ne contiennent aucune logique métier : elles valident l'entrée,
 appellent le service et gèrent les cookies de session.
@@ -34,7 +34,7 @@ _REFRESH_LIMIT_PER_ADDRESS = 120
     dependencies=[Depends(rate_limit("register", _REGISTER_LIMIT_PER_ADDRESS, _WINDOW_SECONDS))],
 )
 async def register(payload: RegisterRequest, container: ContainerDep) -> AccountResponse:
-    """Crée un compte joueur. N'ouvre pas de session (02b-C3)."""
+    """Crée un compte joueur. N'ouvre pas de session."""
     account = await container.auth_service.register_player(
         payload.username, payload.password, payload.password_confirmation
     )
@@ -48,7 +48,7 @@ async def register(payload: RegisterRequest, container: ContainerDep) -> Account
 async def login_player(
     payload: LoginRequest, response: Response, container: ContainerDep
 ) -> AccountResponse:
-    """Connexion depuis l'accès joueur (02a)."""
+    """Connexion depuis la page des joueurs."""
     return await _login(payload, response, container, Role.PLAYER)
 
 
@@ -59,7 +59,7 @@ async def login_player(
 async def login_gm(
     payload: LoginRequest, response: Response, container: ContainerDep
 ) -> AccountResponse:
-    """Connexion depuis l'accès dédié du MJ (02c)."""
+    """Connexion depuis la page réservée au MJ."""
     return await _login(payload, response, container, Role.GM)
 
 
@@ -81,7 +81,7 @@ async def refresh(request: Request, container: ContainerDep) -> Response:
 
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
 async def logout(request: Request, container: ContainerDep) -> Response:
-    """Ferme la session, ses connexions temps réel et retire les cookies (US-003, T3)."""
+    """Ferme la session, ses connexions temps réel et retire les cookies."""
     access_token = request.cookies.get(ACCESS_COOKIE)
     if access_token is not None:
         try:

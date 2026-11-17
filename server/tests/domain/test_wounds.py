@@ -1,4 +1,4 @@
-"""Piste de blessures : RM-008 (ordre, pas de trou), RM-009 (symboles), RM-011 (capacité)."""
+"""Piste de blessures : ordre sans trou, symboles et capacité maximale."""
 
 import pytest
 

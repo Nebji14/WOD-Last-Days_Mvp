@@ -1,4 +1,4 @@
-"""Routes du chat général (US-013, US-029, US-030).
+"""Routes du chat général.
 
 Toute route exige une session. Les droits sur un message (auteur ou MJ) sont
 contrôlés par le service.
@@ -42,7 +42,7 @@ async def history(
     before: Annotated[int | None, Query(ge=1)] = None,
     limit: Annotated[int, Query(ge=1, le=_HISTORY_PAGE_MAX)] = _HISTORY_PAGE_DEFAULT,
 ) -> HistoryResponse:
-    """Retourne une page d'historique, les plus récents par défaut (US-013 · CA1, CA2)."""
+    """Retourne une page d'historique, les plus récents par défaut."""
     messages, has_more = await container.chat_service.history(before, limit)
     return HistoryResponse(
         messages=[MessageResponse.from_message(message) for message in messages],
@@ -54,7 +54,7 @@ async def history(
 async def send_message(
     payload: SendMessageRequest, container: ContainerDep, account: CurrentAccount
 ) -> MessageResponse:
-    """Envoie un message dans le chat général (US-013 · CA5, US-029)."""
+    """Envoie un message dans le chat général."""
     _limit_writes(container, account.id)
     message = await container.chat_service.send(account, payload.client_token, payload.body)
     return MessageResponse.from_message(message)
@@ -64,7 +64,7 @@ async def send_message(
 async def edit_message(
     message_id: UUID, payload: EditMessageRequest, container: ContainerDep, account: CurrentAccount
 ) -> MessageResponse:
-    """Modifie un message : le sien, ou n'importe lequel pour le MJ (US-013 · CA6, US-030 · CA1)."""
+    """Modifie un message : le sien, ou n'importe lequel pour le MJ."""
     _limit_writes(container, account.id)
     message = await container.chat_service.edit(account, message_id, payload.body)
     return MessageResponse.from_message(message)
@@ -74,7 +74,7 @@ async def edit_message(
 async def delete_message(
     message_id: UUID, container: ContainerDep, account: CurrentAccount
 ) -> MessageResponse:
-    """Supprime un message en laissant sa trace (US-013 · CA7, US-030 · CA2, CA5)."""
+    """Supprime un message en laissant sa trace."""
     _limit_writes(container, account.id)
     message = await container.chat_service.delete(account, message_id)
     return MessageResponse.from_message(message)

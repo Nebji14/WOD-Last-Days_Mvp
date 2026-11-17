@@ -1,13 +1,8 @@
 "use client";
 
 /**
- * Panneaux propres à la feuille de PNJ (écran 07, US-039 à US-043).
- *
- * - [Panneau — Caractéristiques simplifiées] : Puissance, Finesse, Résilience,
- *   de 1 à 10, jamais 0 (07-I2, RM-022).
- * - [Panneau — Notes du PNJ] : notes intégrées, texte long (07-I4, US-039 · CA7).
- * - Catégorie du PNJ, modifiable en mode modification (Q04c-1, Q07-3).
- * - « Supprimer ce PNJ », en mode modification, après confirmation (US-043 · CA1).
+ * Panneaux propres à la feuille de PNJ : Puissance, Finesse et Résilience (de 1
+ * à 10), notes du PNJ, choix de la catégorie et suppression du PNJ.
  */
 import { useState } from "react";
 
@@ -124,7 +119,7 @@ export function NpcCategoryLine({ character }: { readonly character: Character }
   );
 }
 
-/** « Supprimer ce PNJ » en bas du verso, en mode modification (US-043 · CA1, CA3). */
+/** « Supprimer ce PNJ » en bas du verso, en mode modification. */
 export function NpcDeleteLink() {
   const { character, editing } = useSheet();
   const [confirming, setConfirming] = useState(false);

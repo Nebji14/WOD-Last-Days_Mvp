@@ -23,12 +23,12 @@ class Settings(BaseSettings):
         supabase_secret_key: clé d'administration ; ne quitte jamais le serveur.
         database_url: chaîne de connexion PostgreSQL.
         allowed_origins: origines autorisées pour CORS et le contrôle d'origine.
-        session_idle_seconds: durée d'inactivité avant expiration (CDC 12.2).
+        session_idle_seconds: durée d'inactivité avant expiration.
         technical_email_domain: domaine des adresses techniques associées aux
-            noms d'utilisateur des joueurs (décision T-3).
+            noms d'utilisateur des joueurs.
         gm_access_path: chemin réservé de l'accès du MJ côté client, sans barre
-            oblique (décision T-4). Communiqué uniquement à qui présente les
-            identifiants valides du MJ sur l'accès joueur (02a-E6).
+            oblique. Communiqué uniquement à qui présente les
+            identifiants valides du MJ sur l'accès joueur.
     """
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")

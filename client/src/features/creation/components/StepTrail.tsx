@@ -1,9 +1,9 @@
 "use client";
 
 /**
- * [Étapes (fil d'avancement)] (06) : étape faite = pastille or ✓, étape en
- * cours = contour or lumineux, étape à venir = grisée. Un clic sur une étape
- * déjà atteinte y revient.
+ * Fil d'avancement de la création : étape faite = pastille or ✓, étape en
+ * cours = contour or, étape à venir = grisée. Un clic sur une étape déjà
+ * atteinte y revient.
  */
 import { labels } from "@/shared/i18n";
 

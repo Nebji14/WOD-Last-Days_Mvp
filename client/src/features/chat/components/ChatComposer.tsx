@@ -1,10 +1,10 @@
 "use client";
 
 /**
- * [Saisie — message] : Entrée ou « ENVOYER » envoie le message (03-I6).
+ * Saisie d'un message : Entrée ou « ENVOYER » l'envoie.
  *
- * Le champ est vidé dès l'envoi : le message part en attente et n'a jamais à
- * être ressaisi, même si la connexion est coupée (03-E7).
+ * Le champ est vidé aussitôt : le message part en attente et n'a jamais à être
+ * ressaisi, même si la connexion est coupée.
  */
 import { type FormEvent, useState } from "react";
 

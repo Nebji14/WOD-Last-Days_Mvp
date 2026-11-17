@@ -1,4 +1,4 @@
-/** Libellés français de l'outil PNJ (04c) et de la feuille de PNJ (07). */
+/** Libellés français de l'outil PNJ et de la feuille de PNJ. */
 export const frNpcs = {
   npcsTool: {
     windowTitle: "PNJ",
@@ -52,7 +52,7 @@ export const frNpcs = {
     notesLabel: "Notes du PNJ",
     notesPlaceholder: "Rôle, secrets, comportement en jeu…",
     fixedByGm: "fixée par le MJ :",
-    noBase: "Simplifié : aucune base calculée (RM-022) · valeurs du MJ",
+    noBase: "Simplifié : aucune base calculée · valeurs du MJ",
     deleteNpc: "SUPPRIMER CE PNJ",
   },
 } as const;

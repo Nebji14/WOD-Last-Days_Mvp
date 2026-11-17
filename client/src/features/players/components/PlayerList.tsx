@@ -1,8 +1,6 @@
 /**
- * [Panneau — Liste des joueurs] de l'outil Joueurs (04a, US-025 · CA1, CA2).
- *
- * Une « Ligne joueur » par joueur : avatar, nom, personnages ou « Aucun
- * personnage », statut. La ligne sélectionnée est bordée d'or (04a-I1).
+ * Liste de tous les joueurs dans l'outil Joueurs : avatar, nom, personnages
+ * (ou « Aucun personnage ») et présence. La ligne sélectionnée est bordée d'or.
  */
 import { initials } from "@/features/table/seatLayout";
 import { fill, labels } from "@/shared/i18n";

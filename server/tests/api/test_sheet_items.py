@@ -30,7 +30,7 @@ def _spend(actor: Actor, character_id: str, points: int, tactical: bool = False)
     )
 
 
-# --- Spécialités (05-I9, RM-004) --------------------------------------------------------
+# --- Spécialités --------------------------------------------------------
 
 
 def test_specialty_field_is_split_on_commas_and_emptied_by_an_empty_text(
@@ -57,7 +57,7 @@ def test_specialty_on_an_unknown_skill_is_refused(ctx: TestContext) -> None:
     assert response.status_code == 422
 
 
-# --- Annotations de moralité (05-I5, RM-013) --------------------------------------------
+# --- Annotations de moralité --------------------------------------------
 
 
 def test_morality_notes_keep_the_level_where_they_were_acquired(ctx: TestContext) -> None:
@@ -92,7 +92,7 @@ def test_morality_note_level_is_bounded(ctx: TestContext) -> None:
     assert error_code(response) == "validation_error"
 
 
-# --- Atouts, handicaps, pouvoirs, objets, armes, armures (05-I7, RM-014) ----------------
+# --- Atouts, handicaps, pouvoirs, objets, armes, armures ----------------
 
 
 def test_entry_keeps_only_the_fields_of_its_kind(ctx: TestContext) -> None:
@@ -154,7 +154,7 @@ def test_entry_values_are_bounded(ctx: TestContext) -> None:
     assert error_code(response) == "validation_error"
 
 
-# --- Tactiques partagées (Q05-3, C06) ---------------------------------------------------
+# --- Tactiques partagées ---------------------------------------------------
 
 
 def test_tactic_is_shared_between_sheets_and_survives_until_the_last_one_drops_it(
@@ -204,7 +204,7 @@ def test_tactic_can_only_be_edited_from_a_sheet_that_knows_it(ctx: TestContext) 
     assert response.status_code == 404
 
 
-# --- Expérience (RM-015, RM-016, RM-017) ------------------------------------------------
+# --- Expérience ------------------------------------------------
 
 
 def test_expense_lowers_the_balance_and_never_the_total(ctx: TestContext) -> None:
@@ -216,7 +216,7 @@ def test_expense_lowers_the_balance_and_never_the_total(ctx: TestContext) -> Non
     spent = _spend(lea, character_id, 6).json()
 
     assert spent["xp_general"] == {"total": 10, "balance": 4}
-    # RM-015 : l'expérience tactique est suivie à part.
+    # L'expérience tactique est suivie à part.
     assert spent["xp_tactical"] == {"total": 4, "balance": 4}
     assert [(e["points"], e["is_tactical"]) for e in spent["expenses"]] == [(6, False)]
 
@@ -279,7 +279,7 @@ def test_gm_spends_experience_like_the_owner(ctx: TestContext) -> None:
     assert _spend(gm, character_id, 2).json()["xp_general"]["balance"] == 1
 
 
-# --- Notes de la fiche (05c) ------------------------------------------------------------
+# --- Notes de la fiche -------------------------------------------------------------
 
 
 def test_owner_manages_notes_and_the_gm_only_reads_them(ctx: TestContext) -> None:

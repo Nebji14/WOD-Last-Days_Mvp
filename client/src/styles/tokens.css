@@ -1,6 +1,6 @@
 /*
- * Base de design, extraite de la maquette et validée le 2026-11-16.
- * Légende T4 (palette cuivrée) et T5 (rouge réservé aux actions importantes).
+ * Base de design : palette cuivrée, rouge réservé aux actions importantes,
+ * erreurs et suppressions.
  * Toute couleur, police ou ombre de l'interface provient de ce fichier.
  */
 @theme {
@@ -23,7 +23,7 @@
   --color-ink-muted: #a1957e;
   --color-ink-faint: #6d6253;
 
-  /* Accents (T4) */
+  /* Accents */
   --color-gold: #c9b06a;
   --color-copper: #b7774d;
   --color-copper-light: #e6b493;
@@ -33,7 +33,7 @@
   --color-copper-to: #664026;
   --color-gm: #d49a6e;
 
-  /* Actions importantes, erreurs et suppressions (T5) */
+  /* Actions importantes, erreurs et suppressions */
   --color-blood-from: #b3261f;
   --color-blood-to: #7a1512;
   --color-blood-line: #d8352c;

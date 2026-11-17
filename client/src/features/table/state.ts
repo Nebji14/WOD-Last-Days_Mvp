@@ -1,14 +1,14 @@
-/** État de présence de la table, tel que le diffuse le serveur (US-012 · CA2, US-028 · CA1). */
+/** État de présence de la table, tel que le diffuse le serveur. */
 import { isRecord } from "@/shared/api/client";
 
-/** Personnage joué, affiché sur le siège : visible de tous les joueurs (Q03-3). */
+/** Personnage joué, affiché sur le siège : visible de tous les joueurs. */
 export interface SeatCharacter {
   readonly id: string;
   readonly name: string;
   readonly concept: string;
-  /** Nombre de cases de santé (santé maximale effective, RM-011). */
+  /** Nombre de cases de santé (santé maximale effective). */
   readonly healthMax: number;
-  /** Blessures, par gravité décroissante : `*` aggravée, `X` létale, `/` contondante (RM-009). */
+  /** Blessures, par gravité décroissante : `*` aggravée, `X` létale, `/` contondante. */
   readonly woundTrack: string;
   readonly willpowerMax: number;
   readonly willpowerCurrent: number;
@@ -19,9 +19,9 @@ export interface Seat {
   readonly position: number;
   readonly accountId: string;
   readonly displayName: string;
-  /** `false` : le joueur a quitté la salle, son siège reste affiché atténué (03-E2). */
+  /** `false` : le joueur a quitté la salle, son siège reste affiché atténué. */
   readonly online: boolean;
-  /** `null` : le joueur n'a pas de personnage (03-E4). */
+  /** `null` : le joueur n'a pas de personnage. */
   readonly character: SeatCharacter | null;
 }
 

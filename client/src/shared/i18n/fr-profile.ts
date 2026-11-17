@@ -1,4 +1,4 @@
-/** Libellés français du profil du joueur (écran 09). */
+/** Libellés français du profil du joueur. */
 export const frProfile = {
   profile: {
     windowTitle: "PROFIL",
@@ -25,7 +25,7 @@ export const frProfile = {
       notLinked: "non rattaché",
     },
     editInfo: "MODIFIER MES INFORMATIONS",
-    editInfoLater: "Modification du compte et des méthodes de connexion : après le MVP (US-004).",
+    editInfoLater: "Modification du compte et des méthodes de connexion : disponible plus tard.",
     characters: {
       title: "MES PERSONNAGES · {count}",
       create: "+  CRÉER UN PERSONNAGE",
@@ -38,7 +38,7 @@ export const frProfile = {
       deleteTitle: "SUPPRIMER LE PERSONNAGE",
       deleteQuestion:
         "Supprimer définitivement « {name} » ? Sa fiche, ses formes et ses notes seront effacées. Cette action est irréversible.",
-      deleteHint: "Supprimer un personnage demande toujours une confirmation (US-010).",
+      deleteHint: "Supprimer un personnage demande toujours une confirmation.",
       mainForm: "principale",
       oneForm: "1 forme : {names}",
       manyForms: "{count} formes : {names}",

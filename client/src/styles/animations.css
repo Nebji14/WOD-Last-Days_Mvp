@@ -1,10 +1,10 @@
 /*
  * Animations de l'interface.
- * Écran titre : A1 (ouverture), A2 (reflets et halo), A4 (invite), I1 (sortie).
- * Table de jeu : 03-A6 (arrivée d'un siège), 03-A4 (déroulé du chat).
- * Fiche : court fondu au changement de face (Q05-1).
- * Images du MJ : voile de pause et image qui grandit depuis le centre (03-A2, 08a).
- * La préférence « réduire les animations » (01-I2) les neutralise en fin de fichier.
+ * Écran titre : ouverture, reflets et halo, invite, sortie.
+ * Table de jeu : arrivée d'un siège, déroulé du chat.
+ * Fiche : court fondu au changement de face.
+ * Images du MJ : voile de pause et image qui grandit depuis le centre.
+ * La préférence « réduire les animations » les neutralise en fin de fichier.
  */
 @theme {
   /* A1 : ouverture de l'écran titre, dans l'ordre fond → titre → halo → sous-titre → invite. */
@@ -119,14 +119,14 @@
   }
 }
 
-/* 03-A6 : fondu depuis la transparence jusqu'à l'opacité propre de l'élément. */
+/* Arrivée d'un siège : fondu depuis la transparence jusqu'à l'opacité propre de l'élément. */
 @keyframes appear {
   from {
     opacity: 0;
   }
 }
 
-/* 03-A4 : pendant que le panneau du chat change de taille, son contenu monte en fondu. */
+/* Pendant que le panneau du chat change de taille, son contenu monte en fondu. */
 @keyframes chat-content {
   from {
     opacity: 0;
@@ -149,7 +149,7 @@
   }
 }
 
-/* 01-I2 : A1 réduite à un fondu simple ; A2 et A4 désactivées. */
+/* Moins d'animations : l'ouverture devient un simple fondu, les effets continus s'arrêtent. */
 @media (prefers-reduced-motion: reduce) {
   .animate-title-bg,
   .animate-title-smoke,

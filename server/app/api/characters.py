@@ -1,4 +1,4 @@
-"""Routes des personnages et de leurs formes (US-007 à US-010, US-026, US-027).
+"""Routes des personnages et de leurs formes.
 
 Toute route exige une session. Les droits (propriétaire ou MJ) sont contrôlés
 par les services ; un personnage inaccessible répond comme un personnage absent.
@@ -50,7 +50,7 @@ async def list_characters(
     account: CurrentAccount,
     owner: Annotated[UUID | None, Query()] = None,
 ) -> CharacterListResponse:
-    """Liste mes personnages ; le MJ peut demander ceux d'un joueur (US-026 · CA1)."""
+    """Liste mes personnages ; le MJ peut demander ceux d'un joueur."""
     characters = await container.character_service.list_for(account, owner or account.id)
     return CharacterListResponse(
         characters=[character_response(character, account) for character in characters]
@@ -61,7 +61,7 @@ async def list_characters(
 async def create_character(
     payload: CreateCharacterRequest, container: ContainerDep, account: CurrentAccount
 ) -> AnyCharacterResponse:
-    """Crée un personnage depuis l'assistant de création (US-007)."""
+    """Crée un personnage depuis l'assistant de création."""
     character = await container.character_service.create(account, payload.to_input())
     return character_response(character, account)
 
@@ -70,7 +70,7 @@ async def create_character(
 async def get_character(
     character_id: UUID, container: ContainerDep, account: CurrentAccount
 ) -> AnyCharacterResponse:
-    """Retourne la fiche complète d'un personnage (US-008, US-026)."""
+    """Retourne la fiche complète d'un personnage."""
     character = await container.character_service.get(account, character_id)
     return character_response(character, account)
 
@@ -83,7 +83,7 @@ async def get_character(
 async def delete_character(
     character_id: UUID, container: ContainerDep, account: CurrentAccount
 ) -> Response:
-    """Supprime définitivement un personnage (US-010)."""
+    """Supprime définitivement un personnage."""
     await container.character_service.delete(account, character_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
@@ -92,7 +92,7 @@ async def delete_character(
 async def play_character(
     character_id: UUID, container: ContainerDep, account: CurrentAccount
 ) -> AnyCharacterResponse:
-    """Désigne le personnage joué à la table (09-I4)."""
+    """Désigne le personnage joué à la table."""
     character = await container.character_service.play(account, character_id)
     return character_response(character, account)
 
@@ -101,7 +101,7 @@ async def play_character(
 async def awaken_character(
     character_id: UUID, container: ContainerDep, account: CurrentAccount
 ) -> AnyCharacterResponse:
-    """Déclenche l'éveil du personnage (04a-I5). Réservé au MJ, sans indice pour un joueur."""
+    """Déclenche l'éveil du personnage. Réservé au MJ, sans indice pour un joueur."""
     character = await container.awakening_service.awaken(account, character_id)
     return character_response(character, account)
 
@@ -113,7 +113,7 @@ async def update_character_field(
     container: ContainerDep,
     account: CurrentAccount,
 ) -> AnyCharacterResponse:
-    """Modifie l'avantage surnaturel ou un total d'expérience (05-I10, RM-017)."""
+    """Modifie l'avantage surnaturel ou un total d'expérience."""
     character = await container.character_service.set_character_field(
         account, character_id, payload.field, payload.value, payload.expected
     )
@@ -128,7 +128,7 @@ async def update_character_field(
 async def add_form(
     character_id: UUID, payload: FormRequest, container: ContainerDep, account: CurrentAccount
 ) -> AnyCharacterResponse:
-    """Ajoute une forme, copie de la forme principale (05-F2)."""
+    """Ajoute une forme, copie de la forme principale."""
     character = await container.character_service.add_form(account, character_id, payload.form_name)
     return character_response(character, account)
 
@@ -137,7 +137,7 @@ async def add_form(
 async def update_sheet_field(
     sheet_id: UUID, payload: FieldUpdateRequest, container: ContainerDep, account: CurrentAccount
 ) -> AnyCharacterResponse:
-    """Modifie un champ d'une forme, enregistré seul et aussitôt (US-009 · CA1)."""
+    """Modifie un champ d'une forme, enregistré seul et aussitôt."""
     character = await container.character_service.set_sheet_field(
         account, sheet_id, payload.field, payload.value, payload.expected
     )
@@ -148,7 +148,7 @@ async def update_sheet_field(
 async def delete_form(
     sheet_id: UUID, container: ContainerDep, account: CurrentAccount
 ) -> AnyCharacterResponse:
-    """Supprime une forme alternative (05-F3)."""
+    """Supprime une forme alternative."""
     character = await container.character_service.delete_form(account, sheet_id)
     return character_response(character, account)
 
@@ -157,7 +157,7 @@ async def delete_form(
 async def change_wounds(
     sheet_id: UUID, payload: WoundRequest, container: ContainerDep, account: CurrentAccount
 ) -> AnyCharacterResponse:
-    """Ajoute, soigne ou aggrave une blessure (05-I4, RM-008, RM-011)."""
+    """Ajoute, soigne ou aggrave une blessure."""
     character = await container.character_service.change_wounds(
         account, sheet_id, payload.action, payload.wound, payload.expected
     )

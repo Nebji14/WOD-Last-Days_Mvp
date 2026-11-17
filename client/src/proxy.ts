@@ -2,10 +2,9 @@
  * Proxy Next.js.
  *
  * 1. Pose une Content-Security-Policy stricte, avec un nonce renouvelé à chaque
- *    requête. Les pages sont donc rendues dynamiquement.
- * 2. Sert l'accès dédié du MJ (US-023, décision T-4) : le chemin réservé est
- *    réécrit vers le segment interne, et ce segment répond 404 s'il est demandé
- *    directement.
+ *    requête ; les pages sont donc rendues dynamiquement.
+ * 2. Sert la page secrète du MJ : son chemin est réécrit vers le segment
+ *    interne, qui répond 404 s'il est demandé directement.
  */
 import { type NextRequest, NextResponse } from "next/server";
 

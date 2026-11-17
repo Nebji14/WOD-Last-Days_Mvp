@@ -1,7 +1,7 @@
 """Socle commun des cas d'usage sur les personnages : droits, lecture, diffusion.
 
 Tout cas d'usage suit le même déroulé : charger le personnage, vérifier le droit
-de l'acteur (CDC 8.3), appliquer le changement, puis relire le personnage et
+de l'acteur, appliquer le changement, puis relire le personnage et
 prévenir en temps réel ceux qui peuvent le voir.
 """
 
@@ -42,7 +42,7 @@ def not_found() -> AppError:
 
 
 def rule_violation(rule: str, subject: str | None = None) -> AppError:
-    """Refus d'une saisie contraire à une règle métier (US-009 · CA3, 05-E2)."""
+    """Refus d'une saisie contraire à une règle métier."""
     detail = {"rule": rule} | ({"field": subject} if subject else {})
     return AppError(
         ErrorCode.RULE_VIOLATION,
@@ -55,7 +55,7 @@ def rule_violation(rule: str, subject: str | None = None) -> AppError:
 def require_player_character(character: Character, subject: str) -> None:
     """Refuse sur un PNJ ce qui n'appartient qu'aux personnages joueurs.
 
-    Un PNJ n'a ni expérience, ni tactiques, ni formes, ni éveil (07-D2, D3, D6).
+    Un PNJ n'a ni expérience, ni tactiques, ni formes, ni éveil.
 
     Raises:
         AppError: ``rule_violation`` avec la règle ``npc_feature``.
@@ -65,7 +65,7 @@ def require_player_character(character: Character, subject: str) -> None:
 
 
 def edit_conflict() -> AppError:
-    """La valeur a changé entre-temps : rien n'est écrasé (CDC 12.3, 05-E3)."""
+    """La valeur a changé entre-temps : rien n'est écrasé."""
     return AppError(
         ErrorCode.EDIT_CONFLICT,
         "Cette valeur vient d'être modifiée par quelqu'un d'autre.",
@@ -97,7 +97,7 @@ class CharacterAccess:
         self._gm_id: UUID | None = None
 
     async def readable(self, actor: Account, character_id: UUID) -> Character:
-        """Retourne le personnage si ``actor`` peut le consulter (US-008, US-026).
+        """Retourne le personnage si ``actor`` peut le consulter.
 
         Raises:
             AppError: ``not_found`` s'il n'existe pas ou n'est pas accessible.
@@ -108,7 +108,7 @@ class CharacterAccess:
         return character
 
     async def editable(self, actor: Account, character_id: UUID | None) -> Character:
-        """Retourne le personnage si ``actor`` peut le modifier (US-009, US-027).
+        """Retourne le personnage si ``actor`` peut le modifier.
 
         Raises:
             AppError: ``not_found`` s'il n'existe pas ou n'est pas accessible.
@@ -152,7 +152,7 @@ class CharacterAccess:
         return set() if self._gm_id is None else {self._gm_id}
 
     async def notify(self, character_id: UUID, owner_id: UUID | None, seat_affected: bool) -> None:
-        """Diffuse le changement, et l'état de la table si un siège l'affiche (US-009 · CA1).
+        """Diffuse le changement, et l'état de la table si un siège l'affiche.
 
         Un PNJ n'a pas de propriétaire : seul le MJ est prévenu.
         """

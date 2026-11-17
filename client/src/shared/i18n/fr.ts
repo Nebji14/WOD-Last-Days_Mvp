@@ -2,7 +2,7 @@
  * Libellés français de l'interface.
  *
  * Aucun texte n'est écrit en dur dans les composants : ils passent tous par ce
- * fichier, ce qui prépare la traduction anglaise (CDC 6.1).
+ * fichier, ce qui prépare la traduction anglaise.
  */
 export const fr = {
   app: {

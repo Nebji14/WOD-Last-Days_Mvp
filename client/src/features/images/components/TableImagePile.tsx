@@ -1,13 +1,11 @@
 "use client";
 
 /**
- * [Pile d'images du MJ (sur la table)] (03, décision du 2026-11-16).
+ * Pile des images posées sur la table.
  *
- * Tout à gauche du tapis, pour ne jamais gêner les dés : miniatures à bord
- * blanc, posées en éventail (−10°, +7°, −2°), la dernière posée au-dessus, et
- * [Compteur d'images]. Un clic ouvre la galerie de toutes les images posées
- * (03-I5) : consultation pour les joueurs, retrait de la table pour le MJ
- * (03-MJ-I3).
+ * Tout à gauche du tapis, pour ne pas gêner les dés : miniatures à bord blanc
+ * posées en éventail, la dernière au-dessus, avec un compteur. Un clic ouvre la
+ * galerie de toutes les images posées ; le MJ peut y retirer une image.
  */
 import { useEffect, useRef, useState } from "react";
 

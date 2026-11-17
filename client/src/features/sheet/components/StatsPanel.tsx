@@ -1,13 +1,12 @@
 "use client";
 
 /**
- * [Panneau — Caractéristiques] du recto (05a).
+ * Panneau « Caractéristiques » du recto.
  *
- * Deux colonnes (RM-005) : BASE, calculée par le serveur et jamais stockée, et
- * EFFECTIVE, saisie librement et seule conservée. Modifier un attribut recalcule
- * la base sans toucher à l'effective. La protection globale se saisit à la
- * main, sans aucun calcul (RM-024). PNJ simplifié : aucune base calculée,
- * colonne BASE à « — » (RM-022).
+ * La colonne BASE est calculée par le serveur et jamais stockée ; la colonne
+ * EFFECTIVE est saisie et seule conservée. Modifier un attribut recalcule la
+ * base sans toucher à l'effective. La protection globale se saisit à la main.
+ * Un PNJ simplifié n'a pas de base : la colonne affiche « — ».
  */
 import { setSheetField } from "@/features/characters/api";
 import { isSimplifiedNpc } from "@/features/characters/model";

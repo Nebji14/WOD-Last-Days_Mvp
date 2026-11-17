@@ -1,17 +1,13 @@
 "use client";
 
 /**
- * Panneaux de listes du verso (05b) : atouts, handicaps, pouvoirs, armes,
- * armures et objets.
+ * Listes du verso : atouts, handicaps, pouvoirs, armes, armures et objets.
  *
- * Un même composant sert les six listes ; chaque type déclare ses colonnes
- * (RM-014 pour une arme). « + Ajouter » ouvre une ligne de saisie dans les deux
- * modes : créer ne demande pas de passer en modification. ✎ modifie sur place
- * et ✕ supprime après confirmation (05-I7, T1) : à tout moment pour
- * l'équipement (armes, armures, objets), qui change en cours de partie ; en
- * mode modification seulement pour les atouts, handicaps et pouvoirs, qui ne
- * progressent qu'avec l'accord du MJ.
- * Liste vide : « Aucun … pour l'instant. » (05-E1).
+ * Un même composant sert les six listes ; chaque type déclare ses colonnes.
+ * « + Ajouter » fonctionne dans les deux modes. ✎ et ✕ sont disponibles à tout
+ * moment pour l'équipement, qui change en cours de partie, et seulement en mode
+ * modification pour les atouts, handicaps et pouvoirs, qui ne progressent
+ * qu'avec l'accord du MJ.
  */
 import { type FormEvent, useState } from "react";
 

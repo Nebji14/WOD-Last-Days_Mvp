@@ -1,6 +1,6 @@
-"""Routes de l'outil PNJ du MJ (écran 04c) et des données propres au PNJ (écran 07).
+"""Routes de l'outil PNJ du MJ et des données propres au PNJ.
 
-Réservées au MJ (CDC 8.3). La feuille d'un PNJ (identité, santé, listes…)
+Réservées au MJ. La feuille d'un PNJ (identité, santé, listes…)
 passe par les routes des fiches, qui appliquent les mêmes droits.
 """
 
@@ -28,7 +28,7 @@ router = APIRouter(prefix="/api", tags=["npcs"])
 
 @router.get("/npcs")
 async def get_directory(container: ContainerDep, _gm: CurrentGm) -> NpcDirectoryResponse:
-    """Catégories et liste de tous les PNJ (US-040 · CA1, CA4)."""
+    """Catégories et liste de tous les PNJ."""
     return NpcDirectoryResponse.from_directory(await container.npc_service.directory())
 
 
@@ -36,7 +36,7 @@ async def get_directory(container: ContainerDep, _gm: CurrentGm) -> NpcDirectory
 async def create_npc(
     payload: CreateNpcRequest, container: ContainerDep, gm: CurrentGm
 ) -> AnyCharacterResponse:
-    """Crée une feuille de PNJ vierge du modèle choisi (US-039 · CA1, RM-021)."""
+    """Crée une feuille de PNJ vierge du modèle choisi."""
     character = await container.npc_service.create(payload.model, payload.category_id)
     return character_response(character, gm)
 
@@ -45,7 +45,7 @@ async def create_npc(
 async def set_npc_field(
     character_id: UUID, payload: NpcFieldRequest, container: ContainerDep, gm: CurrentGm
 ) -> AnyCharacterResponse:
-    """Modifie la catégorie, les notes intégrées ou Puissance / Finesse / Résilience (US-042)."""
+    """Modifie la catégorie, les notes intégrées ou Puissance / Finesse / Résilience."""
     character = await container.npc_service.set_field(
         gm, character_id, payload.field, payload.value, payload.expected
     )
@@ -54,7 +54,7 @@ async def set_npc_field(
 
 @router.delete("/npcs/{character_id}", status_code=_NO_CONTENT, dependencies=[SheetWrite])
 async def delete_npc(character_id: UUID, container: ContainerDep, gm: CurrentGm) -> Response:
-    """Supprime définitivement la feuille du PNJ (US-043)."""
+    """Supprime définitivement la feuille du PNJ."""
     await container.npc_service.delete(gm, character_id)
     return Response(status_code=_NO_CONTENT)
 
@@ -63,7 +63,7 @@ async def delete_npc(character_id: UUID, container: ContainerDep, gm: CurrentGm)
 async def create_category(
     payload: CategoryRequest, container: ContainerDep, _gm: CurrentGm
 ) -> CreatedResponse:
-    """Crée une catégorie, à la racine ou sous une catégorie (04c-I2)."""
+    """Crée une catégorie, à la racine ou sous une catégorie."""
     category_id = await container.npc_service.create_category(payload.name, payload.parent_id)
     return CreatedResponse(id=category_id)
 
@@ -72,7 +72,7 @@ async def create_category(
 async def rename_category(
     category_id: UUID, payload: CategoryRenameRequest, container: ContainerDep, _gm: CurrentGm
 ) -> Response:
-    """Renomme une catégorie (04c-I2)."""
+    """Renomme une catégorie."""
     await container.npc_service.rename_category(category_id, payload.name)
     return Response(status_code=_NO_CONTENT)
 
@@ -81,13 +81,13 @@ async def rename_category(
 async def move_category(
     category_id: UUID, payload: MoveCategoryRequest, container: ContainerDep, _gm: CurrentGm
 ) -> Response:
-    """Range une catégorie sous une autre ; refusé s'il créerait un cycle (C07)."""
+    """Range une catégorie sous une autre ; refusé s'il créerait un cycle."""
     await container.npc_service.move_category(category_id, payload.parent_id)
     return Response(status_code=_NO_CONTENT)
 
 
 @router.delete("/npc-categories/{category_id}", status_code=_NO_CONTENT)
 async def delete_category(category_id: UUID, container: ContainerDep, _gm: CurrentGm) -> Response:
-    """Supprime une catégorie ; ses PNJ et sous-catégories remontent au parent (Q04c-2)."""
+    """Supprime une catégorie ; ses PNJ et sous-catégories remontent au parent."""
     await container.npc_service.delete_category(category_id)
     return Response(status_code=_NO_CONTENT)

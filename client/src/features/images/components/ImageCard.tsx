@@ -1,12 +1,12 @@
 "use client";
 
 /**
- * Carte « Image — … » de la grille (04b) : vignette, nom, [Badge — Sur la table].
+ * Vignette d'une image de la bibliothèque, avec son nom et le badge
+ * « Sur la table » le cas échéant.
  *
- * Au survol ou au clavier : voile + [Afficher à la table], [Renommer],
- * [Supprimer de la bibliothèque] (04b-I2). Un clic sur la vignette ouvre
- * l'aperçu sans rien montrer à la table. La carte se glisse sur un dossier
- * pour l'y ranger (04b-I10).
+ * Au survol : « Afficher à la table », « Renommer », « Supprimer ». Un clic sur
+ * la vignette ouvre un aperçu, sans rien montrer à la table. La carte se glisse
+ * sur un dossier pour l'y ranger.
  */
 import { labels } from "@/shared/i18n";
 import { InlineName } from "@/shared/ui/InlineName";
@@ -21,7 +21,7 @@ const OVERLAY_BUTTON =
 
 interface ImageCardProps {
   readonly image: LibraryImage;
-  /** Chemin du dossier, affiché sous le nom dans les résultats de recherche (04b-I8). */
+  /** Chemin du dossier, affiché sous le nom dans les résultats de recherche. */
   readonly path?: string;
   readonly renaming: boolean;
   readonly onPreview: () => void;

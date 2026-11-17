@@ -1,9 +1,9 @@
-"""Déclenchement de l'éveil d'un personnage par le MJ (04a-I5, notes 05 ÉVEIL).
+"""Déclenchement de l'éveil d'un personnage par le MJ.
 
 L'éveil fait passer le plafond des attributs du personnage de 5 à 10. Il est
 secret : un joueur qui appelle cette action reçoit la même réponse que pour un
 personnage inexistant, sans indice sur la fonctionnalité. Il n'est pas
-réversible au MVP (Q05-13) et le joueur n'est pas prévenu (Q05-14) : il le
+réversible au MVP et le joueur n'est pas prévenu : il le
 découvre sur sa fiche, mise à jour en temps réel.
 """
 

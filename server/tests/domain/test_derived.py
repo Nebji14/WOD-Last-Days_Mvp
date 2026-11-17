@@ -1,4 +1,4 @@
-"""Valeurs de base (RM-006, RM-007, RM-010) et découpage des spécialités (05-I9)."""
+"""Valeurs de base et découpage des spécialités."""
 
 from app.domain.derived import base_values
 from app.domain.traits import (

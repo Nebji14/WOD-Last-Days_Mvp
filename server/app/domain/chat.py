@@ -1,4 +1,4 @@
-"""Règles métier du chat général (US-013, US-029, US-030).
+"""Règles métier du chat général.
 
 Module pur : aucun accès réseau ni base de données.
 """
@@ -18,12 +18,12 @@ class ChatMessage:
 
     Attributs:
         position: rang d'envoi, croissant ; fixe l'ordre d'affichage.
-        author_name: nom affiché de l'auteur (Q03-6 : nom du joueur).
+        author_name: nom affiché du joueur (et non celui de son personnage).
         body: texte du message, ``None`` une fois le message supprimé.
         edited_at: date de la dernière modification, ``None`` si le message
-            n'a jamais été modifié (US-030 · CA4).
+            n'a jamais été modifié.
         deleted_by_role: rôle de qui a supprimé le message, ``None`` s'il ne
-            l'est pas. Détermine la mention laissée à sa place (US-030 · CA5).
+            l'est pas. Détermine la mention laissée à sa place.
     """
 
     id: UUID
@@ -45,7 +45,7 @@ class ChatMessage:
 def can_moderate(actor: Account, message: ChatMessage) -> bool:
     """Indique si ``actor`` peut modifier ou supprimer ``message``.
 
-    Un joueur n'agit que sur ses propres messages (US-013 · CA6 à CA8) ; le MJ
-    agit sur tous (US-030 · CA1, CA2).
+    Un joueur n'agit que sur ses propres messages ; le MJ
+    agit sur tous.
     """
     return actor.role is Role.GM or message.author_id == actor.id

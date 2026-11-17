@@ -14,7 +14,7 @@ _MAX_PASSWORD_INPUT = 256
 
 
 class RegisterRequest(BaseModel):
-    """Demande d'inscription d'un joueur (US-001, écran 02b)."""
+    """Demande d'inscription d'un joueur."""
 
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=False)
 
@@ -24,7 +24,7 @@ class RegisterRequest(BaseModel):
 
 
 class LoginRequest(BaseModel):
-    """Demande de connexion par nom d'utilisateur et mot de passe (US-002, US-023)."""
+    """Demande de connexion par nom d'utilisateur et mot de passe."""
 
     model_config = ConfigDict(extra="forbid")
 

@@ -1,17 +1,15 @@
 "use client";
 
 /**
- * Disposition des deux faces de jeu de la fiche.
+ * Disposition des faces RECTO et VERSO de la fiche.
  *
- * RECTO (05a) : identité, attributs, moralité, avantage surnaturel, santé,
- * volonté, caractéristiques, puis compétences en pleine largeur.
- * VERSO (05b) : listes, tactiques et expérience à gauche ; armes, armures,
- * objets, description et récit à droite.
+ * Recto : identité, attributs, moralité, avantage surnaturel, santé, volonté,
+ * caractéristiques, puis compétences. Verso : listes, tactiques et expérience à
+ * gauche ; équipement et description à droite.
  *
- * Feuille de PNJ (07) : recto simplifié = caractéristiques simplifiées et notes
- * du PNJ à la place des attributs et compétences (D4) ; recto complet = celui
- * de 05a, notes du PNJ sous les compétences (D5) ; verso sans tactiques ni
- * expérience, avec « Supprimer ce PNJ » en mode modification (D6, US-043).
+ * Pour un PNJ simplifié, Puissance / Finesse / Résilience et les notes du PNJ
+ * remplacent attributs et compétences ; un PNJ complet garde le recto normal
+ * avec ses notes en dessous. Le verso d'un PNJ n'a ni tactiques ni expérience.
  */
 import { isSimplifiedNpc } from "@/features/characters/model";
 

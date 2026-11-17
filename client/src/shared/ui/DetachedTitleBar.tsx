@@ -1,7 +1,6 @@
 /**
- * [Barre de titre] des fenêtres détachées : titre, sous-titre et
- * [Bouton — Fermer], qui ferme la fenêtre (04a-I4, 09-I5). Même barre pour le
- * profil et les outils du MJ.
+ * Barre de titre des fenêtres détachées (profil, outils du MJ) : titre,
+ * sous-titre et bouton qui ferme la fenêtre.
  */
 
 interface DetachedTitleBarProps {

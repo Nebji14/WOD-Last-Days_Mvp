@@ -1,18 +1,14 @@
 "use client";
 
 /**
- * Ligne de message du chat ([Historique des messages], 08b).
+ * Ligne de message du chat.
  *
- * - Nom du MJ en cuivre, nom d'un joueur en or (RÈGLES DU CHAT, 03-MJ-I4).
- * - Message modifié : mention « (modifié) » (US-030 · CA4).
- * - Message supprimé pendant que le chat est affiché : une trace prend sa place
- *   pendant {@link DELETED_TRACE_MS} ms, puis disparaît pour ne pas encombrer
- *   le chat (US-030 · CA5, ajusté par le développeur le 2026-11-17). Un message
- *   déjà supprimé au chargement de l'historique n'est pas affiché.
- * - Actions « Modifier » et « Supprimer » au survol ou au clavier : sur ses
- *   propres messages pour un joueur, sur tous pour le MJ (US-013 · CA6 à CA8,
- *   US-030 · CA1, CA2). Le serveur revérifie ce droit.
- * - La suppression demande une confirmation dans une fenêtre modale (règle T1).
+ * - Nom du MJ en cuivre, nom d'un joueur en or ; mention « (modifié) » si besoin.
+ * - Un message supprimé sous les yeux du lecteur laisse une trace pendant
+ *   {@link DELETED_TRACE_MS} ms, puis disparaît pour ne pas encombrer le chat.
+ *   Un message déjà supprimé au chargement n'est pas affiché.
+ * - « Modifier » et « Supprimer » apparaissent au survol : sur ses propres
+ *   messages pour un joueur, sur tous pour le MJ. Le serveur revérifie ce droit.
  */
 import { type FormEvent, useEffect, useState } from "react";
 

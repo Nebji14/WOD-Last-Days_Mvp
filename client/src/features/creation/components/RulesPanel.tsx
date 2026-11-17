@@ -1,9 +1,9 @@
 "use client";
 
 /**
- * [Panneau — Règles et aperçu] (06, US-007 · CA4) : règles de l'étape en
- * cours et valeurs de base recalculées à chaque point (RM-006, RM-007,
- * RM-010). La Défense n'apparaît qu'une fois Sports réparti (06-É3).
+ * Panneau latéral de la création : règles de l'étape en cours et aperçu des
+ * valeurs de base, recalculées à chaque point. La Défense n'apparaît qu'une
+ * fois les Sports répartis, car elle en dépend.
  */
 import { labels } from "@/shared/i18n";
 

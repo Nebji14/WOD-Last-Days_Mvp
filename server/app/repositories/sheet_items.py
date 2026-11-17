@@ -79,7 +79,7 @@ class PgSheetItemRepository:
         return character_id
 
     async def replace_specialties(self, sheet_id: UUID, skill: str, labels: Sequence[str]) -> None:
-        """Remplace les spécialités d'une compétence (05-I9). Une liste vide les supprime."""
+        """Remplace les spécialités d'une compétence. Une liste vide les supprime."""
         async with self._pool.acquire() as connection, connection.transaction():
             await connection.execute(
                 "delete from sheet_specialty where sheet_id = $1 and skill = $2", sheet_id, skill
@@ -131,7 +131,7 @@ class PgSheetItemRepository:
         await self._pool.execute("delete from sheet_entry where id = $1", entry_id)
 
     async def list_tactics(self) -> list[Tactic]:
-        """Retourne toutes les tactiques existantes, pour en rattacher une à une feuille (Q05-3)."""
+        """Retourne toutes les tactiques existantes, pour en rattacher une à une feuille."""
         rows = await self._pool.fetch(
             "select id, name, description from tactic order by lower(name), created_at"
         )
@@ -191,7 +191,7 @@ class PgSheetItemRepository:
         return [row["character_id"] for row in rows]
 
     async def unlink_tactic(self, sheet_id: UUID, tactic_id: UUID) -> None:
-        """Détache une tactique de la feuille ; la supprime si plus aucune ne la connaît (C06)."""
+        """Détache une tactique de la feuille ; la supprime si plus aucune ne la connaît."""
         async with self._pool.acquire() as connection, connection.transaction():
             await connection.execute(
                 "delete from sheet_tactic where sheet_id = $1 and tactic_id = $2",

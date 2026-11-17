@@ -1,4 +1,4 @@
-"""Outil Joueurs du MJ (04a) : liste des joueurs (US-025) et éveil (04a-I5)."""
+"""Outil Joueurs du MJ : liste des joueurs et éveil."""
 
 from uuid import uuid4
 
@@ -6,7 +6,7 @@ from tests.api.helpers import error_code, game_master, player
 from tests.api.test_characters import create, patch_sheet
 from tests.conftest import TestContext
 
-# --- Liste des joueurs (US-025) ---------------------------------------------------------
+# --- Liste des joueurs ---------------------------------------------------------
 
 
 def test_gm_sees_every_player_with_or_without_character(ctx: TestContext) -> None:
@@ -37,7 +37,7 @@ def test_player_list_is_reserved_to_the_gm(ctx: TestContext) -> None:
     assert error_code(response) == "forbidden"
 
 
-# --- Éveil (04a-I5, notes 05 ÉVEIL) -----------------------------------------------------
+# --- Éveil -------------------------------------------------------------------------
 
 
 def test_gm_awakens_a_character_and_its_attributes_can_reach_ten(ctx: TestContext) -> None:

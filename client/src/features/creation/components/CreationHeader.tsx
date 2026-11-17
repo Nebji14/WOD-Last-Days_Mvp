@@ -1,8 +1,8 @@
 "use client";
 
 /**
- * Barre de titre de la création : titre, joueur et étape, [Bouton — Fermer].
- * Une création entamée n'est abandonnée qu'après confirmation (Q06-1).
+ * Barre de titre de la création : titre, joueur, étape et bouton Fermer.
+ * Une création entamée n'est abandonnée qu'après confirmation.
  */
 import { useState } from "react";
 

@@ -1,6 +1,5 @@
 /**
- * Libellés français de la fiche de personnage, de la création et du profil
- * (écrans 05, 06 et 09).
+ * Libellés français de la fiche de personnage.
  */
 export const frSheet = {
   categories: { mental: "Mentaux", physical: "Physiques", social: "Sociaux" },

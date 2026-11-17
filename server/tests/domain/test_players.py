@@ -1,4 +1,4 @@
-"""Ordre de la liste des joueurs dans l'outil Joueurs du MJ (Q04a-2)."""
+"""Ordre de la liste des joueurs dans l'outil Joueurs du MJ."""
 
 from uuid import uuid4
 

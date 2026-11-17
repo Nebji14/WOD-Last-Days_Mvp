@@ -1,10 +1,9 @@
 /**
- * [Panneau — Détail du joueur sélectionné] de l'outil Joueurs (04a, US-025 · CA3).
+ * Détail du joueur sélectionné dans l'outil Joueurs.
  *
- * Données du compte, puis un bloc par personnage : aperçu (siège),
- * [Bouton — Consulter la fiche] (04a-I2, US-026), [Bouton — Modifier la fiche]
- * (04a-I3, US-027) et bloc Éveil. Joueur sans personnage : aucun bouton de
- * fiche, aucun bloc Éveil. Les notes du joueur se lisent depuis la fiche (Q04a-1).
+ * Données du compte, puis pour chaque personnage : aperçu, « Consulter la
+ * fiche », « Modifier la fiche » et bloc Éveil. Les notes du joueur se lisent
+ * depuis sa fiche.
  */
 import { CharacterPreview } from "@/features/characters/components/CharacterPreview";
 import type { Character } from "@/features/characters/model";

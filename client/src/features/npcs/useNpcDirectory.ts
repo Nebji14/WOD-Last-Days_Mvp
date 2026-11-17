@@ -1,11 +1,11 @@
 "use client";
 
 /**
- * État de l'outil PNJ du MJ (écran 04c).
+ * État de l'outil PNJ du MJ.
  *
  * La liste se relit à chaque changement signalé par le serveur : PNJ créé,
- * modifié depuis sa fiche, supprimé, ou catégorie changée (≤ 1 s, CDC 12.3).
- * Sans session, la fenêtre se ferme (T3).
+ * modifié depuis sa fiche ou supprimé, catégorie changée. Sans session, la
+ * fenêtre se ferme.
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 

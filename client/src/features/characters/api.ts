@@ -1,5 +1,5 @@
 /**
- * Appels API des personnages et de leurs fiches (US-007 à US-010, US-026, US-027).
+ * Appels API des personnages et de leurs fiches.
  *
  * Chaque écriture renvoie le personnage à jour, que l'appelant affiche tel quel.
  */
@@ -27,7 +27,7 @@ function parseCharacters(data: unknown): Character[] {
   throw new ApiError(502, "internal_error");
 }
 
-/** Mes personnages, ou ceux d'un joueur pour le MJ (US-026 · CA1). */
+/** Mes personnages, ou ceux d'un joueur pour le MJ. */
 export function fetchCharacters(ownerId?: string): Promise<Character[]> {
   const query = ownerId === undefined ? "" : `?owner=${ownerId}`;
   return apiRequest(`/api/characters${query}`, { parse: parseCharacters });
@@ -47,31 +47,31 @@ export interface CreationPayload {
   readonly effective: Readonly<Record<string, number>>;
 }
 
-/** Crée un personnage depuis l'assistant (US-007). */
+/** Crée un personnage depuis l'assistant. */
 export function createCharacter(payload: CreationPayload): Promise<Character> {
   return write("POST", "/api/characters", payload);
 }
 
-/** Supprime définitivement un personnage (US-010). */
+/** Supprime définitivement un personnage. */
 export function deleteCharacter(characterId: string): Promise<void> {
   return apiRequest(`/api/characters/${characterId}`, { method: "DELETE" });
 }
 
-/** Désigne le personnage joué à la table (09-I4). */
+/** Désigne le personnage joué à la table. */
 export function playCharacter(characterId: string): Promise<Character> {
   return write("POST", `/api/characters/${characterId}/play`);
 }
 
-/** Déclenche l'éveil d'un personnage (04a-I5). Réservé au MJ, refusé par le serveur sinon. */
+/** Déclenche l'éveil d'un personnage. Réservé au MJ, refusé par le serveur sinon. */
 export function awakenCharacter(characterId: string): Promise<Character> {
   return write("POST", `/api/characters/${characterId}/awaken`);
 }
 
 /**
- * Modifie un champ, enregistré seul et aussitôt (US-009 · CA1).
+ * Modifie un champ, enregistré seul et aussitôt.
  *
  * @param expected valeur affichée avant la saisie : le serveur refuse l'écriture
- *   si elle a changé entre-temps (05-E3).
+ *   si elle a changé entre-temps.
  */
 export function setSheetField(
   sheetId: string,
@@ -93,7 +93,7 @@ export function setCharacterField(
 
 export type WoundSymbol = "*" | "X" | "/";
 
-/** Ajoute, soigne ou aggrave une blessure (05-I4, RM-008). */
+/** Ajoute, soigne ou aggrave une blessure. */
 export function changeWounds(
   sheetId: string,
   action: "add" | "heal" | "worsen",
@@ -111,7 +111,7 @@ export function deleteForm(sheetId: string): Promise<Character> {
   return write("DELETE", `/api/sheets/${sheetId}`);
 }
 
-/** Remplace les spécialités d'une compétence ; un texte vide les supprime (05-I9). */
+/** Remplace les spécialités d'une compétence ; un texte vide les supprime. */
 export function setSpecialties(sheetId: string, skill: string, text: string): Promise<Character> {
   return write("PUT", `/api/sheets/${sheetId}/specialties/${skill}`, { text });
 }
@@ -163,7 +163,7 @@ function parseTactics(data: unknown): Tactic[] {
   throw new ApiError(502, "internal_error");
 }
 
-/** Tactiques existantes, pour en rattacher une à la feuille (Q05-3). */
+/** Tactiques existantes, pour en rattacher une à la feuille. */
 export function fetchTactics(): Promise<Tactic[]> {
   return apiRequest("/api/tactics", { parse: parseTactics });
 }
@@ -193,7 +193,7 @@ export function removeTactic(sheetId: string, tacticId: string): Promise<Charact
   return write("DELETE", `/api/sheets/${sheetId}/tactics/${tacticId}`);
 }
 
-/** Enregistre une dépense d'expérience : type, points, justification obligatoire (RM-016). */
+/** Enregistre une dépense d'expérience : type, points, justification obligatoire. */
 export function addExpense(
   characterId: string,
   isTactical: boolean,
@@ -211,7 +211,7 @@ export function deleteExpense(expenseId: string): Promise<Character> {
   return write("DELETE", `/api/xp-expenses/${expenseId}`);
 }
 
-/** Crée une note vide et retourne son identifiant, à sélectionner (05c-N4). */
+/** Crée une note vide et retourne son identifiant, à sélectionner. */
 export function addNote(characterId: string): Promise<{ character: Character; noteId: string }> {
   return apiRequest(`/api/characters/${characterId}/notes`, {
     method: "POST",

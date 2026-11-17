@@ -1,4 +1,4 @@
-/** Libellés français des images : outil du MJ (04b) et images de la table (03-A2, 08a). */
+/** Libellés français des images : outil du MJ et images montrées à la table. */
 export const frImages = {
   imagesTool: {
     windowTitle: "IMAGES",

@@ -1,11 +1,8 @@
 "use client";
 
 /**
- * Fenêtre détachée de l'outil Images du MJ (écran 04b, US-031).
- *
- * Ouverte par [Outil — Images] de la table du MJ : une fenêtre par outil (T2).
- * À gauche la bibliothèque, à droite [Panneau — Sur la table]. Le serveur
- * refuse la bibliothèque à tout autre compte que le MJ.
+ * Fenêtre de l'outil Images du MJ : bibliothèque à gauche, images posées sur la
+ * table à droite. Le serveur refuse la bibliothèque à tout autre compte.
  */
 import { useEffect, useState } from "react";
 

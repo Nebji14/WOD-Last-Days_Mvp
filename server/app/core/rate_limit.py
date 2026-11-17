@@ -1,6 +1,6 @@
 """Limitation de débit en mémoire, par fenêtre glissante.
 
-Suffisant pour une instance unique (10 utilisateurs simultanés, CDC 12.3).
+Suffisant pour une instance unique (10 utilisateurs simultanés au plus).
 Un déploiement sur plusieurs instances demanderait un stockage partagé.
 """
 

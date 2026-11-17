@@ -1,12 +1,11 @@
 "use client";
 
 /**
- * Scène à l'échelle de la fenêtre.
+ * Scène mise à l'échelle de la fenêtre.
  *
- * Les écrans de jeu sont dessinés pour 1440 × 900 (maquette). La scène garde
- * ces proportions : elle est agrandie ou réduite d'un seul bloc pour remplir
- * la fenêtre, et l'espace restant en largeur ou en hauteur lui est ajouté.
- * Son contenu se positionne donc en pixels de maquette.
+ * Les écrans de jeu sont dessinés pour 1440 × 900. La scène garde ces
+ * proportions : elle est agrandie ou réduite d'un bloc pour remplir la fenêtre.
+ * Son contenu se positionne donc en pixels de ce format de référence.
  *
  * L'échelle est appliquée par le DOM et non par un attribut `style` : la
  * politique de sécurité du contenu interdit les styles en ligne.

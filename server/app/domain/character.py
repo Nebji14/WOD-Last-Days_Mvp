@@ -1,11 +1,11 @@
-"""Modèle d'un personnage et de ses feuilles, et droits d'accès (CDC 8.3).
+"""Modèle d'un personnage et de ses feuilles, et droits d'accès.
 
 Un personnage est un personnage joueur (avec propriétaire) ou un PNJ du MJ
-(sans propriétaire, avec un profil de PNJ ; US-039 à US-043).
+(sans propriétaire, avec un profil de PNJ).
 
 Un personnage porte ce qui est commun à toutes ses formes (expérience, notes,
 avantage surnaturel, éveil). Chaque forme est une feuille complète ; la forme
-principale existe toujours (maquette 05, FORMES DU PERSONNAGE).
+principale existe toujours.
 
 Module pur : aucun accès réseau ni base de données.
 """
@@ -20,7 +20,7 @@ from app.domain.npc_profile import NpcProfile
 
 
 class EntryKind(StrEnum):
-    """Type d'un élément de feuille (panneaux du verso, 05b)."""
+    """Type d'un élément de feuille (listes du verso)."""
 
     MERIT = "merit"
     FLAW = "flaw"
@@ -32,7 +32,7 @@ class EntryKind(StrEnum):
 
 @dataclass(frozen=True, slots=True)
 class Entry:
-    """Atout, handicap, pouvoir, objet, arme (RM-014) ou armure.
+    """Atout, handicap, pouvoir, objet, arme ou armure.
 
     Les champs propres à un autre type que ``kind`` valent ``None``.
     """
@@ -55,7 +55,7 @@ class Entry:
 
 @dataclass(frozen=True, slots=True)
 class MoralityNote:
-    """Annotation de moralité, liée au niveau où elle a été acquise (RM-013)."""
+    """Annotation de moralité, liée au niveau où elle a été acquise."""
 
     id: UUID
     level: int
@@ -73,7 +73,7 @@ class Tactic:
 
 @dataclass(frozen=True, slots=True)
 class Expense:
-    """Dépense d'expérience (RM-016)."""
+    """Dépense d'expérience."""
 
     id: UUID
     is_tactical: bool
@@ -84,7 +84,7 @@ class Expense:
 
 @dataclass(frozen=True, slots=True)
 class Note:
-    """Note de la fiche (face NOTES, 05c)."""
+    """Note de la fiche (face NOTES)."""
 
     id: UUID
     title: str
@@ -99,7 +99,7 @@ class Sheet:
     Attributs:
         texts: champs de texte (identité, description, protection globale).
         traits: valeurs des neuf attributs et des vingt-quatre compétences.
-        numbers: valeurs effectives saisies (RM-005), volonté disponible et
+        numbers: valeurs effectives saisies, volonté disponible et
             moralité.
         specialties: spécialités par compétence, dans l'ordre de saisie.
     """
@@ -125,7 +125,7 @@ class Character:
         awakened_at: date de l'éveil, ``None`` s'il n'est pas déclenché. Secret
             du MJ : jamais transmis au joueur avant le déclenchement.
         owner_id: propriétaire du personnage joueur ; ``None`` pour un PNJ.
-        is_played: personnage affiché sur le siège de son propriétaire (Q03-5).
+        is_played: personnage affiché sur le siège de son propriétaire.
         npc: profil du PNJ ; ``None`` pour un personnage joueur.
         sheets: formes du personnage, la principale en premier.
     """
@@ -151,7 +151,7 @@ class Character:
 
     @property
     def is_awakened(self) -> bool:
-        """L'éveil porte le plafond des attributs de 5 à 10 (05, ÉVEIL V2)."""
+        """L'éveil porte le plafond des attributs de 5 à 10."""
         return self.awakened_at is not None
 
     @property
@@ -164,18 +164,18 @@ class Character:
         return next((sheet for sheet in self.sheets if sheet.id == sheet_id), None)
 
     def xp_spent(self, tactical: bool) -> int:
-        """Total des dépenses d'un type d'expérience (RM-015)."""
+        """Total des dépenses d'un type d'expérience."""
         return sum(e.points for e in self.expenses if e.is_tactical is tactical)
 
     def xp_balance(self, tactical: bool) -> int:
-        """Solde disponible : total acquis moins dépenses (RM-017)."""
+        """Solde disponible : total acquis moins dépenses."""
         total = self.xp_tactical_total if tactical else self.xp_general_total
         return total - self.xp_spent(tactical)
 
 
 @dataclass(frozen=True, slots=True)
 class SeatCharacter:
-    """Résumé public du personnage joué, affiché sur un siège (03, Q03-3)."""
+    """Résumé public du personnage joué, affiché sur son siège à la table."""
 
     character_id: UUID
     name: str
@@ -187,19 +187,19 @@ class SeatCharacter:
 
 
 def can_read(actor: Account, owner_id: UUID | None) -> bool:
-    """Le propriétaire et le MJ consultent la fiche (US-008, US-026).
+    """Le propriétaire et le MJ consultent la fiche.
 
     Un joueur n'ouvre jamais la fiche d'un autre joueur, ni celle d'un PNJ
-    (``owner_id`` à ``None``), réservée au MJ (US-041).
+    (``owner_id`` à ``None``), réservée au MJ.
     """
     return actor.role is Role.GM or (owner_id is not None and actor.id == owner_id)
 
 
 def can_edit(actor: Account, owner_id: UUID | None) -> bool:
-    """Le MJ modifie la fiche avec les mêmes possibilités que son propriétaire (US-009, US-027)."""
+    """Le MJ modifie la fiche avec les mêmes possibilités que son propriétaire."""
     return can_read(actor, owner_id)
 
 
 def can_manage_notes(actor: Account, owner_id: UUID | None) -> bool:
-    """Seul le propriétaire crée, modifie et supprime ses notes ; le MJ les lit (05c-N5)."""
+    """Seul le propriétaire crée, modifie et supprime ses notes ; le MJ les lit."""
     return actor.id == owner_id

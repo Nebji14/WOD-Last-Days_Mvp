@@ -1,12 +1,9 @@
-/**
- * Catégories de PNJ (04c) : contenu et compteurs, sous-catégories comprises
- * (Q04c-4). Fonctions pures.
- */
+/** Catégories de PNJ : contenu et compteurs, sous-catégories comprises. */
 import { byName, nodePath, subtreeIds } from "@/shared/tree";
 
 import type { NpcCard, NpcCategory } from "./api";
 
-/** PNJ de la catégorie et de ses sous-catégories ; `null` : tous les PNJ (04c-I1). */
+/** PNJ de la catégorie et de ses sous-catégories ; `null` : tous les PNJ. */
 export function npcsIn(
   npcs: readonly NpcCard[],
   categories: readonly NpcCategory[],

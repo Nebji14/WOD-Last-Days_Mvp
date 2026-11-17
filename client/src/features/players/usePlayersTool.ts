@@ -1,13 +1,12 @@
 "use client";
 
 /**
- * État de l'outil Joueurs du MJ (écran 04a).
+ * État de l'outil Joueurs du MJ.
  *
- * - La liste des joueurs et les personnages du joueur sélectionné se
- *   rechargent à chaque arrivée ou départ autour de la table (statuts ≤ 1 s,
- *   CDC 12.3) et à chaque changement d'un personnage (04a-I5).
- * - Le premier joueur de la liste est sélectionné à l'ouverture (04a-I1).
- * - Sans session, la fenêtre se ferme (T3).
+ * - La liste et les personnages du joueur sélectionné se rechargent à chaque
+ *   arrivée ou départ autour de la table et à chaque changement de personnage.
+ * - Le premier joueur de la liste est sélectionné à l'ouverture.
+ * - Sans session, la fenêtre se ferme.
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 

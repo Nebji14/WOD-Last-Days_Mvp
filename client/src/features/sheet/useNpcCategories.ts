@@ -1,9 +1,9 @@
 "use client";
 
 /**
- * Catégories de PNJ lues par la fiche d'un PNJ (07, D1 et Q04c-1) : chemin de
- * la catégorie dans le titre, liste de choix en mode modification. Rien n'est
- * demandé pour un personnage joueur.
+ * Catégories de PNJ lues par la fiche d'un PNJ : chemin de la catégorie dans le
+ * titre et liste de choix en mode modification. Rien n'est demandé pour un
+ * personnage joueur.
  */
 import { useEffect, useState } from "react";
 

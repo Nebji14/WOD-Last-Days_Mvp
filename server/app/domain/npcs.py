@@ -1,4 +1,4 @@
-"""Règles pures des feuilles de PNJ (US-039 à US-043, RM-021 à RM-023, écran 07).
+"""Règles pures des feuilles de PNJ.
 
 Aucun accès réseau ni base.
 """
@@ -17,12 +17,12 @@ SIMPLIFIED_TRAIT_MIN = 1
 SIMPLIFIED_TRAIT_MAX = 10
 DEFAULT_NPC_NAME = "Nouveau PNJ"
 SIMPLIFIED_TRAITS = ("power", "finesse", "resilience")
-"""Puissance, Finesse, Résilience (RM-022)."""
+"""Puissance, Finesse, Résilience."""
 
 
 @dataclass(frozen=True, slots=True)
 class NpcCategory:
-    """Catégorie de PNJ (C07) : parent facultatif, sans cycle."""
+    """Catégorie de PNJ : parent facultatif, sans cycle."""
 
     id: UUID
     name: str
@@ -31,7 +31,7 @@ class NpcCategory:
 
 @dataclass(frozen=True, slots=True)
 class NpcSummary:
-    """Carte « PNJ — … » de la liste (04c) : nom, modèle, concept et résumé chiffré."""
+    """PNJ tel qu'il apparaît dans la liste : nom, modèle, concept et résumé chiffré."""
 
     id: UUID
     name: str
@@ -42,7 +42,7 @@ class NpcSummary:
 
 
 def check_npc_sheet_field(profile: NpcProfile | None, field: str) -> None:
-    """Refuse les attributs et compétences d'un PNJ simplifié, non renseignés (C08, RM-022).
+    """Refuse les attributs et compétences d'un PNJ simplifié, non renseignés.
 
     Raises:
         FieldRuleError: ``unknown_field`` pour ces champs sur un PNJ simplifié.
@@ -52,10 +52,10 @@ def check_npc_sheet_field(profile: NpcProfile | None, field: str) -> None:
 
 
 def initial_sheet_values(form_name: str) -> dict[str, str | int]:
-    """Feuille vierge d'un PNJ (07-I5) : attributs et compétences au minimum.
+    """Feuille vierge d'un PNJ : attributs et compétences au minimum.
 
     Les valeurs effectives partent des valeurs de base de cette feuille ; le
-    MJ les fixe ensuite librement, santé et volonté comprises (RM-023).
+    MJ les fixe ensuite librement, santé et volonté comprises.
     """
     traits = dict.fromkeys(ATTRIBUTE_NAMES, ATTRIBUTE_MIN) | dict.fromkeys(SKILL_NAMES, SKILL_MIN)
     base = base_values(traits, BASE_SIZE)
@@ -79,7 +79,7 @@ def initial_traits(model: NpcModel) -> dict[str, int | None]:
 
 
 def validate_npc_field(profile: NpcProfile, field: str, value: object) -> str | int:
-    """Contrôle la saisie d'une donnée propre au PNJ (07-I2, I4).
+    """Contrôle la saisie d'une donnée propre au PNJ.
 
     Args:
         profile: données actuelles du PNJ.

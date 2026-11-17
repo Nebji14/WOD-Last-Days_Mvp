@@ -1,8 +1,7 @@
 /**
- * Jauges d'un personnage : piste de santé et points de volonté.
- *
- * Elles servent sur les sièges de la table ([Composant — Siège joueur]) et sur
- * les cartes du profil. La fiche a ses propres jauges, plus grandes.
+ * Jauges compactes d'un personnage : piste de santé et points de volonté.
+ * Elles servent sur les sièges de la table et dans le profil ; la fiche a ses
+ * propres jauges, plus grandes.
  */
 
 const WOUND_STYLE: Record<string, string> = {
@@ -13,9 +12,9 @@ const WOUND_STYLE: Record<string, string> = {
 const EMPTY_BOX = "border-line bg-panel";
 
 interface HealthTrackProps {
-  /** Nombre de cases : santé maximale effective (RM-011). */
+  /** Nombre de cases : santé maximale effective. */
   readonly capacity: number;
-  /** Blessures rangées par gravité : `*`, puis `X`, puis `/` (RM-008, RM-009). */
+  /** Blessures rangées par gravité : `*`, puis `X`, puis `/`. */
   readonly wounds: string;
   readonly label: string;
 }

@@ -13,7 +13,7 @@ import {
   spent,
 } from "./rules";
 
-describe("RM-001 · attributs", () => {
+describe("attributs", () => {
   it("compte le point gratuit comme non dépensé", () => {
     const values = initialTraits("attributes");
     expect(spent("attributes", values, "mental")).toBe(0);
@@ -51,7 +51,7 @@ describe("RM-001 · attributs", () => {
   });
 });
 
-describe("06-I1 · échange de priorités", () => {
+describe("échange de priorités", () => {
   it("échange les priorités et remet à zéro une catégorie dont le budget est dépassé", () => {
     const values = { ...initialTraits("attributes"), intelligence: 4, wits: 3 };
     const change = changePriority("attributes", DEFAULT_PRIORITIES, values, "mental", 3);
@@ -68,14 +68,14 @@ describe("06-I1 · échange de priorités", () => {
   });
 });
 
-describe("RM-002 · alerte", () => {
+describe("alerte 4-5", () => {
   it("signale les attributs à 4 ou 5", () => {
     const values = { ...initialTraits("attributes"), strength: 4, wits: 5, resolve: 3 };
     expect(attributesToDiscuss(values)).toEqual(["wits", "strength"]);
   });
 });
 
-describe("RM-003 · compétences", () => {
+describe("compétences", () => {
   it("part de 0 avec les budgets 11 / 7 / 4", () => {
     const values = initialTraits("skills");
     expect(remaining("skills", DEFAULT_PRIORITIES, values, "mental")).toBe(11);
@@ -84,7 +84,7 @@ describe("RM-003 · compétences", () => {
   });
 });
 
-describe("RM-004 · spécialités", () => {
+describe("spécialités", () => {
   const skills = { ...initialTraits("skills"), firearms: 2, survival: 1 };
 
   it("accepte trois spécialités sur des compétences à 1 point ou plus", () => {
@@ -104,7 +104,7 @@ describe("RM-004 · spécialités", () => {
   });
 });
 
-describe("RM-006, RM-007, RM-010 · valeurs de base", () => {
+describe("valeurs de base", () => {
   it("applique les formules", () => {
     const attributes = {
       ...initialTraits("attributes"),

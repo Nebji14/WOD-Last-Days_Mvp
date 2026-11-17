@@ -1,11 +1,10 @@
 "use client";
 
 /**
- * Formulaire de connexion : écran 02a (accès joueur, US-002) et écran 02c
- * (accès dédié du MJ, US-023).
+ * Formulaire de connexion, pour les joueurs comme pour le MJ.
  *
- * États couverts : E2 identifiants incorrects, E3 envoi en cours, E5 coupure
- * (les valeurs saisies sont conservées pour réessayer), E6 mauvaise page.
+ * Gère les identifiants incorrects, l'envoi en cours, la coupure réseau (les
+ * valeurs saisies sont conservées) et le compte saisi sur la mauvaise page.
  */
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";

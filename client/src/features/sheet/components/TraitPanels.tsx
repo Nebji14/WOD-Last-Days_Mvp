@@ -1,11 +1,11 @@
 "use client";
 
 /**
- * [Panneau — Attributs] et [Panneau — Compétences] du recto (05a).
+ * Panneaux Attributs et Compétences du recto.
  *
  * Attributs : 5 points affichés, 10 pour un personnage éveillé. Avant l'éveil,
- * rien ne laisse deviner les points 6 à 10 (05, ÉVEIL V1 à V4).
- * Compétences : nom, champ de spécialités, points (05-I9).
+ * rien ne laisse deviner qu'on pourra aller au-delà de 5.
+ * Compétences : nom, champ des spécialités et points.
  */
 import { setSheetField, setSpecialties } from "@/features/characters/api";
 import {

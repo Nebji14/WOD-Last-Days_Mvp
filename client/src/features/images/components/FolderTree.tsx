@@ -1,12 +1,11 @@
 "use client";
 
 /**
- * [Arborescence — Dossiers] de la bibliothèque (04b).
+ * Arborescence des dossiers d'images.
  *
- * « Toutes les images » puis les dossiers ; ▸ replié, ▾ déplié ; sous-dossiers
- * en retrait ; nombre d'images à droite. Dossier ouvert : fond cuivré sombre et
- * filet cuivre (04b-I9). Chaque ligne accepte une vignette ou un dossier glissé
- * (04b-I10).
+ * « Toutes les images » puis les dossiers, repliables, avec le nombre d'images.
+ * Le dossier ouvert est mis en évidence. On peut déposer sur une ligne une
+ * vignette ou un autre dossier pour l'y ranger.
  */
 import { type DragEvent, useState } from "react";
 

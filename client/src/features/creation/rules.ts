@@ -1,13 +1,12 @@
 /**
  * Règles de la création de personnage, reflétées côté client pour guider la
- * saisie (écran 06). Le serveur reste seul garant : il refait tous ces
- * contrôles à l'enregistrement.
+ * saisie. Le serveur refait tous ces contrôles à l'enregistrement.
  *
- * RM-001 attributs : 1 point gratuit, puis 5 / 4 / 3 selon la priorité.
- * RM-002 un attribut à 4 ou 5 déclenche une alerte non bloquante.
- * RM-003 compétences : 11 / 7 / 4, classement indépendant des attributs.
- * RM-004 trois spécialités sur des compétences à 1 point ou plus.
- * RM-006, RM-007, RM-010 valeurs de base de l'aperçu.
+ * - Attributs : 1 point gratuit, puis 5 / 4 / 3 selon la priorité.
+ * - Un attribut à 4 ou 5 déclenche une alerte non bloquante.
+ * - Compétences : 11 / 7 / 4, priorités indépendantes de celles des attributs.
+ * - Trois spécialités, sur des compétences à 1 point ou plus.
+ * - Valeurs de base de l'aperçu (vitesse, défense, initiative, santé, volonté).
  */
 import {
   ATTRIBUTE_MAX,
@@ -32,7 +31,7 @@ const ATTRIBUTE_ALERT_THRESHOLD = 4;
 const BASE_SIZE = 5;
 const SPEED_BONUS = 5;
 
-/** Point de départ et plafond d'un trait selon son type (RM-001, RM-003, Q05-2). */
+/** Point de départ et plafond d'un trait selon son type. */
 export const TRAIT_BOUNDS: Readonly<Record<TraitKind, { min: number; max: number }>> = {
   attributes: { min: 1, max: ATTRIBUTE_MAX },
   skills: { min: 0, max: SKILL_MAX },
@@ -83,7 +82,7 @@ export function remaining(
 }
 
 /**
- * Nouvelle valeur d'un trait après un clic sur son n-ième point (06-I2).
+ * Nouvelle valeur d'un trait après un clic sur son n-ième point.
  *
  * Cliquer le point de la valeur actuelle la baisse d'un point. Jamais sous le
  * minimum, jamais au-delà du plafond, et jamais au-delà du budget restant de
@@ -107,13 +106,13 @@ export function clickedValue(
 export interface PriorityChange {
   readonly priorities: Priorities;
   readonly values: Record<string, number>;
-  /** Catégories remises à zéro parce que leur nouveau budget était dépassé (06-I1). */
+  /** Catégories remises à zéro parce que leur nouveau budget était dépassé. */
   readonly trimmed: readonly Category[];
 }
 
 /**
  * Donne une priorité à une catégorie ; celle qui l'avait prend l'ancienne
- * priorité de la première (06-I1). Une catégorie dont le nouveau budget est
+ * priorité de la première. Une catégorie dont le nouveau budget est
  * dépassé est remise à son point de départ, et signalée.
  */
 export function changePriority(
@@ -156,7 +155,7 @@ export function firstIncomplete(
   return null;
 }
 
-/** Attributs à 4 ou 5, à discuter avec le MJ (RM-002). */
+/** Attributs à 4 ou 5, à discuter avec le MJ. */
 export function attributesToDiscuss(values: TraitValues): AttributeName[] {
   return CATEGORIES.flatMap((category) => ATTRIBUTES[category]).filter(
     (name) => (values[name] ?? 0) >= ATTRIBUTE_ALERT_THRESHOLD,
@@ -168,7 +167,7 @@ export interface SpecialtyDraft {
   readonly label: string;
 }
 
-/** Index (à partir de 0) de la première spécialité invalide, ou `null` (RM-004). */
+/** Index (à partir de 0) de la première spécialité invalide, ou `null`. */
 export function firstInvalidSpecialty(
   specialties: readonly SpecialtyDraft[],
   skills: TraitValues,
@@ -186,7 +185,7 @@ export function firstInvalidSpecialty(
 export type BaseValues = Readonly<Record<EffectiveField, number>>;
 
 /**
- * Valeurs de base (RM-006, RM-007, RM-010).
+ * Valeurs de base.
  *
  * @param size Taille retenue : la santé de base en dépend.
  */

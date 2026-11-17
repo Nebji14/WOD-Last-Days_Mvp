@@ -1,9 +1,8 @@
 "use client";
 
 /**
- * Images du MJ sur la table de jeu (03-A2, 03-I5, 08a) : pile à gauche du tapis
- * et image affichée en grand, partie en pause. Les actions du MJ (reposer,
- * retirer) sont revérifiées par le serveur.
+ * Images du MJ sur la table de jeu : pile à gauche du tapis et image affichée
+ * en grand. Les actions du MJ (reposer, retirer) sont revérifiées par le serveur.
  */
 import type { RealtimeClient } from "@/shared/realtime/client";
 

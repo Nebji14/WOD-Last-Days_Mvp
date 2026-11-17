@@ -3,7 +3,7 @@
  *
  * Un envoi est d'abord placé en attente, puis transmis. Si le réseau est
  * coupé, il reste en attente et repart seul au retour de la connexion, sans
- * ressaisie ni doublon (CDC 12.3, 03-E7).
+ * ressaisie ni doublon.
  */
 import { create } from "zustand";
 
@@ -29,7 +29,7 @@ interface ChatState {
   upsert(message: ChatMessage): void;
   /** Recharge les messages les plus récents ; appelé à chaque (re)connexion. */
   loadLatest(): Promise<void>;
-  /** Charge la page qui précède le plus ancien message connu (US-013 · CA1). */
+  /** Charge la page qui précède le plus ancien message connu. */
   loadOlder(): Promise<void>;
   /** Place un message en attente et tente de l'envoyer. */
   send(body: string): void;

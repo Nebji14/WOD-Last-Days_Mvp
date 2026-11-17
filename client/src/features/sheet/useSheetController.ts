@@ -1,15 +1,13 @@
 "use client";
 
 /**
- * État et enregistrements d'une fenêtre de fiche (écrans 05).
+ * État et enregistrements d'une fenêtre de fiche.
  *
  * - La fiche se recharge dès que le serveur signale un changement : une
- *   modification faite par le MJ ou depuis une autre fenêtre apparaît en direct
- *   (US-009 · CA1, 05-E3).
+ *   modification faite ailleurs (par le MJ, une autre fenêtre) apparaît en direct.
  * - Chaque écriture renvoie la fiche à jour. Une saisie refusée laisse la fiche
- *   telle qu'elle est et affiche la règle en cause (05-E2).
- * - En cas de coupure, l'écriture est retentée seule jusqu'à réussir : rien
- *   n'est à ressaisir (05-E4, CDC 12.3).
+ *   telle quelle et affiche la règle en cause.
+ * - En cas de coupure, l'écriture est retentée seule jusqu'à réussir.
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 

@@ -1,14 +1,12 @@
 "use client";
 
 /**
- * Étapes 2 et 3 de la création : [Panneau — Étape Attributs] et son pendant
- * pour les compétences (06-É2, 06-É3).
+ * Étapes « Attributs » et « Compétences » de la création.
  *
- * Trois cartes « Catégorie — … » : [Choix de priorité] (06-I1), [Compteur de
- * points] (vert ✓ si complet, rouge « reste n » sinon, carte incomplète
- * bordée de rouge), puis les traits et leurs points (06-I2). Pour les
+ * Une carte par catégorie : choix de la priorité, compteur de points (✓ si
+ * complet, « reste n » sinon), puis les traits et leurs points. Pour les
  * attributs, le point gratuit est grisé et une valeur de 4 ou 5 affiche une
- * alerte non bloquante (RM-002).
+ * alerte non bloquante.
  */
 import { type Dispatch } from "react";
 

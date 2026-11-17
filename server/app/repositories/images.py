@@ -53,7 +53,7 @@ class PgImageRepository:
         )
 
     async def delete_folder(self, folder_id: UUID, parent_id: UUID | None) -> None:
-        """Supprime un dossier ; ses images et sous-dossiers remontent au parent (Q04b-4)."""
+        """Supprime un dossier ; ses images et sous-dossiers remontent au parent."""
         async with self._pool.acquire() as connection, connection.transaction():
             await connection.execute(
                 "update image set folder_id = $2 where folder_id = $1", folder_id, parent_id
@@ -103,11 +103,11 @@ class PgImageRepository:
         return image_id
 
     async def rename_image(self, image_id: UUID, name: str) -> None:
-        """Renomme une image (04b-I5)."""
+        """Renomme une image."""
         await self._pool.execute("update image set name = $2 where id = $1", image_id, name)
 
     async def move_image(self, image_id: UUID, folder_id: UUID | None) -> None:
-        """Range une image dans un dossier, ou à la racine (04b-I10)."""
+        """Range une image dans un dossier, ou à la racine."""
         await self._pool.execute(
             "update image set folder_id = $2 where id = $1", image_id, folder_id
         )
@@ -129,14 +129,14 @@ class PgImageRepository:
             await connection.execute("update image set is_shown = true where id = $1", image_id)
 
     async def put_down(self) -> UUID | None:
-        """Pose l'image affichée sur la pile (04b-I4). Retourne son identifiant, ou ``None``."""
+        """Pose l'image affichée sur la pile. Retourne son identifiant, ou ``None``."""
         image_id: UUID | None = await self._pool.fetchval(
             "update image set is_shown = false, on_table_at = now() where is_shown returning id"
         )
         return image_id
 
     async def remove_from_table(self, image_id: UUID) -> None:
-        """Retire l'image de la table sans la supprimer (04b-I6, US-031 · CA6)."""
+        """Retire l'image de la table sans la supprimer."""
         await self._pool.execute(
             "update image set on_table_at = null, is_shown = false where id = $1", image_id
         )

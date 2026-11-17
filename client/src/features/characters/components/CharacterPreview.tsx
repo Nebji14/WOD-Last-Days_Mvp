@@ -1,8 +1,6 @@
 /**
- * [Aperçu du personnage (siège)] : le personnage tel qu'il apparaît sur un siège
- * de la table (instance du [Composant — Siège joueur]).
- *
- * Utilisé par les cartes du profil (09) et par l'outil Joueurs du MJ (04a).
+ * Aperçu d'un personnage tel qu'il apparaît sur un siège de la table : avatar,
+ * nom, concept, santé et volonté. Utilisé par le profil et l'outil Joueurs.
  */
 import { type Character, mainSheet } from "@/features/characters/model";
 import { initials } from "@/features/table/seatLayout";

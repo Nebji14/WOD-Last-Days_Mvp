@@ -1,8 +1,8 @@
-"""Bibliothèque d'images du MJ : images et dossiers (US-031, écran 04b).
+"""Bibliothèque d'images du MJ : images et dossiers.
 
 Le droit d'accès (MJ uniquement) est contrôlé par les routes. Chaque
-changement est signalé en temps réel : la pop-up Images et la table se
-relisent (≤ 1 s, CDC 12.3).
+changement est signalé en temps réel : la fenêtre Images et la table se
+relisent.
 """
 
 import logging
@@ -82,7 +82,7 @@ def _invalid_name() -> AppError:
 
 
 class ImageService:
-    """Cas d'usage de la bibliothèque (CRUD des images et des dossiers, T1).
+    """Cas d'usage de la bibliothèque : création, lecture, modification et suppression.
 
     Args:
         store: accès aux données.
@@ -98,13 +98,13 @@ class ImageService:
         self._broadcaster = broadcaster
 
     async def library(self) -> Library:
-        """Retourne toute la bibliothèque (US-031 · CA1)."""
+        """Retourne toute la bibliothèque."""
         images = await self._store.list_images()
         folders = await self._store.list_folders()
         return Library(folders, images, await image_links(self._storage, images))
 
     async def upload(self, filename: str, folder_id: UUID | None, content: bytes) -> Image:
-        """Ajoute une image à la bibliothèque, dans le dossier ouvert (04b-I1).
+        """Ajoute une image à la bibliothèque, dans le dossier ouvert.
 
         Le type est vérifié sur la signature du fichier, le nom du fichier
         stocké est régénéré.
@@ -134,20 +134,20 @@ class ImageService:
         return await self._image(image_id)
 
     async def rename_image(self, image_id: UUID, name: str) -> None:
-        """Renomme une image (04b-I5)."""
+        """Renomme une image."""
         await self._image(image_id)
         await self._store.rename_image(image_id, self._name(name, IMAGE_NAME_MAX))
         await self._broadcaster.images_changed()
 
     async def move_image(self, image_id: UUID, folder_id: UUID | None) -> None:
-        """Range une image dans un dossier, ou à la racine (04b-I10)."""
+        """Range une image dans un dossier, ou à la racine."""
         await self._image(image_id)
         await self._require_folder(folder_id)
         await self._store.move_image(image_id, folder_id)
         await self._broadcaster.images_changed()
 
     async def delete_image(self, image_id: UUID) -> None:
-        """Supprime une image, même posée sur la table : elle quitte aussi la pile (Q04b-2)."""
+        """Supprime une image, même posée sur la table : elle quitte aussi la pile."""
         image = await self._image(image_id)
         await self._store.delete_image(image_id)
         await self._broadcaster.images_changed()
@@ -159,20 +159,20 @@ class ImageService:
             logger.warning("Fichier d'image non supprimé", extra={"image_id": str(image_id)})
 
     async def create_folder(self, name: str, parent_id: UUID | None) -> UUID:
-        """Crée un dossier à la racine ou dans le dossier ouvert (04b-I9)."""
+        """Crée un dossier à la racine ou dans le dossier ouvert."""
         await self._require_folder(parent_id)
         folder_id = await self._store.create_folder(self._name(name, FOLDER_NAME_MAX), parent_id)
         await self._broadcaster.images_changed()
         return folder_id
 
     async def rename_folder(self, folder_id: UUID, name: str) -> None:
-        """Renomme un dossier (04b-I9)."""
+        """Renomme un dossier."""
         if not await self._store.rename_folder(folder_id, self._name(name, FOLDER_NAME_MAX)):
             raise _not_found()
         await self._broadcaster.images_changed()
 
     async def move_folder(self, folder_id: UUID, parent_id: UUID | None) -> None:
-        """Range un dossier sous un autre ; refusé s'il créerait un cycle (04b-I10)."""
+        """Range un dossier sous un autre ; refusé s'il créerait un cycle."""
         parents = await self._parents()
         if folder_id not in parents or (parent_id is not None and parent_id not in parents):
             raise _not_found()
@@ -186,7 +186,7 @@ class ImageService:
         await self._broadcaster.images_changed()
 
     async def delete_folder(self, folder_id: UUID) -> None:
-        """Supprime un dossier ; son contenu remonte au dossier parent (Q04b-4)."""
+        """Supprime un dossier ; son contenu remonte au dossier parent."""
         parents = await self._parents()
         if folder_id not in parents:
             raise _not_found()

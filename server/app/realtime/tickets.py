@@ -5,7 +5,7 @@ n'est pas sur l'origine du client. Une session authentifiée demande donc un
 ticket par l'API, puis le présente comme premier message de la connexion
 WebSocket. Le ticket est aléatoire, à usage unique et de courte durée.
 
-Stockage en mémoire : suffisant pour une instance unique (CDC 12.3).
+Stockage en mémoire : suffisant pour une instance unique.
 """
 
 import secrets

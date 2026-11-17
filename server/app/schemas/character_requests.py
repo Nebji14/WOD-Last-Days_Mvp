@@ -58,7 +58,7 @@ class EffectiveInput(BaseModel):
 
 
 class CreateCharacterRequest(BaseModel):
-    """Saisie complète de l'assistant de création (US-007, écran 06)."""
+    """Saisie complète de l'assistant de création."""
 
     model_config = _STRICT
 
@@ -91,11 +91,11 @@ class CreateCharacterRequest(BaseModel):
 
 
 class FieldUpdateRequest(BaseModel):
-    """Modification d'un seul champ (enregistrement immédiat, US-009 · CA1).
+    """Modification d'un seul champ, enregistré aussitôt.
 
     Attributs:
         expected: valeur affichée avant la saisie ; le serveur refuse l'écriture
-            si elle a changé entre-temps (05-E3).
+            si elle a changé entre-temps.
     """
 
     model_config = _STRICT
@@ -106,7 +106,7 @@ class FieldUpdateRequest(BaseModel):
 
 
 class WoundRequest(BaseModel):
-    """Action sur la piste de blessures (05-I4)."""
+    """Action sur la piste de blessures."""
 
     model_config = _STRICT
 
@@ -116,7 +116,7 @@ class WoundRequest(BaseModel):
 
 
 class SpecialtiesRequest(BaseModel):
-    """Champ de spécialités d'une compétence, valeurs séparées par des virgules (05-I9)."""
+    """Champ de spécialités d'une compétence, valeurs séparées par des virgules."""
 
     model_config = _STRICT
 
@@ -166,7 +166,7 @@ class CreateEntryRequest(EntryValuesInput):
 
 
 class TacticRequest(BaseModel):
-    """Rattache une tactique existante (``tactic_id``) ou en crée une nouvelle (Q05-3)."""
+    """Rattache une tactique existante (``tactic_id``) ou en crée une nouvelle."""
 
     model_config = _STRICT
 
@@ -183,7 +183,7 @@ class TacticUpdateRequest(BaseModel):
 
 
 class ExpenseRequest(BaseModel):
-    """Dépense d'expérience : type, points et justification obligatoire (RM-016)."""
+    """Dépense d'expérience : type, points et justification obligatoire."""
 
     model_config = _STRIPPED
 

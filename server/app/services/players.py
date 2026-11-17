@@ -1,4 +1,4 @@
-"""Cas d'usage de l'outil Joueurs du MJ (écran 04a, US-025).
+"""Cas d'usage de l'outil Joueurs du MJ.
 
 Le droit d'accès (MJ uniquement) est contrôlé par la route.
 """
@@ -34,7 +34,7 @@ class PlayerService:
         self._presence = presence
 
     async def list_players(self) -> list[PlayerSummary]:
-        """Retourne tous les joueurs, connectés d'abord (US-025 · CA1, CA2 ; Q04a-2)."""
+        """Retourne tous les joueurs, connectés d'abord."""
         online = self._presence.online_accounts()
         records = await self._players.list_players()
         return order_players(

@@ -1,4 +1,4 @@
-"""Règles pures de la bibliothèque d'images du MJ (US-031, écran 04b).
+"""Règles pures de la bibliothèque d'images du MJ.
 
 Aucun accès réseau ni base : type réel d'un fichier, noms, dossiers et pile
 de la table.
@@ -10,7 +10,7 @@ from enum import StrEnum
 from uuid import UUID
 
 MAX_IMAGE_BYTES = 8 * 1024 * 1024
-"""Poids maximal d'une image (04b-I1, limite fixée par le développeur)."""
+"""Poids maximal d'une image chargée."""
 
 IMAGE_NAME_MAX = 120
 FOLDER_NAME_MAX = 60
@@ -60,7 +60,7 @@ def detect_image_type(head: bytes) -> ImageType | None:
 
 
 def image_name_from_filename(filename: str) -> str:
-    """Nom proposé pour une image chargée : le nom du fichier, sans extension (04b-I1).
+    """Nom proposé pour une image chargée : le nom du fichier, sans extension.
 
     Les espaces superflus sont retirés et le nom est borné à ``IMAGE_NAME_MAX``.
     Un nom vide devient ``DEFAULT_IMAGE_NAME``.
@@ -74,7 +74,7 @@ def image_name_from_filename(filename: str) -> str:
 
 @dataclass(frozen=True, slots=True)
 class ImageFolder:
-    """Dossier de la bibliothèque (décision du 2026-11-16)."""
+    """Dossier de la bibliothèque d'images, rangé ou non dans un dossier parent."""
 
     id: UUID
     name: str
@@ -87,7 +87,7 @@ class Image:
 
     Attributs:
         storage_path: nom de l'objet dans le bucket privé.
-        is_shown: affichée en grand à la table (03-A2).
+        is_shown: affichée en grand à la table.
         on_table_at: date de pose sur la pile ; ``None`` hors de la table.
     """
 
@@ -103,6 +103,6 @@ class Image:
 
 
 def table_pile(images: list[Image]) -> list[Image]:
-    """Images posées sur la table, la plus récente en premier (04b, Sur la table)."""
+    """Images posées sur la table, la plus récente en premier."""
     posed = [image for image in images if image.on_table_at is not None]
     return sorted(posed, key=lambda image: image.on_table_at or image.created_at, reverse=True)

@@ -1,4 +1,4 @@
-"""Règles des PNJ : RM-021 (modèle), RM-022 (Puissance, Finesse, Résilience), C08."""
+"""Règles des PNJ : modèle, Puissance / Finesse / Résilience, champs du modèle simplifié."""
 
 from uuid import uuid4
 

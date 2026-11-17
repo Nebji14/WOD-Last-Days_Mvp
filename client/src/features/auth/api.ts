@@ -1,4 +1,4 @@
-/** Appels API d'authentification (US-001, US-002, US-003, US-023). */
+/** Appels API d'authentification. */
 import { ApiError, apiRequest, isRecord } from "@/shared/api/client";
 
 export type Role = "player" | "gm";
@@ -34,7 +34,7 @@ export function parseAccount(data: unknown): Account {
   throw new ApiError(502, "internal_error");
 }
 
-/** Crée un compte joueur. N'ouvre pas de session (02b-C3). */
+/** Crée un compte joueur. N'ouvre pas de session. */
 export function register(credentials: Credentials, passwordConfirmation: string): Promise<Account> {
   return apiRequest("/api/auth/register", {
     method: "POST",
@@ -43,7 +43,7 @@ export function register(credentials: Credentials, passwordConfirmation: string)
   });
 }
 
-/** Connexion depuis l'accès joueur (02a) ou l'accès dédié du MJ (02c). */
+/** Connexion depuis la page des joueurs ou la page du MJ. */
 export function login(credentials: Credentials, portal: Role): Promise<Account> {
   return apiRequest(portal === "gm" ? "/api/auth/gm/login" : "/api/auth/login", {
     method: "POST",
@@ -52,7 +52,7 @@ export function login(credentials: Credentials, portal: Role): Promise<Account> 
   });
 }
 
-/** Ferme la session (US-003). */
+/** Ferme la session. */
 export function logout(): Promise<void> {
   return apiRequest("/api/auth/logout", { method: "POST" });
 }

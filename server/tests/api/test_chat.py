@@ -1,4 +1,4 @@
-"""Routes du chat général : US-013, US-029, US-030 et droits d'accès."""
+"""Routes du chat général : envoi, historique, modification, modération et droits."""
 
 from uuid import uuid4
 
@@ -29,7 +29,7 @@ def test_chat_requires_a_session(ctx: TestContext) -> None:
     assert refused.status_code == 401
 
 
-# --- US-013 · CA5, US-029 : envoi -------------------------------------------------------
+# --- Envoi -------------------------------------------------------------------------
 
 
 def test_player_sends_a_message(ctx: TestContext) -> None:
@@ -83,7 +83,7 @@ def test_sending_is_rate_limited_per_account(ctx: TestContext) -> None:
     assert statuses[10] == 429
 
 
-# --- US-013 · CA1, CA2 : historique -----------------------------------------------------
+# --- Historique -------------------------------------------------------------------
 
 
 def test_history_returns_latest_messages_in_chronological_order(ctx: TestContext) -> None:
@@ -112,7 +112,7 @@ def test_history_bounds_are_validated(ctx: TestContext) -> None:
     assert _history(lea, "?before=0").status_code == 422
 
 
-# --- US-013 · CA6 à CA8 : ses propres messages ------------------------------------------
+# --- Ses propres messages -------------------------------------------------------
 
 
 def test_author_edits_own_message(ctx: TestContext) -> None:
@@ -160,7 +160,7 @@ def test_player_cannot_touch_a_gm_message(ctx: TestContext) -> None:
     assert lea.request("DELETE", f"/api/chat/messages/{message_id}").status_code == 403
 
 
-# --- US-030 : modération par le MJ ------------------------------------------------------
+# --- Modération par le MJ ------------------------------------------------------------
 
 
 def test_gm_edits_and_deletes_any_message(ctx: TestContext) -> None:

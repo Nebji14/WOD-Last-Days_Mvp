@@ -11,7 +11,7 @@ from app.domain.chat import MESSAGE_MAX_LENGTH, ChatMessage
 
 
 class SendMessageRequest(BaseModel):
-    """Envoi d'un message (US-013 · CA5).
+    """Envoi d'un message.
 
     Attributs:
         client_token: jeton choisi par le client pour cet envoi ; le même jeton
@@ -26,7 +26,7 @@ class SendMessageRequest(BaseModel):
 
 
 class EditMessageRequest(BaseModel):
-    """Nouveau texte d'un message (US-013 · CA6, US-030 · CA1)."""
+    """Nouveau texte d'un message."""
 
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
 
@@ -46,7 +46,7 @@ class MessageResponse(BaseModel):
 
     Attributs:
         body: ``None`` pour un message supprimé.
-        edited: le message a été modifié (mention « (modifié) », US-030 · CA4).
+        edited: le message a été modifié (mention « (modifié) » visible par tous).
         deleted_by: rôle de qui a supprimé le message, ``None`` s'il ne l'est pas.
     """
 

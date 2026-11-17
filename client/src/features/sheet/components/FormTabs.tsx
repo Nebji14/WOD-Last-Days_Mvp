@@ -1,11 +1,11 @@
 "use client";
 
 /**
- * [Barre d'onglets — Formes du personnage] (05, F1 à F5).
+ * Onglets des formes du personnage.
  *
  * Un onglet par forme, la forme principale en premier et jamais supprimable.
- * [Bouton — Nouvelle forme] : saisie du nom, puis copie de la forme principale
- * (Q05-7). En modification, ✎ renomme et ✕ supprime après confirmation (T1).
+ * « Nouvelle forme » demande un nom puis copie la forme principale. En mode
+ * modification, ✎ renomme et ✕ supprime après confirmation.
  */
 import { type FormEvent, useState } from "react";
 
@@ -21,7 +21,7 @@ const TAB = "flex h-10 w-[214px] items-center gap-2 rounded-t-sm border border-b
 const NAME_INPUT =
   "border-line-strong bg-field text-ink focus:border-gold w-full min-w-0 rounded-xs border px-1.5 text-[15px] outline-none";
 
-/** Libellé d'un onglet : le nom du personnage pour la forme principale (05a), sinon celui de la forme. */
+/** Libellé d'un onglet : le nom du personnage pour la forme principale, sinon celui de la forme. */
 function tabLabel(sheet: Sheet): string {
   return sheet.is_main ? sheet.texts.name || sheet.form_name : sheet.form_name;
 }

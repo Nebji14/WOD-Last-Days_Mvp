@@ -3,7 +3,7 @@ import Link from "next/link";
 
 import { labels } from "@/shared/i18n";
 
-/** Message d'erreur affiché sous les champs (02a-E2). */
+/** Message d'erreur affiché sous les champs. */
 export function FormError({ message }: { readonly message: string }) {
   return (
     <p role="alert" className="text-danger text-[17px] leading-snug font-semibold">
@@ -12,7 +12,7 @@ export function FormError({ message }: { readonly message: string }) {
   );
 }
 
-/** [Séparateur — ou] entre l'action principale et la connexion Google. */
+/** Séparateur « ou » entre l'action principale et la connexion Google. */
 export function OrSeparator() {
   return (
     <div className="flex items-center gap-3">
@@ -26,9 +26,9 @@ export function OrSeparator() {
 }
 
 /**
- * [Bouton secondaire — Google].
+ * Bouton de connexion Google.
  *
- * Désactivé tant que le fournisseur Google n'est pas branché (décision T-2).
+ * Désactivé tant que le fournisseur Google n'est pas branché.
  */
 export function GoogleButton({ label }: { readonly label: string }) {
   return (

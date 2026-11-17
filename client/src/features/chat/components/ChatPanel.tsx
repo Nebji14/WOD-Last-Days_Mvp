@@ -1,15 +1,12 @@
 "use client";
 
 /**
- * Chat général de la table (US-013, US-029, US-030).
+ * Chat général de la table.
  *
- * - [Chat (replié)] : en bas à droite, toujours visible, avec les derniers
- *   messages et la saisie (03).
- * - [Chat (déroulé)] : le panneau s'agrandit vers le haut et montre tout
- *   l'historique, avec les actions sur les messages (03-A4, 03-E6, 08b).
- *
- * Le panneau reste ancré en bas à droite : seules sa largeur et sa hauteur
- * changent, ce qui anime le déroulé comme le repli.
+ * Replié : en bas à droite, avec les derniers messages et la saisie. Déroulé :
+ * le panneau s'agrandit vers le haut et montre tout l'historique avec les
+ * actions sur les messages. Le panneau reste ancré en bas à droite ; seules sa
+ * largeur et sa hauteur changent, ce qui anime le déroulé.
  */
 import { useState } from "react";
 

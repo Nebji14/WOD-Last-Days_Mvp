@@ -31,7 +31,7 @@ const npcs = [
   npc("loose", "Inconnu", null),
 ];
 
-describe("04c · catégories (Q04c-4)", () => {
+describe("catégories de PNJ", () => {
   it("montre les PNJ de la catégorie et de ses sous-catégories", () => {
     expect(npcsIn(npcs, categories, "villains").map((n) => n.id)).toEqual([
       "widow",

@@ -1,8 +1,8 @@
 "use client";
 
 /**
- * [Panneau — Identité] : nom, joueur, concept, profession, vertu, vice, compact.
- * Pour un PNJ, la ligne du joueur devient la catégorie (07, Q04c-1).
+ * Panneau « Identité » : nom, joueur, concept, profession, vertu, vice,
+ * compact. Pour un PNJ, la ligne du joueur devient la catégorie.
  */
 import { setSheetField } from "@/features/characters/api";
 import { labels } from "@/shared/i18n";

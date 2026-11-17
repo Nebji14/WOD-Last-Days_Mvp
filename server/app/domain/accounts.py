@@ -18,21 +18,21 @@ PASSWORD_MAX_BYTES = 72
 
 
 class Role(StrEnum):
-    """Rôle d'un compte (MLD : compte_joueur / compte_mj, contrainte C01)."""
+    """Rôle d'un compte : joueur ou MJ (un seul compte MJ)."""
 
     PLAYER = "player"
     GM = "gm"
 
 
 class AccountStatus(StrEnum):
-    """État d'un compte (MLD : etat_compte)."""
+    """État d'un compte : actif ou désactivé."""
 
     ACTIVE = "active"
     DISABLED = "disabled"
 
 
 class PasswordRule(StrEnum):
-    """Règles de sécurité d'un mot de passe (02b-V3)."""
+    """Règles de sécurité d'un mot de passe."""
 
     MIN_LENGTH = "min_length"
     MAX_LENGTH = "max_length"
@@ -67,13 +67,13 @@ def is_valid_username(username: str) -> bool:
 
     De 3 à 24 caractères parmi les lettres non accentuées, les chiffres, le
     point, le tiret et le tiret bas. Ce format garantit une adresse technique
-    valide (décision T-3).
+    valide.
     """
     return _USERNAME_PATTERN.fullmatch(username) is not None
 
 
 def password_violations(password: str) -> list[PasswordRule]:
-    """Liste les règles de sécurité non respectées par un mot de passe (02b-V3).
+    """Liste les règles de sécurité non respectées par un mot de passe.
 
     Returns:
         Une liste vide si le mot de passe est conforme.
@@ -94,7 +94,7 @@ def technical_email(username: str, domain: str) -> str:
     """Construit l'adresse technique d'un joueur à partir de son nom d'utilisateur.
 
     Le fournisseur d'identité exige une adresse ; elle reste invisible pour le
-    joueur (décision T-3). La casse est neutralisée pour rester cohérente avec
+    joueur. La casse est neutralisée pour rester cohérente avec
     l'unicité insensible à la casse du nom d'utilisateur.
     """
     return f"{username.lower()}@{domain}"

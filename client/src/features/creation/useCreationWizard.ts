@@ -1,10 +1,10 @@
 "use client";
 
 /**
- * État de l'assistant de création (écran 06, US-007).
+ * État de l'assistant de création.
  *
  * Tout reste dans la fenêtre jusqu'au bouton « Créer le personnage » : rien
- * n'est enregistré avant, et fermer la fenêtre abandonne la création (Q06-1).
+ * n'est enregistré avant, et fermer la fenêtre abandonne la création.
  */
 import { useReducer } from "react";
 
@@ -46,7 +46,7 @@ export interface CreationState {
   readonly specialties: readonly SpecialtyDraft[];
   /** Valeurs effectives saisies à l'étape 5 ; absentes, elles reprennent la base. */
   readonly effective: Readonly<Partial<Record<EffectiveField, number>>>;
-  /** Catégories vidées par le dernier échange de priorités (06-I1). */
+  /** Catégories vidées par le dernier échange de priorités. */
   readonly trimmed: readonly Category[];
   /** Vrai dès la première saisie : fermer demande alors confirmation. */
   readonly dirty: boolean;
@@ -148,7 +148,7 @@ export function useCreationWizard() {
   return useReducer(creationReducer, undefined, initialState);
 }
 
-/** Saisie envoyée au serveur, qui refait tous les contrôles (US-007 · CA2). */
+/** Saisie envoyée au serveur, qui refait tous les contrôles. */
 export function toPayload(state: CreationState): CreationPayload {
   return {
     identity: Object.fromEntries(

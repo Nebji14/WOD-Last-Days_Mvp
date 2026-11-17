@@ -1,11 +1,10 @@
 "use client";
 
 /**
- * [Arborescence des catégories] de l'outil PNJ (04c).
+ * Arborescence des catégories de PNJ.
  *
- * « Tous les PNJ », puis catégories ▾ / ▸ et sous-catégories en retrait, avec
- * le nombre de PNJ, sous-catégories comprises. Catégorie sélectionnée : bordure
- * or. Au survol ou au clavier : Renommer, Supprimer (04c-I2).
+ * « Tous les PNJ », puis les catégories repliables avec leur nombre de PNJ,
+ * sous-catégories comprises. Au survol : renommer ou supprimer.
  */
 import { labels } from "@/shared/i18n";
 import { childrenOf } from "@/shared/tree";

@@ -1,12 +1,11 @@
 "use client";
 
 /**
- * Fenêtre détachée de l'outil PNJ du MJ (écran 04c, US-039 à US-043).
+ * Fenêtre de l'outil PNJ du MJ.
  *
- * À gauche [Panneau — Catégories], à droite [Panneau — PNJ de la catégorie] :
- * fil d'Ariane, compteur, [Bouton — Créer un PNJ] et grille des cartes. Pas de
- * recherche au MVP (US-044). Une feuille créée s'ouvre aussitôt en mode
- * modification (07-I5).
+ * Catégories à gauche ; à droite, les PNJ de la catégorie choisie, le bouton de
+ * création et la grille des cartes. Une feuille créée s'ouvre aussitôt en mode
+ * modification.
  */
 import { useEffect, useState } from "react";
 

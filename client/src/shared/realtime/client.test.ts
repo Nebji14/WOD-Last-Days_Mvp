@@ -105,7 +105,7 @@ describe("createRealtimeClient", () => {
     expect(statuses).toEqual(["connecting"]);
   });
 
-  it("rouvre la connexion avec un nouveau ticket après une coupure (03-E7)", async () => {
+  it("rouvre la connexion avec un nouveau ticket après une coupure", async () => {
     const fetchTicket = vi
       .fn<() => Promise<string>>()
       .mockResolvedValueOnce("ticket-1")

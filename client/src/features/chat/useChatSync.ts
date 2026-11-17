@@ -4,9 +4,9 @@
  * Synchronisation du chat avec le serveur.
  *
  * - Chaque événement `chat.message` met à jour le message concerné : création,
- *   modification ou suppression (US-013 · CA3, US-030 · CA3).
+ *   modification ou suppression.
  * - À chaque (re)connexion, les messages récents sont rechargés pour rattraper
- *   ce qui a été manqué, puis les envois en attente repartent (03-E7).
+ *   ce qui a été manqué, puis les envois en attente repartent.
  */
 import { useEffect } from "react";
 

@@ -1,4 +1,4 @@
-"""Cas d'usage des PNJ et de leurs catégories (US-039 à US-043, écrans 04c et 07).
+"""Cas d'usage des PNJ et de leurs catégories.
 
 Le droit d'accès (MJ uniquement) est contrôlé par les routes. La feuille d'un
 PNJ se modifie par les mêmes services que celle d'un personnage joueur ; ce
@@ -71,7 +71,7 @@ class NpcBroadcaster(Protocol):
 
 @dataclass(frozen=True, slots=True)
 class NpcDirectory:
-    """Contenu de l'outil PNJ : catégories et cartes des PNJ (US-040 · CA1, CA4)."""
+    """Contenu de l'outil PNJ : catégories et cartes des PNJ."""
 
     categories: list[NpcCategory]
     npcs: list[NpcSummary]
@@ -108,7 +108,7 @@ class NpcService:
         return NpcDirectory(await self._npcs.list_categories(), await self._npcs.list_npcs())
 
     async def create(self, model: NpcModel, category_id: UUID | None) -> Character:
-        """Crée une feuille de PNJ vierge, rangée dans la catégorie choisie (04c-I3, RM-021)."""
+        """Crée une feuille de PNJ vierge, rangée dans la catégorie choisie."""
         await self._require_category(category_id)
         new = NewCharacter(initial_sheet_values(MAIN_FORM_NAME), [])
         character_id = await self._npcs.create_npc(model, category_id, initial_traits(model), new)
@@ -121,7 +121,7 @@ class NpcService:
         """Modifie une donnée propre au PNJ : catégorie, notes, Puissance, Finesse, Résilience.
 
         Raises:
-            AppError: ``not_found``, ``rule_violation`` (07-I2) ou ``edit_conflict``.
+            AppError: ``not_found``, ``rule_violation`` ou ``edit_conflict``.
         """
         profile = await self._profile(actor, character_id)
         if field == "category_id":
@@ -142,13 +142,13 @@ class NpcService:
         return await self._access.changed(character_id)
 
     async def delete(self, actor: Account, character_id: UUID) -> None:
-        """Supprime définitivement la feuille du PNJ (US-043)."""
+        """Supprime définitivement la feuille du PNJ."""
         await self._profile(actor, character_id)
         await self._characters.delete(character_id)
         await self._access.notify(character_id, None, seat_affected=False)
         await self._signal()
 
-    # --- Catégories (C07, 04c-I2) ------------------------------------------------------
+    # --- Catégories ------------------------------------------------------
 
     async def create_category(self, name: str, parent_id: UUID | None) -> UUID:
         """Crée une catégorie, à la racine ou sous la catégorie sélectionnée."""
@@ -163,7 +163,7 @@ class NpcService:
         await self._signal()
 
     async def move_category(self, category_id: UUID, parent_id: UUID | None) -> None:
-        """Range une catégorie sous une autre ; refusé s'il créerait un cycle (C07)."""
+        """Range une catégorie sous une autre ; refusé s'il créerait un cycle."""
         parents = await self._parents()
         if category_id not in parents or (parent_id is not None and parent_id not in parents):
             raise not_found()
@@ -177,7 +177,7 @@ class NpcService:
         await self._signal()
 
     async def delete_category(self, category_id: UUID) -> None:
-        """Supprime une catégorie ; ses PNJ et sous-catégories remontent au parent (Q04c-2)."""
+        """Supprime une catégorie ; ses PNJ et sous-catégories remontent au parent."""
         parents = await self._parents()
         if category_id not in parents:
             raise not_found()

@@ -1,6 +1,6 @@
 "use client";
 
-/** Contenu de l'étape en cours de l'assistant de création (06-É1 à É5). */
+/** Contenu de l'étape en cours de l'assistant de création. */
 import type { Dispatch } from "react";
 
 import { type CreationAction, type CreationState, STEPS } from "../useCreationWizard";

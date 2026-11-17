@@ -1,10 +1,10 @@
 "use client";
 
 /**
- * Briques communes des panneaux de la fiche (écrans 05).
+ * Briques communes des panneaux de la fiche.
  *
- * Deux modes (05, MODES) : M1 consultation, lecture seule sans champ encadré ;
- * M2 modification, champs encadrés enregistrés dès qu'on les quitte.
+ * Deux modes : consultation (lecture seule, sans champ encadré) et
+ * modification (champs encadrés, enregistrés dès qu'on les quitte).
  */
 import { createContext, type ReactNode, useContext, useState } from "react";
 
@@ -22,7 +22,7 @@ interface SheetContextValue {
   /** M2 : la fiche est en cours de modification. */
   readonly editing: boolean;
   readonly run: RunAction;
-  /** Catégories de PNJ, pour la fiche d'un PNJ (07, Q04c-1) ; vide pour un personnage joueur. */
+  /** Catégories de PNJ, pour la fiche d'un PNJ ; vide pour un personnage joueur. */
   readonly npcCategories: readonly NpcCategory[];
 }
 
@@ -79,7 +79,7 @@ interface DotsProps {
 /**
  * Points ●○ d'un attribut ou d'une compétence.
  *
- * 05-I3 : en modification, cliquer le n-ième point donne la valeur n ; cliquer
+ * En modification, cliquer le n-ième point donne la valeur n ; cliquer
  * le point de la valeur actuelle donne n − 1.
  */
 export function Dots({ label, value, max, min, onChange }: DotsProps) {
@@ -220,12 +220,12 @@ interface ConfirmDeleteProps {
   readonly onConfirm: () => void;
   /** Question posée avant la suppression. */
   readonly question?: string;
-  /** Texte du déclencheur à la place de l'icône ✕ (lien « Supprimer la note », 05c). */
+  /** Texte du déclencheur à la place de l'icône ✕ (lien « Supprimer la note »). */
   readonly trigger?: string;
 }
 
 /**
- * Suppression en deux temps (règle T1) : le déclencheur ouvre une fenêtre de
+ * Suppression en deux temps : le déclencheur ouvre une fenêtre de
  * confirmation modale ; rien n'est supprimé avant « SUPPRIMER ».
  */
 export function ConfirmDelete({ label, onConfirm, question, trigger }: ConfirmDeleteProps) {

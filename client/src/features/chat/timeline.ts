@@ -1,7 +1,4 @@
-/**
- * Mise en forme de l'historique du chat : séparateurs de jour (08b,
- * [Historique des messages]).
- */
+/** Mise en forme de l'historique du chat : séparateurs de jour. */
 import { longDate } from "@/shared/format/date";
 import { labels } from "@/shared/i18n";
 

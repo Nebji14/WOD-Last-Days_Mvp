@@ -1,7 +1,7 @@
 """Cas d'usage d'authentification : inscription, connexion, session.
 
-Couvre US-001 (créer son compte), US-002 (se connecter), US-003 (se
-déconnecter) et US-023 (connexion du MJ par son accès dédié).
+Inscription des joueurs, connexion (joueur ou MJ par sa page dédiée),
+renouvellement et fermeture de la session.
 """
 
 import logging
@@ -54,7 +54,7 @@ class IdentityProvider(Protocol):
 
 
 def _invalid_credentials() -> AppError:
-    """Erreur unique pour tout échec de connexion : aucune énumération des comptes (02c-E2)."""
+    """Erreur unique pour tout échec de connexion : aucune énumération des comptes."""
     return AppError(
         ErrorCode.INVALID_CREDENTIALS, "Identifiant ou mot de passe incorrect.", status_code=401
     )
@@ -81,7 +81,7 @@ class AuthService:
         accounts: dépôt des comptes.
         identity: fournisseur d'identité.
         technical_email_domain: domaine des adresses techniques des joueurs.
-        gm_access_path: chemin réservé de l'accès du MJ, joint à l'erreur 02a-E6.
+        gm_access_path: chemin de la page du MJ, renvoyé quand il se trompe de page.
     """
 
     def __init__(
@@ -99,9 +99,9 @@ class AuthService:
     async def register_player(
         self, username: str, password: str, password_confirmation: str
     ) -> Account:
-        """Crée un compte joueur (US-001, contrôles 02b-V1 à V3).
+        """Crée un compte joueur après contrôle du nom et du mot de passe.
 
-        Le joueur n'est pas connecté à l'issue de l'inscription (02b-C3).
+        Le joueur n'est pas connecté à l'issue de l'inscription.
 
         Raises:
             AppError: ``username_invalid``, ``password_mismatch``,
@@ -133,12 +133,12 @@ class AuthService:
         )
 
     async def create_gm(self, username: str, email: str, password: str) -> Account:
-        """Crée le compte MJ (décision T-5), depuis le script d'initialisation uniquement.
+        """Crée le compte MJ, depuis le script d'initialisation uniquement.
 
-        L'adresse est réelle : elle sert à la récupération du mot de passe (02c-C4).
+        L'adresse est réelle : elle sert à la récupération du mot de passe.
 
         Raises:
-            AppError: si les données sont invalides ou si un compte MJ existe déjà (C01).
+            AppError: si les données sont invalides ou si un compte MJ existe déjà.
         """
         if not is_valid_username(username):
             raise AppError(ErrorCode.USERNAME_INVALID, "Identifiant du MJ invalide.", 422)
@@ -157,10 +157,10 @@ class AuthService:
     async def login(
         self, username: str, password: str, portal: Role
     ) -> tuple[Account, SessionTokens]:
-        """Ouvre une session depuis l'accès joueur (02a) ou l'accès MJ (02c).
+        """Ouvre une session depuis la page des joueurs ou celle du MJ.
 
         Des identifiants valides saisis sur le mauvais accès n'ouvrent pas de
-        session et produisent une erreur dédiée (02a-E6, 02c-E6).
+        session et produisent une erreur dédiée.
 
         Raises:
             AppError: ``invalid_credentials``, ``wrong_portal_gm`` (compte MJ sur
@@ -212,7 +212,7 @@ class AuthService:
             raise _unavailable() from None
 
     async def logout(self, access_token: str | None) -> None:
-        """Ferme la session (US-003). N'échoue jamais : les cookies sont supprimés par la route."""
+        """Ferme la session. N'échoue jamais : les cookies sont supprimés par la route."""
         if access_token is None:
             return
         try:

@@ -1,4 +1,4 @@
-"""Modèles de sortie de l'outil Joueurs du MJ (écran 04a, US-025)."""
+"""Modèles de sortie de l'outil Joueurs du MJ."""
 
 from uuid import UUID
 
@@ -9,7 +9,7 @@ from app.domain.players import PlayerSummary
 
 
 class PlayerResponse(BaseModel):
-    """Ligne de la liste des joueurs et données de compte affichées au MJ (US-025 · CA3)."""
+    """Ligne de la liste des joueurs et données de compte affichées au MJ."""
 
     id: UUID
     username: str

@@ -2,7 +2,7 @@ import { AuthScreen } from "@/features/auth/components/AuthScreen";
 import { LoginForm } from "@/features/auth/components/LoginForm";
 import { labels } from "@/shared/i18n";
 
-/** Écran 02a — Connexion (joueur). Sert aussi l'état 08c après une déconnexion. */
+/** Connexion des joueurs ; affiche aussi la notification après une déconnexion. */
 export default function PlayerLoginPage() {
   return (
     <AuthScreen

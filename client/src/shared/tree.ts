@@ -1,8 +1,8 @@
 /**
- * Arborescences : dossiers d'images (04b) et catégories de PNJ (04c, C07).
+ * Arborescences : dossiers d'images et catégories de PNJ.
  *
- * Fonctions pures : le serveur reste seul garant de l'absence de cycle, le
- * client la reflète pour l'ergonomie.
+ * Le serveur reste seul garant de l'absence de cycle ; le client la reflète pour
+ * guider l'utilisateur.
  */
 
 export interface TreeNode {
@@ -21,7 +21,7 @@ export function childrenOf<T extends TreeNode>(nodes: readonly T[], parentId: st
   return nodes.filter((node) => node.parentId === parentId).sort(byName);
 }
 
-/** Chemin d'un nœud, de la racine jusqu'à lui ([Fil d'Ariane]). */
+/** Chemin d'un nœud, de la racine jusqu'à lui (fil d'Ariane). */
 export function nodePath<T extends TreeNode>(nodes: readonly T[], nodeId: string | null): T[] {
   const byId = new Map(nodes.map((node) => [node.id, node]));
   const path: T[] = [];
@@ -33,7 +33,7 @@ export function nodePath<T extends TreeNode>(nodes: readonly T[], nodeId: string
   return path;
 }
 
-/** Indique si `candidateId` est `nodeId` lui-même ou l'un de ses descendants (04b-I10, C07). */
+/** Indique si `candidateId` est `nodeId` lui-même ou l'un de ses descendants. */
 export function isWithin(
   nodes: readonly TreeNode[],
   nodeId: string,
@@ -42,7 +42,7 @@ export function isWithin(
   return nodePath(nodes, candidateId).some((node) => node.id === nodeId);
 }
 
-/** Le nœud et tous ses descendants (Q04c-4 : une catégorie montre aussi ses sous-catégories). */
+/** Le nœud et tous ses descendants (une catégorie montre aussi ses sous-catégories). */
 export function subtreeIds(nodes: readonly TreeNode[], nodeId: string): Set<string> {
   const ids = new Set([nodeId]);
   let grew = true;

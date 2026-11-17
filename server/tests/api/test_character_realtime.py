@@ -44,7 +44,7 @@ def test_seat_shows_the_played_character_to_everyone(ctx: TestContext, connect: 
 
     assert kind == "table.state"
     seats = {seat["display_name"]: seat["character"] for seat in state["seats"]}
-    assert seats["ben.ard"] is None  # 03-E4 : joueur sans personnage
+    assert seats["ben.ard"] is None  # joueur sans personnage
     assert seats["lea.vale"] == {
         "id": character["id"],
         "name": "Isaac Thorne",
@@ -75,7 +75,7 @@ def test_sheet_change_updates_the_seat_for_all_and_the_sheet_for_owner_and_gm(
     # ne porte que l'identifiant, jamais le contenu de la fiche.
     for name in ("gm", "lea"):
         assert _event(sockets[name]) == ("character.changed", {"character_id": character["id"]})
-    # Tous, y compris un autre joueur, voient la jauge du siège (Q03-3).
+    # Tous, y compris un autre joueur, voient la jauge du siège.
     for name in ("gm", "lea", "ben"):
         kind, state = _event(sockets[name])
         assert kind == "table.state"

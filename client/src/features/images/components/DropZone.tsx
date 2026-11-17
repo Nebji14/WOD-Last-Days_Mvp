@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * [Zone de glisser-déposer] (04b-I1) : toujours visible sous la grille. Les
+ * [Zone de glisser-déposer] : toujours visible sous la grille. Les
  * fichiers déposés vont dans le dossier ouvert. Au survol d'un fichier glissé :
  * bordure pleine or, fond plus clair. Une barre de progression par fichier ;
  * un fichier refusé affiche la raison.

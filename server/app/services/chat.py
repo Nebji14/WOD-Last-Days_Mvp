@@ -1,6 +1,6 @@
 """Cas d'usage du chat général : historique, envoi, modification, suppression.
 
-Couvre US-013 (joueur), US-029 (MJ) et US-030 (modération par le MJ).
+Messages des joueurs et du MJ, et modération par le MJ.
 """
 
 from typing import Protocol
@@ -48,7 +48,7 @@ class ChatService:
         self._broadcaster = broadcaster
 
     async def history(self, before: int | None, limit: int) -> tuple[list[ChatMessage], bool]:
-        """Retourne une page d'historique (US-013 · CA1, CA2).
+        """Retourne une page d'historique.
 
         Args:
             before: position en deçà de laquelle chercher ; ``None`` pour la
@@ -64,17 +64,17 @@ class ChatService:
         return list(reversed(page[:limit])), has_more
 
     async def send(self, author: Account, client_token: UUID, body: str) -> ChatMessage:
-        """Envoie un message et le diffuse (US-013 · CA3, CA5 ; US-029).
+        """Envoie un message et le diffuse.
 
         Un envoi rejoué avec le même ``client_token`` retourne le message déjà
-        enregistré (CDC 12.3 : nouvelle tentative sans doublon).
+        enregistré (nouvelle tentative après coupure, sans doublon).
         """
         message = await self._messages.create(author.id, client_token, body)
         await self._broadcaster.message_changed(message)
         return message
 
     async def edit(self, actor: Account, message_id: UUID, body: str) -> ChatMessage:
-        """Modifie un message et diffuse le changement (US-013 · CA6, US-030 · CA1, CA3, CA4).
+        """Modifie un message et diffuse le changement.
 
         Raises:
             AppError: ``not_found`` si le message n'existe pas, ``forbidden`` si
@@ -89,7 +89,7 @@ class ChatService:
         return message
 
     async def delete(self, actor: Account, message_id: UUID) -> ChatMessage:
-        """Supprime un message en laissant sa trace (US-013 · CA7, US-030 · CA2, CA3, CA5).
+        """Supprime un message en laissant sa trace.
 
         Supprimer un message déjà supprimé ne change rien et n'échoue pas.
 

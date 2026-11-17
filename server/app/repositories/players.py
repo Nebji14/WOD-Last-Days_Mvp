@@ -1,4 +1,4 @@
-"""Lecture des comptes joueurs et de leurs personnages pour l'outil Joueurs (US-025)."""
+"""Lecture des comptes joueurs et de leurs personnages pour l'outil Joueurs."""
 
 import asyncpg
 
@@ -30,7 +30,7 @@ class PgPlayerRepository:
         self._pool = pool
 
     async def list_players(self) -> list[PlayerRecord]:
-        """Retourne tous les comptes joueurs, avec ou sans personnage (US-025 · CA1)."""
+        """Retourne tous les comptes joueurs, avec ou sans personnage."""
         rows = await self._pool.fetch(_LIST_PLAYERS)
         return [_to_record(row) for row in rows]
 

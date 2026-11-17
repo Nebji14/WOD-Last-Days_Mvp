@@ -1,4 +1,4 @@
-"""Client du stockage de fichiers de Supabase (bucket privé des images, US-031).
+"""Client du stockage de fichiers de Supabase (bucket privé des images).
 
 La clé d'administration ne quitte jamais le serveur. Le navigateur ne reçoit
 que des URL signées, valables pour une durée limitée.

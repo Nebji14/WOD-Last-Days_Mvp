@@ -25,7 +25,7 @@ export function errorLabel(code: string): string {
   return code in fr.errors ? fr.errors[code as ErrorLabelKey] : fr.errors.internal_error;
 }
 
-/** Retourne le message court expliquant la règle qui a refusé une saisie (05-E2). */
+/** Retourne le message court expliquant la règle qui a refusé une saisie. */
 export function ruleLabel(rule: string): string {
   return rule in frSheet.sheet.rules
     ? frSheet.sheet.rules[rule as RuleLabelKey]

@@ -1,12 +1,10 @@
 "use client";
 
 /**
- * Fenêtre détachée du profil (écran 09), ouverte par l'icône de profil de la
- * table (03, 03-MJ).
+ * Fenêtre du profil, ouverte par l'icône de profil de la table.
  *
- * Joueur : [Panneau — Mon compte] et [Panneau — Mes personnages].
- * MJ : même fenêtre sans les personnages (le compte MJ n'en a pas).
- * I5 [Bouton — Fermer] ferme la fenêtre.
+ * Joueur : son compte et ses personnages. MJ : son compte seulement, puisqu'il
+ * n'a pas de personnage.
  */
 import { useEffect } from "react";
 

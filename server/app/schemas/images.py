@@ -1,4 +1,4 @@
-"""Modèles d'entrée et de sortie des images (US-031, écrans 04b et 08a)."""
+"""Modèles d'entrée et de sortie des images (bibliothèque et table)."""
 
 from datetime import datetime
 from uuid import UUID
@@ -55,7 +55,7 @@ class LibraryResponse(BaseModel):
 
 
 class SceneResponse(BaseModel):
-    """Images de la table, vues par tous les participants (03-A2, 03-I5)."""
+    """Images de la table, vues par tous les participants."""
 
     shown: ImageResponse | None
     pile: list[ImageResponse]

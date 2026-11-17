@@ -21,13 +21,13 @@ const images = [
   image("loose", "Ruelle", null),
 ];
 
-describe("04b · arborescence", () => {
+describe("arborescence des dossiers", () => {
   it("liste les sous-dossiers d'un dossier par nom", () => {
     expect(childrenOf(folders, "docks").map((f) => f.id)).toEqual(["clues", "places"]);
     expect(childrenOf(folders, null).map((f) => f.id)).toEqual(["maps", "docks"]);
   });
 
-  it("montre seulement les images du dossier ouvert (Q04b-5), toutes à la racine", () => {
+  it("montre seulement les images du dossier ouvert, toutes à la racine", () => {
     expect(imagesIn(images, "docks")).toEqual([]);
     expect(imagesIn(images, "places").map((i) => i.id)).toEqual(["quay"]);
     expect(imagesIn(images, null)).toHaveLength(4);
@@ -45,7 +45,7 @@ describe("04b · arborescence", () => {
   });
 });
 
-describe("04b · recherche (I8)", () => {
+describe("recherche d'images", () => {
   it("cherche dans le nom des images et des dossiers, sans casse ni accents", () => {
     expect(searchImages(images, folders, "symbole").map((i) => i.id)).toEqual(["symbol"]);
     expect(searchImages(images, folders, "DOCKS").map((i) => i.id)).toEqual(["quay", "symbol"]);

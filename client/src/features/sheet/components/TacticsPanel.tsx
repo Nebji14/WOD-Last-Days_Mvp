@@ -1,12 +1,12 @@
 "use client";
 
 /**
- * [Panneau — Tactiques] du verso (05b).
+ * Panneau « Tactiques » du verso.
  *
- * Une tactique peut être partagée entre plusieurs personnages. « + Ajouter »
- * propose donc d'en choisir une existante ou d'en créer une nouvelle (Q05-3).
- * Modifier une tactique la change pour tous ceux qui la connaissent ; la
- * retirer de la fiche ne la supprime pas chez les autres.
+ * Une tactique peut être partagée entre plusieurs personnages : « + Ajouter »
+ * propose d'en choisir une existante ou d'en créer une. La modifier la change
+ * pour tous ceux qui la connaissent ; la retirer de la fiche ne la supprime pas
+ * chez les autres.
  */
 import { type FormEvent, useEffect, useState } from "react";
 

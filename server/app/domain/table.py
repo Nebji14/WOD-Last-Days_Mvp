@@ -1,4 +1,4 @@
-"""Règles métier de la table de jeu : places et présence (US-012, US-028).
+"""Règles métier de la table de jeu : places et présence.
 
 Module pur : aucun accès réseau ni base de données.
 """
@@ -6,7 +6,7 @@ Module pur : aucun accès réseau ni base de données.
 from dataclasses import dataclass
 from uuid import UUID
 
-# CDC 12.3 : 10 utilisateurs simultanés, MJ compris.
+# 10 utilisateurs simultanés au plus, MJ compris.
 PLAYER_SEAT_COUNT = 9
 
 
@@ -21,7 +21,7 @@ class Seat:
     Attributs:
         position: rang de la place, de 0 à ``PLAYER_SEAT_COUNT - 1``.
         online: ``False`` quand le joueur a quitté la salle ; son siège reste
-            affiché, atténué (03-E2, Q03-7).
+            affiché, atténué.
     """
 
     position: int
@@ -33,9 +33,9 @@ class Seat:
 class SeatMap:
     """Attribution des places pour la durée de vie du serveur.
 
-    Un joueur reçoit la première place libre à sa première entrée (03-A6) et la
-    conserve ensuite, qu'il soit connecté ou non (Q03-7). Un même compte peut
-    ouvrir plusieurs connexions (fenêtres détachées, T2) : il reste en ligne
+    Un joueur reçoit la première place libre à sa première entrée et la
+    conserve ensuite, qu'il soit connecté ou non. Un même compte peut
+    ouvrir plusieurs connexions (fenêtres détachées) : il reste en ligne
     tant qu'il en garde au moins une.
     """
 

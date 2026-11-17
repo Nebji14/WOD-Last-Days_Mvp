@@ -23,7 +23,7 @@ ATTRIBUTES: dict[Category, tuple[str, ...]] = {
     Category.SOCIAL: ("presence", "manipulation", "composure"),
 }
 
-# Compétences, dans l'ordre du MLD (enum competence_feuille) : érudition,
+# Compétences, dans l'ordre de la fiche : érudition,
 # informatique, artisanat, investigation, médecine, occultisme, politique,
 # sciences / sports, bagarre, conduite, armes à feu, larcin, discrétion, survie,
 # armes blanches / animaux, empathie, expression, intimidation, persuasion,
@@ -65,8 +65,7 @@ ATTRIBUTE_NAMES: tuple[str, ...] = tuple(name for names in ATTRIBUTES.values() f
 SKILL_NAMES: tuple[str, ...] = tuple(name for names in SKILLS.values() for name in names)
 
 ATTRIBUTE_MIN = 1
-# Plafond ordinaire des attributs ; l'éveil le porte à ``ATTRIBUTE_MAX_AWAKENED``
-# (maquette 05, ÉVEIL V1 et V2).
+# Plafond ordinaire des attributs ; l'éveil le porte à ``ATTRIBUTE_MAX_AWAKENED``.
 ATTRIBUTE_MAX = 5
 ATTRIBUTE_MAX_AWAKENED = 10
 SKILL_MIN = 0
@@ -81,7 +80,7 @@ def attribute_max(awakened: bool) -> int:
 
 
 def parse_specialties(text: str) -> list[str]:
-    """Découpe le champ de spécialités d'une compétence (maquette 05, I9).
+    """Découpe le champ de spécialités d'une compétence.
 
     Les spécialités sont séparées par des virgules. Les espaces autour de
     chacune sont retirés, les entrées vides et les doublons (casse ignorée)

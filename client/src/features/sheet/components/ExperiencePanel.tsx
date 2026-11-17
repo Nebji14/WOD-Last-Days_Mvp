@@ -1,14 +1,12 @@
 "use client";
 
 /**
- * [Panneau — Expérience] du verso (05b).
+ * Panneau « Expérience » du verso.
  *
- * - Expérience générale et tactique suivies séparément (RM-015).
- * - Total acquis et solde toujours visibles et distincts (RM-017). Le total se
- *   saisit ; le solde ne se modifie que par une dépense.
- * - Dépense (05-I6, RM-016) : type, points et justification obligatoire. Elle
- *   baisse le solde, jamais le total. Le serveur refuse un solde insuffisant.
- * - L'expérience est commune à toutes les formes du personnage (Q05-8).
+ * Expérience générale et tactique suivies séparément, avec le total acquis et
+ * le solde. Le total se saisit ; le solde ne baisse que par une dépense, qui
+ * porte un type, des points et une justification obligatoire. Le serveur
+ * refuse une dépense supérieure au solde.
  */
 import { type FormEvent, useState } from "react";
 

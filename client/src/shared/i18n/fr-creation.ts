@@ -1,4 +1,4 @@
-/** Libellés français de l'assistant de création de personnage (écran 06). */
+/** Libellés français de l'assistant de création de personnage. */
 export const frCreation = {
   creation: {
     windowTitle: "CRÉATION DE PERSONNAGE",

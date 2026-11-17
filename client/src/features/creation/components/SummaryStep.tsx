@@ -1,12 +1,11 @@
 "use client";
 
 /**
- * Étape 5 de la création : récapitulatif et état initial (06-É5).
+ * Étape « Récapitulatif » de la création.
  *
- * Caractéristiques, santé et volonté maximales : la base calculée est
- * proposée comme valeur effective, modifiable (RM-005). Piste vide, volonté
- * disponible au maximum, moralité 7 et expérience à 0 sont fixées par le
- * serveur (RM-008, RM-011, RM-013, RM-015, RM-017).
+ * Caractéristiques, santé et volonté maximales : la base calculée est proposée
+ * comme valeur effective, modifiable. Le serveur fixe le reste de l'état
+ * initial : piste vide, volonté pleine, moralité 7, expérience à 0.
  */
 import type { Dispatch } from "react";
 

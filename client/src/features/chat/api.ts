@@ -1,4 +1,4 @@
-/** Appels API et modèle du chat général (US-013, US-029, US-030). */
+/** Appels API et modèle du chat général. */
 import { ApiError, apiRequest, isRecord } from "@/shared/api/client";
 
 export interface ChatMessage {
@@ -86,7 +86,7 @@ export function fetchHistory(before?: number): Promise<HistoryPage> {
 
 /**
  * Envoie un message. Rejouer l'appel avec le même `clientToken` ne crée pas de
- * doublon : c'est ce qui permet de retenter après une coupure (03-E7).
+ * doublon : c'est ce qui permet de retenter après une coupure.
  */
 export function sendMessage(clientToken: string, body: string): Promise<ChatMessage> {
   return apiRequest("/api/chat/messages", {

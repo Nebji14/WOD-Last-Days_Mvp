@@ -1,4 +1,4 @@
-/** Libellés français de l'outil Joueurs du MJ (écran 04a). */
+/** Libellés français de l'outil Joueurs du MJ. */
 export const frPlayers = {
   playersTool: {
     windowTitle: "JOUEURS",

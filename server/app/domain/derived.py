@@ -1,8 +1,8 @@
-"""Valeurs de base calculées d'une feuille (RM-005, RM-006, RM-007, RM-010).
+"""Valeurs de base calculées d'une feuille.
 
 Une valeur de base est une référence : elle est recalculée à chaque lecture et
 n'est jamais stockée. La valeur effective, saisie par le joueur ou le MJ, est
-la seule conservée ; un recalcul ne la modifie jamais (RM-005).
+la seule conservée ; un recalcul ne la modifie jamais.
 
 Module pur : aucun accès réseau ni base de données.
 """
@@ -32,13 +32,13 @@ def base_values(traits: Mapping[str, int], effective_size: int) -> BaseValues:
     Args:
         traits: valeurs des attributs et compétences de la feuille.
         effective_size: Taille effective saisie ; la santé de base en dépend
-            (RM-007).
+           .
 
     Returns:
         Taille = 5 ; Vitesse = Force + Dextérité + 5 ; Défense = min(Astuce,
-        Dextérité) + Sports ; Initiative = Dextérité + Calme (RM-006) ;
-        Santé = Taille effective + Vigueur (RM-007) ; Volonté = Résolution +
-        Calme (RM-010).
+        Dextérité) + Sports ; Initiative = Dextérité + Calme ;
+        Santé = Taille effective + Vigueur ; Volonté = Résolution +
+        Calme.
     """
     return BaseValues(
         size=BASE_SIZE,

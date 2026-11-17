@@ -1,8 +1,8 @@
 "use client";
 
 /**
- * Notification en haut à droite ([Notification — Déconnexion réussie], 08c).
- * Elle disparaît seule après quelques secondes ou par son bouton de fermeture.
+ * Notification en haut à droite (par exemple « Déconnexion réussie »). Elle
+ * disparaît seule après quelques secondes ou par son bouton de fermeture.
  */
 import { useEffect, useSyncExternalStore } from "react";
 

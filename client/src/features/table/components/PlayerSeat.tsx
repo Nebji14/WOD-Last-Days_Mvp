@@ -1,19 +1,14 @@
 "use client";
 
 /**
- * Siège d'un joueur autour de la table ([Composant — Siège joueur]).
+ * Siège d'un joueur autour de la table.
  *
  * - Personnage joué : initiales, nom, concept, santé et volonté, visibles de
- *   tous (Q03-3). Sans personnage : « Aucun personnage » (03-E4).
- * - Mon siège : bordure or, [Étiquette — VOUS] et action principale, « Ouvrir
- *   ma fiche » (03-I1) ou « Créer mon personnage » (03-I2).
- * - Vue MJ : aucun bouton de fiche sur les sièges. Le MJ ouvre les fiches
- *   depuis l'outil Joueurs (04a), décision du développeur du 2026-11-17 qui
- *   remplace 03-MJ-D4.
- * - Joueur déconnecté : siège atténué, pastille masquée (03-E2).
- * - Le siège apparaît en fondu à l'arrivée du joueur (03-A6).
- *
- * Un joueur ne peut rien faire sur le siège d'un autre (03-I7).
+ *   tous ; sinon « Aucun personnage ».
+ * - Mon siège : bordure or, étiquette « VOUS » et bouton « Ouvrir ma fiche » ou
+ *   « Créer mon personnage ».
+ * - Le MJ n'ouvre pas les fiches depuis les sièges : il passe par l'outil Joueurs.
+ * - Joueur déconnecté : siège atténué. Le siège apparaît en fondu à l'arrivée.
  */
 import { labels } from "@/shared/i18n";
 import { HealthTrack, WillpowerDots } from "@/shared/ui/Gauges";

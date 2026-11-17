@@ -51,13 +51,13 @@ class ConnectionHub:
         self._connections.pop(websocket, None)
 
     async def table_changed(self, state: TableState) -> None:
-        """Diffuse l'état de présence de la table (03-A6, 03-E2)."""
+        """Diffuse l'état de présence de la table."""
         await self._broadcast(
             EVENT_TABLE_STATE, TableStateResponse.from_state(state).model_dump(mode="json")
         )
 
     async def message_changed(self, message: ChatMessage) -> None:
-        """Diffuse un message créé, modifié ou supprimé (US-013 · CA3, US-030 · CA3)."""
+        """Diffuse un message créé, modifié ou supprimé."""
         await self._broadcast(
             EVENT_CHAT_MESSAGE, MessageResponse.from_message(message).model_dump(mode="json")
         )
@@ -66,7 +66,7 @@ class ConnectionHub:
         """Signale à ``recipients`` qu'un personnage a changé ou a été supprimé.
 
         L'événement ne porte que l'identifiant : la fiche se relit par l'API,
-        qui applique les droits de chaque lecteur (US-009 · CA1, T3).
+        qui applique les droits de chaque lecteur.
         """
         payload = {"type": EVENT_CHARACTER_CHANGED, "data": {"character_id": str(character_id)}}
         targets = [ws for ws, owner in self._connections.items() if owner in recipients]
@@ -76,12 +76,12 @@ class ConnectionHub:
         """Signale à tous un changement des images de la table ou de la bibliothèque.
 
         L'événement ne porte aucune donnée : chacun relit la scène par l'API,
-        qui produit des liens de lecture signés (03-A2, 04b).
+        qui produit des liens de lecture signés.
         """
         await self._broadcast(EVENT_IMAGES_CHANGED, {})
 
     async def npcs_changed(self, recipients: set[UUID]) -> None:
-        """Signale au MJ un changement de la liste des PNJ ou des catégories (04c).
+        """Signale au MJ un changement de la liste des PNJ ou des catégories.
 
         L'événement ne porte aucune donnée : l'outil PNJ relit la liste par l'API.
         """
@@ -90,7 +90,7 @@ class ConnectionHub:
         await asyncio.gather(*(self._send(ws, payload) for ws in targets))
 
     async def close_account(self, account_id: UUID, code: int) -> None:
-        """Ferme toutes les connexions d'un compte (déconnexion, US-003 et T3)."""
+        """Ferme toutes les connexions d'un compte, fenêtres détachées comprises (déconnexion)."""
         targets = [ws for ws, owner in self._connections.items() if owner == account_id]
         await asyncio.gather(*(self._close(ws, code) for ws in targets))
 

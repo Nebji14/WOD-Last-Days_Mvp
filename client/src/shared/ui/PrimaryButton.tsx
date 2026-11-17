@@ -1,6 +1,6 @@
 /**
- * Bouton d'action principale : rouge, réservé aux actions importantes (légende T5).
- * Pendant un envoi, il est désactivé et affiche un indicateur (02a-E3).
+ * Bouton d'action principale, rouge, réservé aux actions importantes.
+ * Pendant un envoi, il est désactivé et affiche un indicateur.
  */
 import type { ReactNode } from "react";
 

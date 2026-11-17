@@ -1,7 +1,7 @@
-"""Cas d'usage de la table de jeu : présence des participants (US-012, US-028).
+"""Cas d'usage de la table de jeu : présence des participants.
 
-L'état de présence vit en mémoire, pour la durée de vie du serveur (Q03-7).
-Il suffit à une instance unique (CDC 12.3) ; plusieurs instances demanderaient
+L'état de présence vit en mémoire, pour la durée de vie du serveur.
+Il suffit à une instance unique ; plusieurs instances demanderaient
 un stockage partagé.
 """
 
@@ -20,10 +20,10 @@ class TableState:
 
     Attributs:
         gm_name: nom affiché du MJ, ``None`` tant que son compte n'existe pas.
-        gm_online: présence du MJ (US-012 · CA2).
+        gm_online: présence du MJ.
         seats: places attribuées aux joueurs, dans l'ordre des positions.
         characters: personnage joué par compte ; un compte sans personnage en
-            est absent (03-E4).
+            est absent.
     """
 
     gm_name: str | None
@@ -73,7 +73,7 @@ class TableService:
         self._gm_name: str | None = None
 
     async def enter(self, account: Account) -> None:
-        """Enregistre l'arrivée d'une connexion et diffuse le nouvel état (03-A6).
+        """Enregistre l'arrivée d'une connexion et diffuse le nouvel état.
 
         Raises:
             TableFullError: si le joueur n'a pas de place et qu'aucune n'est libre.
@@ -86,7 +86,7 @@ class TableService:
         await self._broadcaster.table_changed(await self.state())
 
     async def leave(self, account: Account) -> None:
-        """Enregistre la fermeture d'une connexion et diffuse le nouvel état (03-E2)."""
+        """Enregistre la fermeture d'une connexion et diffuse le nouvel état."""
         if account.role is Role.GM:
             self._gm_connections = max(0, self._gm_connections - 1)
         else:
@@ -94,11 +94,11 @@ class TableService:
         await self._broadcaster.table_changed(await self.state())
 
     async def refresh(self) -> None:
-        """Rediffuse l'état de la table : un personnage joué a changé (US-009 · CA1)."""
+        """Rediffuse l'état de la table : un personnage joué a changé."""
         await self._broadcaster.table_changed(await self.state())
 
     def online_accounts(self) -> set[UUID]:
-        """Joueurs actuellement connectés à la table (US-025 · CA2)."""
+        """Joueurs actuellement connectés à la table."""
         return {seat.account_id for seat in self._seats.seats() if seat.online}
 
     async def state(self) -> TableState:

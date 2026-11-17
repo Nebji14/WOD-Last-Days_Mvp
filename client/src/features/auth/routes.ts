@@ -1,10 +1,9 @@
 /**
  * Adresses des écrans d'authentification.
  *
- * L'accès du MJ est un chemin réservé, connu du seul MJ (décision T-4). Le
- * client ne l'embarque jamais dans une page joueur : il le mémorise pour la
- * session du navigateur une fois le MJ connecté, afin de le ramener sur son
- * propre écran de connexion à la déconnexion (08c).
+ * Le chemin du MJ est secret : il n'apparaît jamais dans une page joueur. Il est
+ * mémorisé pour la session du navigateur une fois le MJ connecté, afin de le
+ * ramener sur sa propre page de connexion après la déconnexion.
  */
 export const PLAYER_LOGIN_PATH = "/connexion";
 export const REGISTER_PATH = "/inscription";

@@ -104,7 +104,7 @@ def set_session_cookies(response: Response, tokens: SessionTokens, settings: Set
 
     Le cookie de rafraîchissement vit ``session_idle_seconds`` et il est
     renouvelé à chaque rafraîchissement : la session expire donc après cette
-    durée d'inactivité (CDC 12.2).
+    durée d'inactivité.
     """
     common = {"httponly": True, "secure": settings.is_production, "samesite": "lax", "path": "/"}
     response.set_cookie(ACCESS_COOKIE, tokens.access_token, max_age=tokens.expires_in, **common)  # type: ignore[arg-type]

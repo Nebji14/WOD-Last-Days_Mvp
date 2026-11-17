@@ -1,9 +1,9 @@
 "use client";
 
 /**
- * Pied de l'assistant : [Bouton — Précédent], [Blocage — raison] et
- * [Bouton — Suivant], actif seulement quand l'étape est valide (06-I3).
- * À la dernière étape, « Suivant » devient « Créer le personnage ».
+ * Pied de l'assistant : « Précédent », raison du blocage éventuel et
+ * « Suivant », actif seulement quand l'étape est valide. À la dernière étape,
+ * « Suivant » devient « Créer le personnage ».
  */
 import { labels } from "@/shared/i18n";
 

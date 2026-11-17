@@ -1,4 +1,4 @@
-/** Appels API des images : bibliothèque du MJ (04b) et images de la table (03-A2). */
+/** Appels API des images : bibliothèque du MJ et images montrées à la table. */
 import { ApiError, apiRequest, isRecord, uploadFile } from "@/shared/api/client";
 
 export interface ImageFolder {
@@ -96,7 +96,7 @@ export function fetchLibrary(): Promise<Library> {
   return apiRequest("/api/images", { parse: parseLibrary });
 }
 
-/** Ajoute une image au dossier ouvert, avec progression de l'envoi (04b-I1). */
+/** Ajoute une image au dossier ouvert, avec progression de l'envoi. */
 export function uploadImage(
   file: File,
   folderId: string | null,

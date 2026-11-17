@@ -1,4 +1,4 @@
-"""Images (US-031) : bibliothèque du MJ (04b) et images de la table (03-A2, 08a)."""
+"""Images : bibliothèque du MJ et images montrées à la table."""
 
 from typing import Any
 

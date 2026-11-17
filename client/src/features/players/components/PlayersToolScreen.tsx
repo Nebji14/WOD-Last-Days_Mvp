@@ -1,10 +1,8 @@
 "use client";
 
 /**
- * Fenêtre détachée de l'outil Joueurs du MJ (écran 04a, US-025 à US-027).
- *
- * Ouverte par [Outil — Joueurs] de la table du MJ : une fenêtre par outil
- * (T2). Le serveur refuse la liste à tout autre compte que le MJ.
+ * Fenêtre de l'outil Joueurs du MJ : liste à gauche, détail du joueur choisi à
+ * droite. Le serveur refuse la liste à tout autre compte que le MJ.
  */
 import { useEffect } from "react";
 

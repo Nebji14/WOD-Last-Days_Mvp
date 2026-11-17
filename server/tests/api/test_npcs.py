@@ -1,4 +1,4 @@
-"""Outil PNJ (04c) et feuille de PNJ (07) : US-039 à US-043, RM-021 à RM-023."""
+"""Outil PNJ et feuille de PNJ : création, modification, catégories, suppression, droits."""
 
 from typing import Any
 
@@ -25,7 +25,7 @@ def directory(gm: Actor) -> dict[str, Any]:
     return data
 
 
-# --- Création et liste (US-039, US-040) ---------------------------------------------------
+# --- Création et liste ---------------------------------------------------
 
 
 def test_gm_creates_a_blank_simplified_npc_without_owner(ctx: TestContext) -> None:
@@ -72,7 +72,7 @@ def test_player_lists_do_not_include_npcs(ctx: TestContext) -> None:
     assert row["character_names"] == ["Isaac Thorne"]
 
 
-# --- Modification (US-042, RM-022, RM-023) ----------------------------------------------
+# --- Modification ----------------------------------------------
 
 
 def test_simplified_traits_stay_between_one_and_ten(ctx: TestContext) -> None:
@@ -155,7 +155,7 @@ def test_npc_refuses_experience_tactics_forms_and_awakening(ctx: TestContext) ->
     assert awaken.status_code == 404
 
 
-# --- Catégories (US-040 · CA4, C07) -----------------------------------------------------
+# --- Catégories -----------------------------------------------------
 
 
 def test_npc_moves_to_a_category_and_up_when_it_is_deleted(ctx: TestContext) -> None:
@@ -198,7 +198,7 @@ def test_category_cannot_move_into_its_own_subcategory(ctx: TestContext) -> None
     assert error_code(response) == "folder_cycle"
 
 
-# --- Suppression (US-043) -----------------------------------------------------------------
+# --- Suppression -----------------------------------------------------------------
 
 
 def test_deleted_npc_disappears(ctx: TestContext) -> None:

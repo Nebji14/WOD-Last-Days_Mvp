@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Nom modifiable sur place (04b-I5, I9 ; 04c-I2) : Entrée ou sortie du champ valide,
+ * Nom modifiable sur place : Entrée ou sortie du champ valide,
  * Échap annule. Un nom vide ou inchangé annule aussi.
  */
 import { useState } from "react";

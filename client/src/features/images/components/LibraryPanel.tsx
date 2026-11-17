@@ -1,9 +1,8 @@
 "use client";
 
 /**
- * [Panneau — Bibliothèque] de l'outil Images (04b) : en-tête et compteurs,
- * [Bouton — Nouveau dossier], [Bouton — Charger des images], recherche,
- * arborescence, contenu du dossier ouvert et zone de dépôt.
+ * Bibliothèque d'images : compteurs, création de dossier, chargement d'images,
+ * recherche, arborescence, contenu du dossier ouvert et zone de dépôt.
  */
 import { useRef, useState } from "react";
 
@@ -75,7 +74,7 @@ export function LibraryPanel({
     setExpanded((current) => new Set([...current, ...parents]));
   };
 
-  /** Crée « Nouveau dossier », l'ouvre et met son nom en saisie (04b-I9). */
+  /** Crée « Nouveau dossier », l'ouvre et met son nom en saisie. */
   const newFolder = async (parentId: string | null) => {
     const created: { id: string | null } = { id: null };
     const done = await act(async () => {

@@ -1,15 +1,11 @@
 "use client";
 
 /**
- * Carte « Personnage — … » du profil (09).
+ * Carte d'un personnage dans le profil.
  *
- * À gauche, le personnage tel qu'il apparaît sur un siège de la table ; à
- * droite, ses formes et ses actions :
- * - I1 [Bouton — Ouvrir la fiche] → fiche (05) en fenêtre détachée ;
- * - I3 [Lien — Supprimer le personnage] → confirmation qui rappelle son nom,
- *   suppression définitive (US-010, Q09-2) ;
- * - I4 [Bouton — Jouer ce personnage] → il prend place sur le siège du joueur,
- *   choix libre (Q09-1). Le personnage joué porte [Étiquette — À la table].
+ * À gauche, l'aperçu du personnage ; à droite, ses formes et ses actions :
+ * ouvrir la fiche, le jouer à la table, ou le supprimer définitivement après une
+ * confirmation qui rappelle son nom. Le personnage joué porte « À la table ».
  */
 import { useState } from "react";
 

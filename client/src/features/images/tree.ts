@@ -1,5 +1,5 @@
 /**
- * Contenu des dossiers et recherche de la bibliothèque d'images (04b).
+ * Contenu des dossiers et recherche de la bibliothèque d'images.
  * L'arborescence elle-même vient de `@/shared/tree`.
  */
 import { byName, nodePath } from "@/shared/tree";
@@ -22,7 +22,7 @@ export function imagesIn(images: readonly LibraryImage[], folderId: string | nul
   return shown.sort(byName);
 }
 
-/** Nombre d'images rangées directement dans chaque dossier (Q04b-5). */
+/** Nombre d'images rangées directement dans chaque dossier. */
 export function imageCounts(images: readonly LibraryImage[]): Map<string, number> {
   const counts = new Map<string, number>();
   for (const image of images) {
@@ -35,7 +35,7 @@ export function imageCounts(images: readonly LibraryImage[]): Map<string, number
 
 /**
  * Filtre les images sur leur nom ET sur le nom de leurs dossiers, dans tous les
- * dossiers (04b-I8). Une recherche vide ne retourne rien.
+ * dossiers. Une recherche vide ne retourne rien.
  */
 export function searchImages(
   images: readonly LibraryImage[],

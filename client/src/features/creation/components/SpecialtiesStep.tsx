@@ -1,9 +1,8 @@
 "use client";
 
 /**
- * Étape 4 de la création : exactement trois spécialités, chacune sur une
- * compétence dotée d'au moins un point (06-É4, RM-004). Seules ces
- * compétences sont proposées.
+ * Étape « Spécialités » : exactement trois spécialités, chacune sur une
+ * compétence qui a au moins un point. Seules ces compétences sont proposées.
  */
 import type { Dispatch } from "react";
 

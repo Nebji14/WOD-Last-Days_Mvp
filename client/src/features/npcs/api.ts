@@ -1,4 +1,4 @@
-/** Appels API de l'outil PNJ (04c) et des données propres au PNJ (07). */
+/** Appels API de l'outil PNJ et des données propres à un PNJ. */
 import { type Character, type NpcModel, parseCharacter } from "@/features/characters/model";
 import { ApiError, apiRequest, isRecord } from "@/shared/api/client";
 
@@ -8,7 +8,7 @@ export interface NpcCategory {
   readonly parentId: string | null;
 }
 
-/** Carte « PNJ — … » (04c). */
+/** PNJ tel qu'il apparaît dans la liste de l'outil PNJ. */
 export interface NpcCard {
   readonly id: string;
   readonly name: string;
@@ -27,7 +27,7 @@ export interface NpcDirectory {
   readonly npcs: readonly NpcCard[];
 }
 
-/** Données propres au PNJ modifiables par `setNpcField` (07-I2, I4 ; Q04c-1). */
+/** Données propres au PNJ modifiables par `setNpcField`. */
 export type NpcField = "category_id" | "notes" | "power" | "finesse" | "resilience";
 
 const invalid = (): ApiError => new ApiError(502, "internal_error");
@@ -96,7 +96,7 @@ export function fetchDirectory(): Promise<NpcDirectory> {
   return apiRequest("/api/npcs", { parse: parseDirectory });
 }
 
-/** Crée une feuille de PNJ vierge du modèle choisi (04c-I3, RM-021). */
+/** Crée une feuille de PNJ vierge du modèle choisi. */
 export function createNpc(model: NpcModel, categoryId: string | null): Promise<Character> {
   return apiRequest("/api/npcs", {
     method: "POST",
@@ -108,7 +108,7 @@ export function createNpc(model: NpcModel, categoryId: string | null): Promise<C
 /**
  * Modifie une donnée propre au PNJ.
  *
- * @param expected valeur affichée avant la saisie (05-E3) ; ignorée pour la catégorie.
+ * @param expected valeur affichée avant la saisie ; ignorée pour la catégorie.
  */
 export function setNpcField(
   npcId: string,
@@ -123,7 +123,7 @@ export function setNpcField(
   });
 }
 
-/** Supprime définitivement la feuille du PNJ (US-043). */
+/** Supprime définitivement la feuille du PNJ. */
 export function deleteNpc(npcId: string): Promise<void> {
   return apiRequest(`/api/npcs/${npcId}`, { method: "DELETE" });
 }

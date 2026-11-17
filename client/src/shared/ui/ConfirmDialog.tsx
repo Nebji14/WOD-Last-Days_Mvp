@@ -1,11 +1,10 @@
 "use client";
 
 /**
- * Fenêtre de confirmation modale (règle T1 : toute suppression est confirmée).
+ * Fenêtre de confirmation, utilisée avant toute suppression.
  *
- * Repose sur l'élément natif `<dialog>` ouvert par `showModal()` : le reste de la
- * page devient inerte, le focus reste dans la fenêtre et Échap l'annule.
- * Cliquer sur le fond assombri annule également.
+ * Repose sur l'élément natif `<dialog>` : le reste de la page devient inerte, le
+ * focus reste dans la fenêtre, Échap ou un clic sur le fond annulent.
  */
 import { useEffect, useId, useRef } from "react";
 

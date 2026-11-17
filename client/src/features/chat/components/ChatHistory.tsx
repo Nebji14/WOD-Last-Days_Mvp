@@ -1,14 +1,12 @@
 "use client";
 
 /**
- * [Historique des messages] du chat déroulé (08b).
+ * Historique du chat déroulé.
  *
- * - À l'ouverture, l'affichage est calé sur les messages les plus récents
- *   (US-013 · CA2) et il y reste tant que le lecteur n'a pas remonté.
- * - Remonter en haut charge la page précédente, sans déplacer la lecture
- *   (US-013 · CA1).
- * - Dès que le lecteur a remonté, une commande ramène aux plus récents
- *   (US-013 · CA4).
+ * - À l'ouverture, l'affichage est calé sur les messages les plus récents et y
+ *   reste tant que le lecteur ne remonte pas.
+ * - Remonter en haut charge les messages plus anciens sans déplacer la lecture.
+ * - Dès que le lecteur a remonté, un bouton ramène aux plus récents.
  */
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 

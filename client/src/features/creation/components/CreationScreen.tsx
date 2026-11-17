@@ -1,15 +1,13 @@
 "use client";
 
 /**
- * Fenêtre détachée de création de personnage (écran 06, US-007).
+ * Fenêtre de création de personnage.
  *
  * Cinq étapes guidées : identité, attributs, compétences, spécialités,
- * récapitulatif (US-007 · CA3). « Suivant » reste désactivé tant que l'étape
- * n'est pas valide, avec la raison affichée (CA2). À la création, la fenêtre
- * devient celle de la fiche créée (06, Sortie).
- *
- * Q06-1 : fermer en cours de création demande confirmation, puis abandonne
- * la création (aucun brouillon au MVP).
+ * récapitulatif. « Suivant » reste désactivé tant que l'étape n'est pas valide,
+ * avec la raison affichée. Une fois le personnage créé, la fenêtre affiche sa
+ * fiche. Fermer en cours de route demande confirmation et abandonne la
+ * création : aucun brouillon n'est gardé.
  */
 import { useEffect, useState } from "react";
 

@@ -10,7 +10,7 @@ function character(id: string, isPlayed: boolean, forms: readonly [boolean, stri
   return { id, is_played: isPlayed, sheets: sheets as unknown as Sheet[] } as unknown as Character;
 }
 
-describe("09 · résumé des formes", () => {
+describe("résumé des formes", () => {
   it("nomme « principale » la seule forme d'un personnage", () => {
     expect(formsSummary(character("a", false, [[true, "Forme principale"]]))).toBe(
       "1 forme : principale",
@@ -26,7 +26,7 @@ describe("09 · résumé des formes", () => {
   });
 });
 
-describe("09 · ordre des cartes", () => {
+describe("ordre des cartes", () => {
   it("met le personnage à la table en premier sans changer l'ordre des autres", () => {
     const list = [character("a", false, []), character("b", false, []), character("c", true, [])];
     expect(playedFirst(list).map((item) => item.id)).toEqual(["c", "a", "b"]);

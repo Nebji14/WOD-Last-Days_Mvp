@@ -1,10 +1,10 @@
 "use client";
 
 /**
- * Images de la table vues par tous (03-A2, 03-I5, 08a).
+ * Images de la table vues par tous.
  *
- * La scène se relit à chaque (re)connexion, à chaque changement signalé par le
- * serveur (≤ 1 s, CDC 12.3) et régulièrement pour renouveler les liens signés.
+ * Elles se relisent à chaque (re)connexion, à chaque changement signalé par le
+ * serveur et régulièrement pour renouveler les liens signés.
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 

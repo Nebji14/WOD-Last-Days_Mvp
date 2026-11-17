@@ -1,8 +1,8 @@
-"""Cas d'usage des éléments d'une fiche (US-009, US-027, règle T1).
+"""Cas d'usage des éléments d'une fiche.
 
-Spécialités (05-I9), annotations de moralité (05-I5), atouts, handicaps,
-pouvoirs, objets, armes et armures (05-I7), tactiques partagées (Q05-3),
-dépenses d'expérience (05-I6, RM-015 à RM-017) et notes (05c).
+Spécialités, annotations de moralité, atouts, handicaps,
+pouvoirs, objets, armes et armures, tactiques partagées,
+dépenses d'expérience et notes de la fiche.
 """
 
 from typing import Protocol
@@ -79,7 +79,7 @@ def normalize_entry(kind: EntryKind, values: EntryValues) -> EntryValues:
 
     Un atout a toujours un niveau (1 par défaut) ; le niveau d'un handicap ou
     d'un pouvoir est facultatif. Les autres champs ne valent que pour un objet
-    (quantité), une arme (RM-014) ou une armure.
+    (quantité), une arme ou une armure.
     """
     is_weapon = kind is EntryKind.WEAPON
     is_armor = kind is EntryKind.ARMOR
@@ -119,7 +119,7 @@ class SheetItemService:
     async def _sheet_owner(self, actor: Account, sheet_id: UUID) -> Character:
         return await self._owner_of(actor, ItemKind.SHEET, sheet_id)
 
-    # --- Spécialités (05-I9) ------------------------------------------------------------
+    # --- Spécialités ------------------------------------------------------------
 
     async def set_specialties(
         self, actor: Account, sheet_id: UUID, skill: str, text: str
@@ -139,7 +139,7 @@ class SheetItemService:
         await self._items.replace_specialties(sheet_id, skill, labels)
         return await self._access.changed(character.id)
 
-    # --- Annotations de moralité (05-I5, RM-013) ----------------------------------------
+    # --- Annotations de moralité ----------------------------------------
 
     async def add_morality_note(
         self, actor: Account, sheet_id: UUID, level: int, body: str
@@ -160,7 +160,7 @@ class SheetItemService:
         await self._items.delete_morality_note(note_id)
         return await self._access.changed(character.id)
 
-    # --- Atouts, handicaps, pouvoirs, objets, armes, armures (05-I7) --------------------
+    # --- Atouts, handicaps, pouvoirs, objets, armes, armures --------------------
 
     async def add_entry(
         self, actor: Account, sheet_id: UUID, kind: EntryKind, values: EntryValues
@@ -182,7 +182,7 @@ class SheetItemService:
         await self._items.delete_entry(entry_id)
         return await self._access.changed(character.id)
 
-    # --- Tactiques partagées (Q05-3, C06) -----------------------------------------------
+    # --- Tactiques partagées -----------------------------------------------
 
     async def list_tactics(self) -> list[Tactic]:
         """Liste les tactiques existantes, pour en rattacher une à une feuille."""
@@ -191,7 +191,7 @@ class SheetItemService:
     async def add_tactic(
         self, actor: Account, sheet_id: UUID, name: str, description: str
     ) -> Character:
-        """Crée une tactique et la rattache à la feuille. Pas de tactique pour un PNJ (07-D6)."""
+        """Crée une tactique et la rattache à la feuille. Pas de tactique pour un PNJ."""
         character = await self._sheet_owner(actor, sheet_id)
         require_player_character(character, "tactic")
         await self._items.create_tactic(sheet_id, name.strip(), description.strip())
@@ -229,7 +229,7 @@ class SheetItemService:
         await self._items.unlink_tactic(sheet_id, tactic_id)
         return await self._access.changed(character.id)
 
-    # --- Dépenses d'expérience (05-I6, RM-015 à RM-017) ---------------------------------
+    # --- Dépenses d'expérience ---------------------------------
 
     async def add_expense(
         self, actor: Account, character_id: UUID, is_tactical: bool, points: int, justification: str
@@ -264,10 +264,10 @@ class SheetItemService:
         await self._items.delete_expense(expense_id)
         return await self._access.changed(character.id)
 
-    # --- Notes de la fiche (05c) --------------------------------------------------------
+    # --- Notes de la fiche --------------------------------------------------------------
 
     async def add_note(self, actor: Account, character_id: UUID) -> tuple[Character, UUID]:
-        """Crée une note vide « Sans titre » (05c-N4).
+        """Crée une note vide « Sans titre ».
 
         Returns:
             Le personnage à jour et l'identifiant de la note créée.
@@ -297,7 +297,7 @@ class SheetItemService:
 
     @staticmethod
     def _require_note_owner(actor: Account, character: Character) -> None:
-        """Le MJ lit les notes d'un joueur mais ne les modifie pas (05c-N5)."""
+        """Le MJ lit les notes d'un joueur mais ne les modifie pas."""
         if not can_manage_notes(actor, character.owner_id):
             raise AppError(
                 ErrorCode.FORBIDDEN,

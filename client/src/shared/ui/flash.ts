@@ -1,5 +1,5 @@
 /**
- * Notification à afficher une seule fois sur la page suivante (ex. 08c :
+ * Notification à afficher une seule fois sur la page suivante (par exemple
  * « Déconnexion réussie » à l'arrivée sur l'écran de connexion).
  *
  * Le message survit à un rechargement complet grâce à `sessionStorage` et il

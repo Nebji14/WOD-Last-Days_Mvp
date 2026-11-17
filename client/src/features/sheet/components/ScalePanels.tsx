@@ -1,14 +1,12 @@
 "use client";
 
 /**
- * [Panneau — Moralité] et [Panneau — Avantage surnaturel] du recto (05a) :
- * deux jauges graduées de 1 à 10, remplies de 1 jusqu'à la valeur.
+ * Panneaux Moralité et Avantage surnaturel du recto : deux jauges de 1 à 10.
  *
- * Moralité (RM-013, 05-I5) : annotations libres, chacune liée au niveau où
- * elle a été acquise.
- * Avantage surnaturel (05-I10) : commun à toutes les formes, la graduation 1
- * est toujours remplie, nom libre et facultatif. Il ne progresse qu'avec
- * l'accord du MJ : modifiable seulement en mode modification (M2).
+ * La moralité bouge pendant la partie et se modifie à tout moment ; chaque
+ * annotation est liée au niveau où elle a été acquise. L'avantage surnaturel,
+ * commun à toutes les formes, ne progresse qu'avec l'accord du MJ : il se
+ * modifie en mode modification et ne descend jamais sous 1.
  */
 import { type FormEvent, useState } from "react";
 
@@ -126,8 +124,8 @@ function NoteForm({ initial, onSubmit, onCancel }: NoteFormProps) {
 }
 
 /**
- * [Panneau — Moralité] (RM-013) : valeur de jeu, modifiable à tout moment
- * sur indication du MJ, comme ses annotations, sans passer en mode modification.
+ * Moralité : valeur de jeu, modifiable à tout moment sur indication du MJ,
+ * comme ses annotations, sans passer en mode modification.
  */
 export function MoralityPanel() {
   const { sheet, run } = useSheet();

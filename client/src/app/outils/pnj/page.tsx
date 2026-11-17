@@ -1,6 +1,6 @@
 import { NpcsToolScreen } from "@/features/npcs/components/NpcsToolScreen";
 
-/** Fenêtre détachée de l'outil PNJ du MJ (écran 04c). */
+/** Fenêtre détachée de l'outil PNJ du MJ. */
 export default function NpcsToolPage() {
   return <NpcsToolScreen />;
 }

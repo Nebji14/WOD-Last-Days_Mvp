@@ -1,9 +1,9 @@
 /**
- * Gabarit commun des écrans 02a, 02b, 02c et 08c : fond flouté, particules,
- * titre réduit et panneau central.
+ * Gabarit commun des écrans de connexion, d'inscription et de déconnexion :
+ * fond flouté, particules, titre réduit et panneau central.
  *
- * La variante `gm` ajoute le bandeau « Accès maître du jeu » et la bordure
- * cuivre : on voit tout de suite que ce n'est pas la page joueur (02c).
+ * La variante `gm` ajoute le bandeau « Accès maître du jeu » et une bordure
+ * cuivre, pour qu'on voie tout de suite qu'il s'agit de la page du MJ.
  */
 import type { ReactNode } from "react";
 

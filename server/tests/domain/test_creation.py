@@ -1,4 +1,4 @@
-"""Règles de création : RM-001 (attributs), RM-002 (alerte), RM-003 (compétences), RM-004."""
+"""Règles de création : attributs, alerte 4-5, compétences et spécialités."""
 
 from app.domain.creation import (
     CreationRule,
@@ -34,7 +34,7 @@ def _skills(**overrides: int) -> dict[str, int]:
     return values | overrides
 
 
-# --- RM-001 -----------------------------------------------------------------------------
+# --- Attributs ---------------------------------------------------------------------------
 
 
 def test_valid_attribute_allocation_has_no_violation() -> None:
@@ -77,7 +77,7 @@ def test_priorities_must_rank_the_three_categories_differently() -> None:
     ]
 
 
-# --- RM-002 -----------------------------------------------------------------------------
+# --- Alerte 4-5 --------------------------------------------------------------------------
 
 
 def test_attributes_at_four_or_five_are_flagged_without_blocking() -> None:
@@ -88,7 +88,7 @@ def test_attributes_at_four_or_five_are_flagged_without_blocking() -> None:
     assert attributes_to_discuss(_attributes()) == []
 
 
-# --- RM-003 -----------------------------------------------------------------------------
+# --- Compétences -------------------------------------------------------------------------
 
 
 def test_valid_skill_allocation_has_no_violation() -> None:
@@ -115,7 +115,7 @@ def test_skill_budget_and_range_are_enforced() -> None:
     ]
 
 
-# --- RM-004 -----------------------------------------------------------------------------
+# --- Spécialités -------------------------------------------------------------------------
 
 
 def _specialties() -> list[Specialty]:

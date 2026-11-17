@@ -18,7 +18,7 @@ describe("arrangeSeats", () => {
     ]);
   });
 
-  it("traite le bas au centre comme une place ordinaire en vue MJ (03-MJ-D3)", () => {
+  it("traite le bas au centre comme une place ordinaire en vue MJ", () => {
     const seats = Array.from({ length: 9 }, (_, index) => seat(index, `j${index}`));
 
     const placed = arrangeSeats(seats, null);
@@ -53,7 +53,7 @@ describe("arrangeSeats", () => {
     expect(placed.map((p) => p.seat.accountId)).toEqual(["a", "b", "c"]);
   });
 
-  it("garde son emplacement à un joueur quand un autre se déconnecte (Q03-7)", () => {
+  it("garde son emplacement à un joueur quand un autre se déconnecte", () => {
     const before = arrangeSeats([seat(0, "lea"), seat(1, "ben"), seat(2, "moi")], "moi");
     const after = arrangeSeats(
       [{ ...seat(0, "lea"), online: false }, seat(1, "ben"), seat(2, "moi")],

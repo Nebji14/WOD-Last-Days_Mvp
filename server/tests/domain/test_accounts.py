@@ -1,4 +1,4 @@
-"""Règles des comptes : nom d'utilisateur, mot de passe (02b-V3), adresse technique (T-3)."""
+"""Règles des comptes : nom d'utilisateur, mot de passe, adresse technique."""
 
 import pytest
 

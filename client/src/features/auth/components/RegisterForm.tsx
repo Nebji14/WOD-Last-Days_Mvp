@@ -1,11 +1,11 @@
 "use client";
 
 /**
- * Formulaire d'inscription d'un joueur (écran 02b, US-001).
+ * Formulaire d'inscription d'un joueur.
  *
  * Contrôles V1 à V3 : nom déjà pris, confirmation différente, mot de passe non
  * conforme. Après un succès, le joueur est renvoyé vers la connexion sans être
- * connecté (02b-C3).
+ * connecté.
  */
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";

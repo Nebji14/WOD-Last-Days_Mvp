@@ -13,7 +13,7 @@ const VALID = {
   character_names: ["Marcus Vale"],
 };
 
-describe("04a · lecture d'un joueur", () => {
+describe("lecture d'un joueur", () => {
   it("convertit la réponse du serveur", () => {
     expect(parsePlayer(VALID)).toEqual({
       id: "3f1c",
@@ -25,7 +25,7 @@ describe("04a · lecture d'un joueur", () => {
     });
   });
 
-  it("accepte un joueur sans personnage (US-025 · CA1)", () => {
+  it("accepte un joueur sans personnage", () => {
     expect(parsePlayer({ ...VALID, character_names: [] }).characterNames).toEqual([]);
   });
 

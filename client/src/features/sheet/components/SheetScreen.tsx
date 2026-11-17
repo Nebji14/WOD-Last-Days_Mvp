@@ -1,12 +1,11 @@
 "use client";
 
 /**
- * Fenêtre détachée de la fiche de personnage (écrans 05a, 05b, 05c).
+ * Fenêtre de la fiche d'un personnage ou d'un PNJ.
  *
- * Ouverte par le joueur propriétaire (US-008, US-009) ou par le MJ (US-026,
- * US-027) ; le serveur refuse toute autre lecture. Barre de titre, onglets des
- * formes (F1), puis la face choisie : RECTO, VERSO ou NOTES, avec un court
- * fondu au changement (Q05-1).
+ * Ouverte par le propriétaire ou par le MJ ; le serveur refuse toute autre
+ * lecture. Barre de titre, onglets des formes, puis la face choisie (RECTO,
+ * VERSO ou NOTES) avec un court fondu au changement.
  */
 import { useEffect, useState } from "react";
 
@@ -27,7 +26,7 @@ const MESSAGE =
 
 interface SheetScreenProps {
   readonly characterId: string;
-  /** Ouvre la fiche directement en mode modification (04a-I3). */
+  /** Ouvre la fiche directement en mode modification. */
   readonly initialEditing?: boolean;
 }
 

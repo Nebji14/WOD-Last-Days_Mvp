@@ -1,4 +1,4 @@
-"""Règles de création d'un personnage joueur (RM-001 à RM-004, écran 06).
+"""Règles de création d'un personnage joueur.
 
 Module pur : aucun accès réseau ni base de données.
 """
@@ -23,7 +23,7 @@ from app.domain.traits import (
 ATTRIBUTE_BUDGETS = {1: 5, 2: 4, 3: 3}
 SKILL_BUDGETS = {1: 11, 2: 7, 3: 4}
 SPECIALTY_COUNT = 3
-# RM-002 : une valeur d'attribut à partir de ce seuil se discute avec le MJ.
+# Une valeur d'attribut à partir de ce seuil se discute avec le MJ (alerte non bloquante).
 ATTRIBUTE_ALERT_THRESHOLD = 4
 
 
@@ -71,7 +71,7 @@ def _valid_priorities(priorities: Priorities) -> bool:
 
 
 def attribute_violations(priorities: Priorities, values: Mapping[str, int]) -> list[Violation]:
-    """Contrôle la répartition des attributs (RM-001).
+    """Contrôle la répartition des attributs.
 
     Chaque attribut a un point gratuit. S'y ajoutent exactement 5, 4 et 3
     points dans les catégories classées 1re, 2e et 3e. Un attribut reste
@@ -90,7 +90,7 @@ def attribute_violations(priorities: Priorities, values: Mapping[str, int]) -> l
 
 
 def skill_violations(priorities: Priorities, values: Mapping[str, int]) -> list[Violation]:
-    """Contrôle la répartition des compétences (RM-003).
+    """Contrôle la répartition des compétences.
 
     Exactement 11, 7 et 4 points dans les catégories classées 1re, 2e et 3e,
     sans point gratuit. Ce classement est indépendant de celui des attributs.
@@ -109,7 +109,7 @@ def skill_violations(priorities: Priorities, values: Mapping[str, int]) -> list[
 def specialty_violations(
     specialties: list[Specialty], skill_values: Mapping[str, int]
 ) -> list[Violation]:
-    """Contrôle les spécialités (RM-004).
+    """Contrôle les spécialités.
 
     Exactement trois spécialités, chacune avec un texte non vide et portant
     sur une compétence dotée d'au moins un point.
@@ -127,5 +127,5 @@ def specialty_violations(
 
 
 def attributes_to_discuss(values: Mapping[str, int]) -> list[str]:
-    """Attributs à 4 ou 5, à discuter avec le MJ (RM-002). Alerte non bloquante."""
+    """Attributs à 4 ou 5, à discuter avec le MJ. Alerte non bloquante."""
     return [name for name, value in values.items() if value >= ATTRIBUTE_ALERT_THRESHOLD]

@@ -1,5 +1,5 @@
 /**
- * Image lue par un lien signé du stockage privé (US-031).
+ * Image lue par un lien signé du stockage privé.
  *
  * Le lien change à chaque relecture et expire : il ne passe pas par
  * l'optimiseur d'images de Next, d'où un élément `<img>` simple. La CSP

@@ -44,8 +44,8 @@ function apply(state: CreationState, ...actions: CreationAction[]): CreationStat
   return actions.reduce(creationReducer, state);
 }
 
-describe("assistant de création (US-007 · CA2, CA3)", () => {
-  it("bloque l'identité tant que le nom est vide (06-É1)", () => {
+describe("assistant de création", () => {
+  it("bloque l'identité tant que le nom est vide", () => {
     expect(stepBlocker(start())).not.toBeNull();
     const named = apply(start(), { type: "identity", field: "name", value: "Isaac" });
     expect(stepBlocker(named)).toBeNull();
@@ -60,12 +60,12 @@ describe("assistant de création (US-007 · CA2, CA3)", () => {
     expect(next.reached).toBe(1);
   });
 
-  it("indique les points restants d'une catégorie d'attributs (06-I3)", () => {
+  it("indique les points restants d'une catégorie d'attributs", () => {
     const state = apply(start(), { type: "goto", step: 1 });
     expect(stepBlocker(state)).toContain("5");
   });
 
-  it("signale les catégories vidées par un échange de priorités (06-I1)", () => {
+  it("signale les catégories vidées par un échange de priorités", () => {
     const state = apply(
       start(),
       { type: "trait", kind: "attributes", category: "mental", name: "intelligence", rank: 5 },

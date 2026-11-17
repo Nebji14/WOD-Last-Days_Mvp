@@ -1,4 +1,4 @@
-/** Appels API de l'outil Joueurs du MJ (écran 04a, US-025). */
+/** Appels API de l'outil Joueurs du MJ. */
 import { ApiError, apiRequest, isRecord } from "@/shared/api/client";
 
 export interface Player {
@@ -6,7 +6,7 @@ export interface Player {
   readonly username: string;
   readonly displayName: string;
   readonly status: "active" | "disabled";
-  /** Connecté à la table (US-025 · CA2). */
+  /** Connecté à la table. */
   readonly online: boolean;
   /** Noms de ses personnages, du plus ancien au plus récent. */
   readonly characterNames: readonly string[];
@@ -46,7 +46,7 @@ function parsePlayers(data: unknown): Player[] {
   throw new ApiError(502, "internal_error");
 }
 
-/** Tous les joueurs, connectés d'abord (US-025 · CA1, CA2 ; Q04a-2). */
+/** Tous les joueurs, connectés d'abord. */
 export function fetchPlayers(): Promise<Player[]> {
   return apiRequest("/api/players", { parse: parsePlayers });
 }

@@ -1,4 +1,4 @@
-"""Modèles d'entrée et de sortie de l'outil PNJ (écran 04c, US-039 à US-043)."""
+"""Modèles d'entrée et de sortie de l'outil PNJ."""
 
 from typing import Any
 from uuid import UUID
@@ -21,7 +21,7 @@ class NpcCategoryResponse(BaseModel):
 
 
 class NpcSummaryResponse(BaseModel):
-    """Carte « PNJ — … » (04c) : complet = santé et volonté ; simplifié = P/F/R en plus."""
+    """PNJ de la liste : complet = santé et volonté ; simplifié = Puissance, Finesse, Résilience en plus."""
 
     id: UUID
     name: str
@@ -63,7 +63,7 @@ class NpcDirectoryResponse(BaseModel):
 
 
 class CreateNpcRequest(BaseModel):
-    """Modèle choisi dans [Menu — Choix du modèle] et catégorie sélectionnée (04c-I3)."""
+    """Modèle choisi à la création et catégorie dans laquelle ranger le PNJ."""
 
     model: NpcModel
     category_id: UUID | None = None
@@ -72,8 +72,8 @@ class CreateNpcRequest(BaseModel):
 class NpcFieldRequest(BaseModel):
     """Donnée propre au PNJ : ``category_id``, ``notes``, ``power``, ``finesse``, ``resilience``.
 
-    La valeur est contrôlée par les règles du PNJ (RM-022) ; ``expected`` est
-    la valeur affichée avant la saisie (05-E3), inutile pour la catégorie.
+    La valeur est contrôlée par les règles du PNJ ; ``expected`` est
+    la valeur affichée avant la saisie, inutile pour la catégorie.
     """
 
     field: str = Field(min_length=1, max_length=40)

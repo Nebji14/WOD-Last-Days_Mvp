@@ -1,4 +1,4 @@
-"""Routes d'authentification : US-001, US-002, US-003, US-023 et droits d'accès."""
+"""Routes d'authentification : inscription, connexions, session et droits d'accès."""
 
 import asyncio
 
@@ -36,7 +36,7 @@ def _error_code(response: Response) -> str:
     return str(response.json()["error"]["code"])
 
 
-# --- US-001 : inscription (02b) ---------------------------------------------------------
+# --- Inscription ------------------------------------------------------------------------
 
 
 def test_register_creates_player_without_opening_session(ctx: TestContext) -> None:
@@ -46,7 +46,7 @@ def test_register_creates_player_without_opening_session(ctx: TestContext) -> No
     assert response.json()["role"] == "player"
     assert response.json()["display_name"] == "lea.vale"
     assert "auth_email" not in response.json()
-    assert ACCESS_COOKIE not in response.cookies  # 02b-C3 : pas de connexion automatique
+    assert ACCESS_COOKIE not in response.cookies  # pas de connexion automatique après l'inscription
 
 
 def test_register_rejects_taken_username_ignoring_case(ctx: TestContext) -> None:
@@ -88,7 +88,7 @@ def test_validation_error_never_echoes_input(ctx: TestContext) -> None:
     assert "secret-value-1" not in response.text
 
 
-# --- US-002 : connexion joueur (02a) ----------------------------------------------------
+# --- Connexion joueur -------------------------------------------------------------------
 
 
 def test_login_sets_http_only_session_cookies(ctx: TestContext) -> None:
@@ -126,7 +126,7 @@ def test_disabled_account_cannot_login_or_keep_session(ctx: TestContext) -> None
     assert _error_code(_login(ctx)) == "invalid_credentials"
 
 
-# --- 02a-E6 / 02c-E6 : mauvais accès ----------------------------------------------------
+# --- Mauvaise page de connexion --------------------------------------------------------
 
 
 def test_gm_on_player_portal_is_refused_without_session(ctx: TestContext) -> None:
@@ -160,7 +160,7 @@ def test_player_on_gm_portal_is_refused_without_session(ctx: TestContext) -> Non
     assert ctx.identity.sessions == {}
 
 
-# --- US-023 : connexion du MJ (02c) -----------------------------------------------------
+# --- Connexion du MJ --------------------------------------------------------------------
 
 
 def test_gm_login_on_gm_portal(ctx: TestContext) -> None:
@@ -182,7 +182,7 @@ def test_only_one_gm_account_can_exist(ctx: TestContext) -> None:
     assert len(ctx.identity.deleted) == 1  # l'identité orpheline est supprimée
 
 
-# --- Session : /me, rafraîchissement, US-003 déconnexion --------------------------------
+# --- Session : /me, rafraîchissement, déconnexion ------------------------------------
 
 
 def test_me_requires_a_session(ctx: TestContext) -> None:

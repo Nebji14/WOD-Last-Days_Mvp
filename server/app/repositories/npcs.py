@@ -36,7 +36,7 @@ class PgNpcRepository:
     def __init__(self, pool: asyncpg.Pool) -> None:
         self._pool = pool
 
-    # --- Catégories (C07, 04c-I2) ------------------------------------------------------
+    # --- Catégories ------------------------------------------------------
 
     async def list_categories(self) -> list[NpcCategory]:
         """Retourne toutes les catégories, par nom."""
@@ -68,7 +68,7 @@ class PgNpcRepository:
         )
 
     async def delete_category(self, category_id: UUID, parent_id: UUID | None) -> None:
-        """Supprime une catégorie ; ses PNJ et sous-catégories remontent au parent (Q04c-2)."""
+        """Supprime une catégorie ; ses PNJ et sous-catégories remontent au parent."""
         async with self._pool.acquire() as connection, connection.transaction():
             await connection.execute(
                 "update npc_profile set category_id = $2 where category_id = $1",
@@ -85,7 +85,7 @@ class PgNpcRepository:
     # --- PNJ ---------------------------------------------------------------------------
 
     async def list_npcs(self) -> list[NpcSummary]:
-        """Retourne tous les PNJ, par nom (US-040 · CA1)."""
+        """Retourne tous les PNJ, par nom."""
         rows = await self._pool.fetch(_LIST_NPCS)
         return [
             NpcSummary(
@@ -106,7 +106,7 @@ class PgNpcRepository:
         traits: dict[str, int | None],
         new: NewCharacter,
     ) -> UUID:
-        """Crée un PNJ sans propriétaire, sa feuille et son profil (US-039)."""
+        """Crée un PNJ sans propriétaire, sa feuille et son profil."""
         async with self._pool.acquire() as connection, connection.transaction():
             character_id: UUID = await connection.fetchval(
                 "insert into character (kind, owner_id) values ('npc', null) returning id"
@@ -132,7 +132,7 @@ class PgNpcRepository:
 
         Returns:
             ``False`` si la valeur a changé entre-temps : rien n'est écrit
-            (CDC 12.3, pas d'écrasement silencieux).
+            (pas d'écrasement silencieux).
         """
         if field not in _PROFILE_FIELDS:
             raise ValueError(field)
@@ -146,7 +146,7 @@ class PgNpcRepository:
         return str(status).endswith(" 1")
 
     async def set_category(self, character_id: UUID, category_id: UUID | None) -> None:
-        """Range le PNJ dans une catégorie, ou à la racine (Q04c-1)."""
+        """Range le PNJ dans une catégorie, ou à la racine."""
         await self._pool.execute(
             "update npc_profile set category_id = $2 where character_id = $1",
             character_id,

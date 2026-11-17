@@ -1,7 +1,7 @@
 /**
- * Glisser-déposer interne de la bibliothèque (04b-I10) : une vignette ou un
+ * Glisser-déposer interne de la bibliothèque : une vignette ou un
  * dossier glissé sur une ligne de l'arborescence. Les fichiers venant de
- * l'ordinateur passent par la zone de dépôt (04b-I1).
+ * l'ordinateur passent par la zone de dépôt.
  */
 import type { DragEvent } from "react";
 

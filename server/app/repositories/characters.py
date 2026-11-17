@@ -24,7 +24,7 @@ CHARACTER_FIELDS = frozenset(
     {"supernatural_level", "supernatural_name", "xp_general_total", "xp_tactical_total"}
 )
 
-# Colonnes recopiées quand une forme est créée à partir de la forme principale (Q05-7).
+# Colonnes recopiées quand une forme est créée à partir de la forme principale.
 _COPIED_SHEET_COLUMNS = ", ".join([*sorted(SHEET_FIELDS - {"form_name"}), "wound_track"])
 _COPIED_ENTRY_COLUMNS = (
     "kind, name, description, level, quantity, damage_modifier, range, size, "
@@ -35,7 +35,7 @@ _COPIED_ENTRY_COLUMNS = (
 
 @dataclass(frozen=True, slots=True)
 class NewCharacter:
-    """Données d'un personnage à créer (écran 06).
+    """Données d'un personnage à créer.
 
     Attributs:
         values: colonnes de la forme principale et leurs valeurs ; les clés
@@ -102,8 +102,8 @@ class PgCharacterRepository:
     async def create(self, owner_id: UUID, new: NewCharacter) -> UUID:
         """Crée un personnage, sa forme principale et ses spécialités.
 
-        Le nouveau personnage devient celui joué à la table (Q03-5 : par
-        défaut, le dernier créé).
+        Le nouveau personnage devient celui joué à la table : par défaut, c'est
+        le dernier créé.
 
         Returns:
             L'identifiant du personnage créé.
@@ -121,9 +121,9 @@ class PgCharacterRepository:
         return character_id
 
     async def delete(self, character_id: UUID) -> None:
-        """Supprime définitivement le personnage et tout ce qui s'y rattache (US-010).
+        """Supprime définitivement le personnage et tout ce qui s'y rattache.
 
-        Les tactiques qu'aucune feuille ne connaît plus sont supprimées (C06).
+        Les tactiques qu'aucune feuille ne connaît plus sont supprimées.
         """
         async with self._pool.acquire() as connection, connection.transaction():
             await connection.execute("delete from character where id = $1", character_id)
@@ -133,14 +133,14 @@ class PgCharacterRepository:
             )
 
     async def mark_awakened(self, character_id: UUID) -> None:
-        """Enregistre la date de l'éveil, sans toucher à un éveil déjà daté (04a-I5)."""
+        """Enregistre la date de l'éveil, sans toucher à un éveil déjà daté."""
         await self._pool.execute(
             "update character set awakened_at = now() where id = $1 and awakened_at is null",
             character_id,
         )
 
     async def set_played(self, owner_id: UUID, character_id: UUID) -> None:
-        """Désigne le personnage joué à la table par ce compte (09-I4)."""
+        """Désigne le personnage joué à la table par ce compte."""
         await self._pool.execute(
             "update account set played_character_id = $2 where id = $1", owner_id, character_id
         )
@@ -152,7 +152,7 @@ class PgCharacterRepository:
 
         Returns:
             ``False`` si la valeur a changé entre-temps : rien n'est écrit
-            (CDC 12.3, pas d'écrasement silencieux).
+            (pas d'écrasement silencieux).
         """
         if field not in CHARACTER_FIELDS:
             raise ValueError(field)
@@ -178,7 +178,7 @@ class PgCharacterRepository:
         return updated is not None
 
     async def add_form(self, character_id: UUID, form_name: str) -> UUID:
-        """Crée une forme en copiant la forme principale et ses éléments (Q05-7).
+        """Crée une forme en copiant la forme principale et ses éléments.
 
         Returns:
             L'identifiant de la nouvelle forme.
@@ -239,7 +239,7 @@ class PgCharacterRepository:
     async def played_by(self, account_ids: Sequence[UUID]) -> dict[UUID, SeatCharacter]:
         """Retourne, par compte, le résumé du personnage joué à la table.
 
-        Le siège affiche la forme principale (Q05-9). Un compte sans
+        Le siège affiche la forme principale. Un compte sans
         personnage joué est absent du résultat.
         """
         rows = await self._pool.fetch(

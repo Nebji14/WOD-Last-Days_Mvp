@@ -1,8 +1,8 @@
 "use client";
 
 /**
- * [Panneau — Description et récit] du verso (05b) : état civil, apparence,
- * histoire et description. La taille physique n'est pas la Taille de jeu.
+ * Panneau « Description et récit » du verso : état civil, apparence, histoire
+ * et description. La taille physique n'a rien à voir avec la Taille de jeu.
  */
 import { setSheetField } from "@/features/characters/api";
 import { labels } from "@/shared/i18n";

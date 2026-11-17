@@ -12,7 +12,7 @@ export function isValidUsername(username: string): boolean {
   return USERNAME_PATTERN.test(username);
 }
 
-/** Liste les règles de sécurité non respectées par un mot de passe (02b-V3). */
+/** Liste les règles de sécurité non respectées par un mot de passe. */
 export function passwordViolations(password: string): PasswordRule[] {
   const violations: PasswordRule[] = [];
   if (password.length < PASSWORD_MIN_LENGTH) {

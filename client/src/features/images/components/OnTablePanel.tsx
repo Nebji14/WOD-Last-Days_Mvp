@@ -1,9 +1,7 @@
 /**
- * [Panneau — Sur la table] de l'outil Images (04b).
- *
- * L'image affichée en grand, avec [Reposer l'image] (Q04b-1), puis la pile, la
- * plus récente en haut ; chaque ligne « Posée — … » a [Retirer de la table]
- * (04b-I6, US-031 · CA6). [Rappel — affichage] en bas.
+ * Panneau « Sur la table » de l'outil Images : l'image affichée en grand, avec
+ * « Reposer l'image », puis la pile, la plus récente en haut, chaque image
+ * pouvant être retirée de la table.
  */
 import type { ReactNode } from "react";
 

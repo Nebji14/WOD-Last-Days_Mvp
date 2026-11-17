@@ -105,7 +105,7 @@ CurrentAccount = Annotated[Account, Depends(get_current_account)]
 
 
 async def require_gm(account: CurrentAccount) -> Account:
-    """Réserve une route au MJ (CDC 8.3). Refus par défaut pour tout autre rôle."""
+    """Réserve une route au MJ. Refus par défaut pour tout autre rôle."""
     if account.role is not Role.GM:
         raise AppError(ErrorCode.FORBIDDEN, "Action réservée au maître du jeu.", status_code=403)
     return account

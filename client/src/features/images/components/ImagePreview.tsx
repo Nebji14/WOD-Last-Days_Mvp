@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Aperçu en grand d'une image, dans la fenêtre de l'outil seulement (04b-I2) :
+ * Aperçu en grand d'une image, dans la fenêtre de l'outil seulement :
  * rien n'est montré à la table. Échap, le fond ou le bouton referment.
  */
 import { useEffect, useRef } from "react";

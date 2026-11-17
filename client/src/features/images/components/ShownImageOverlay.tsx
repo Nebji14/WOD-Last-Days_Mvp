@@ -1,12 +1,11 @@
 "use client";
 
 /**
- * Image du MJ affichée en grand (03-A2, 03-E5, écran 08a).
+ * Image du MJ affichée en grand chez tous.
  *
- * [Voile de pause (fond flouté)] sur toute la table, chez tous ;
- * [Bandeau — Partie en pause] ; [Image affichée en grand] en cadre photo ;
- * légende avec le nom. Les joueurs ne peuvent rien faire sur la table pendant
- * la pause. Seul le MJ referme, par [Reposer l'image] sous la légende (Q04b-1).
+ * La table est floutée et assombrie, un bandeau annonce la pause et l'image
+ * s'affiche en cadre photo avec son nom. Les joueurs ne peuvent rien faire sur
+ * la table pendant ce temps ; seul le MJ la referme avec « Reposer l'image ».
  */
 import { fill, labels } from "@/shared/i18n";
 import { SignedImage } from "@/shared/ui/SignedImage";

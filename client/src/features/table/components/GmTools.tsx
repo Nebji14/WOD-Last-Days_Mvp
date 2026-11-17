@@ -1,8 +1,8 @@
 /**
- * [Outils MJ (icônes)] de l'en-tête (03-MJ-D1) : Joueurs, Images, PNJ.
+ * [Outils MJ (icônes)] de l'en-tête : Joueurs, Images, PNJ.
  *
  * Ce composant n'est rendu que pour le compte MJ ; les droits sont de toute
- * façon contrôlés par le serveur à chaque appel (03-MJ-D6).
+ * façon contrôlés par le serveur à chaque appel.
  */
 import type { ReactNode } from "react";
 

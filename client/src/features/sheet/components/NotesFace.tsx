@@ -1,13 +1,11 @@
 "use client";
 
 /**
- * Face NOTES de la fiche (05c, N1 à N5).
+ * Face NOTES de la fiche.
  *
- * Les notes sont communes à toutes les formes du personnage (Q05-8).
- * Le propriétaire les crée, les modifie et les supprime ; le MJ les lit
- * seulement (`can_manage_notes`, contrôlé par le serveur).
- * Saisie directe enregistrée automatiquement, peu après la frappe et en
- * quittant le champ : rien n'est perdu à la fermeture (N4).
+ * Les notes sont communes à toutes les formes. Le propriétaire les crée, les
+ * modifie et les supprime ; le MJ les lit seulement (contrôlé par le serveur).
+ * La saisie s'enregistre seule, peu après la frappe et en quittant le champ.
  */
 import { useEffect, useRef, useState } from "react";
 
@@ -113,7 +111,7 @@ interface NoteEditorProps {
 }
 
 /**
- * [Panneau — Éditeur de note] (N3).
+ * Éditeur de la note sélectionnée.
  *
  * Sans saisie en attente, l'éditeur affiche la note du serveur : une
  * modification faite depuis une autre fenêtre apparaît en direct. Une saisie

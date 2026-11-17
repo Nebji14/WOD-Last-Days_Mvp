@@ -1,7 +1,7 @@
 /**
- * Carte « PNJ — … » (04c) : nom, [Badge — Modèle], concept et résumé chiffré ;
- * complet = santé et volonté, simplifié = Puissance, Finesse, Résilience en plus
- * (RM-022, RM-023). [Bouton — Ouvrir la fiche] (04c-I4), [Lien — Supprimer] (04c-I5).
+ * Carte d'un PNJ dans la liste : nom, modèle, concept et résumé chiffré
+ * (santé et volonté, plus Puissance, Finesse et Résilience pour un PNJ
+ * simplifié), avec « Ouvrir la fiche » et « Supprimer ».
  */
 import { fill, labels } from "@/shared/i18n";
 import { openSheet } from "@/shared/windows/detached";

@@ -1,14 +1,13 @@
 "use client";
 
 /**
- * État de l'outil Images du MJ (écran 04b).
+ * État de l'outil Images du MJ.
  *
- * - La bibliothèque et la scène de la table se relisent à chaque changement
- *   signalé par le serveur (≤ 1 s, CDC 12.3), et régulièrement pour renouveler
- *   les liens signés avant leur expiration.
- * - Les envois de fichiers partent en parallèle, chacun avec sa progression ;
- *   un fichier refusé affiche la raison sans bloquer les autres (04b-I1).
- * - Sans session, la fenêtre se ferme (T3).
+ * - La bibliothèque et les images de la table se relisent à chaque changement
+ *   signalé par le serveur, et régulièrement pour renouveler les liens signés.
+ * - Les fichiers s'envoient en parallèle, chacun avec sa progression ; un
+ *   fichier refusé affiche la raison sans bloquer les autres.
+ * - Sans session, la fenêtre se ferme.
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 

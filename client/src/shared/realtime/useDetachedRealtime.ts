@@ -1,11 +1,11 @@
 "use client";
 
 /**
- * Connexion temps réel d'une fenêtre détachée (fiche, création, profil).
+ * Connexion temps réel d'une fenêtre détachée (fiche, création, profil, outils).
  *
  * Chaque fenêtre ouvre sa propre connexion pour rester synchronisée avec la
- * table et les autres fenêtres (règle T3). Quand la session se ferme
- * (déconnexion depuis la fenêtre principale), la fenêtre se ferme d'elle-même.
+ * table. Quand la session se ferme (déconnexion depuis la fenêtre principale),
+ * la fenêtre se ferme d'elle-même.
  */
 import { useEffect, useRef, useState } from "react";
 

@@ -1,4 +1,4 @@
-"""Places autour de la table (03-A6, 03-E2, Q03-7, CDC 12.3)."""
+"""Places autour de la table."""
 
 from uuid import uuid4
 

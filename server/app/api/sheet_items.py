@@ -1,4 +1,4 @@
-"""Routes des éléments d'une fiche (US-009, US-027, règle T1).
+"""Routes des éléments d'une fiche.
 
 Spécialités, annotations de moralité, éléments de feuille, tactiques, dépenses
 d'expérience et notes. Chaque écriture renvoie le personnage à jour.
@@ -41,7 +41,7 @@ async def set_specialties(
     container: ContainerDep,
     account: CurrentAccount,
 ) -> AnyCharacterResponse:
-    """Remplace les spécialités d'une compétence (05-I9)."""
+    """Remplace les spécialités d'une compétence."""
     character = await container.sheet_item_service.set_specialties(
         account, sheet_id, skill, payload.text
     )
@@ -52,7 +52,7 @@ async def set_specialties(
 async def add_morality_note(
     sheet_id: UUID, payload: MoralityNoteRequest, container: ContainerDep, account: CurrentAccount
 ) -> AnyCharacterResponse:
-    """Ajoute une annotation de moralité (05-I5, RM-013)."""
+    """Ajoute une annotation de moralité."""
     character = await container.sheet_item_service.add_morality_note(
         account, sheet_id, payload.level, payload.body
     )
@@ -81,7 +81,7 @@ async def delete_morality_note(
 async def add_entry(
     sheet_id: UUID, payload: CreateEntryRequest, container: ContainerDep, account: CurrentAccount
 ) -> AnyCharacterResponse:
-    """Ajoute un atout, un handicap, un pouvoir, un objet, une arme ou une armure (05-I7)."""
+    """Ajoute un atout, un handicap, un pouvoir, un objet, une arme ou une armure."""
     character = await container.sheet_item_service.add_entry(
         account, sheet_id, payload.kind, payload.to_values()
     )
@@ -108,7 +108,7 @@ async def delete_entry(
 
 @router.get("/tactics")
 async def list_tactics(container: ContainerDep, _: CurrentAccount) -> TacticListResponse:
-    """Liste les tactiques existantes, pour en rattacher une à une feuille (Q05-3)."""
+    """Liste les tactiques existantes, pour en rattacher une à une feuille."""
     tactics = await container.sheet_item_service.list_tactics()
     return TacticListResponse(
         tactics=[TacticResponse(id=t.id, name=t.name, description=t.description) for t in tactics]
@@ -119,7 +119,7 @@ async def list_tactics(container: ContainerDep, _: CurrentAccount) -> TacticList
 async def add_tactic(
     sheet_id: UUID, payload: TacticRequest, container: ContainerDep, account: CurrentAccount
 ) -> AnyCharacterResponse:
-    """Rattache une tactique existante ou en crée une nouvelle (Q05-3)."""
+    """Rattache une tactique existante ou en crée une nouvelle."""
     service = container.sheet_item_service
     if payload.tactic_id is not None:
         character = await service.link_tactic(account, sheet_id, payload.tactic_id)
@@ -154,7 +154,7 @@ async def remove_tactic(
 async def add_expense(
     character_id: UUID, payload: ExpenseRequest, container: ContainerDep, account: CurrentAccount
 ) -> AnyCharacterResponse:
-    """Enregistre une dépense d'expérience (05-I6, RM-016)."""
+    """Enregistre une dépense d'expérience."""
     character = await container.sheet_item_service.add_expense(
         account, character_id, payload.is_tactical, payload.points, payload.justification
     )
@@ -186,7 +186,7 @@ async def delete_expense(
 async def add_note(
     character_id: UUID, container: ContainerDep, account: CurrentAccount
 ) -> NoteCreatedResponse:
-    """Crée une note vide, réservée au propriétaire de la fiche (05c-N4, N5)."""
+    """Crée une note vide, réservée au propriétaire de la fiche."""
     character, note_id = await container.sheet_item_service.add_note(account, character_id)
     return NoteCreatedResponse(character=character_response(character, account), note_id=note_id)
 

@@ -1,8 +1,8 @@
 /**
  * Signalement de l'état de la connexion temps réel.
  *
- * - Coupure : bandeau discret, la reconnexion est automatique (03-E7, CDC 12.3).
- * - Table complète : les neuf places sont prises (CDC 12.3), la table n'est pas
+ * - Coupure : bandeau discret, la reconnexion est automatique.
+ * - Table complète : les neuf places sont prises, la table n'est pas
  *   affichée.
  */
 import type { RealtimeStatus } from "@/shared/realtime/client";

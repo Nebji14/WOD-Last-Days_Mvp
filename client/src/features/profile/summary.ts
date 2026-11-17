@@ -1,5 +1,5 @@
 /**
- * Résumés affichés sur les cartes du profil (écran 09).
+ * Résumés affichés sur les cartes du profil.
  */
 import type { Character } from "@/features/characters/model";
 import { fill, labels } from "@/shared/i18n";

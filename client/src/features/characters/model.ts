@@ -51,7 +51,7 @@ export const SKILLS = {
 export type AttributeName = (typeof ATTRIBUTES)[Category][number];
 export type SkillName = (typeof SKILLS)[Category][number];
 
-/** Plafond ordinaire d'un attribut ; 10 pour un personnage éveillé (05, ÉVEIL V4). */
+/** Plafond ordinaire d'un attribut ; 10 pour un personnage éveillé. */
 export const ATTRIBUTE_MAX = 5;
 export const ATTRIBUTE_MAX_AWAKENED = 10;
 export const SKILL_MAX = 5;
@@ -116,9 +116,9 @@ export interface Sheet {
   readonly texts: Readonly<Record<string, string>>;
   readonly attributes: Readonly<Record<AttributeName, number>>;
   readonly skills: Readonly<Record<SkillName, number>>;
-  /** Valeurs saisies et stockées (RM-005). */
+  /** Valeurs saisies et stockées. */
   readonly effective: Readonly<Record<EffectiveField, number>>;
-  /** Valeurs de référence calculées par le serveur, jamais stockées (RM-005). */
+  /** Valeurs de référence calculées par le serveur, jamais stockées. */
   readonly base: Readonly<Record<EffectiveField, number>>;
   readonly wound_track: string;
   readonly willpower_current: number;
@@ -134,15 +134,15 @@ export interface Experience {
   readonly balance: number;
 }
 
-/** Modèle d'un PNJ, choisi à la création (RM-021, Q07-2). */
+/** Modèle d'un PNJ, choisi à la création. */
 export type NpcModel = "full" | "simplified";
 
-/** Données propres à une feuille de PNJ (07), lues par le MJ seul. */
+/** Données propres à une feuille de PNJ, lues par le MJ seul. */
 export interface NpcProfile {
   readonly model: NpcModel;
   readonly category_id: string | null;
   readonly notes: string;
-  /** Puissance, Finesse, Résilience : de 1 à 10 en simplifié, `null` en complet (RM-022). */
+  /** Puissance, Finesse, Résilience : de 1 à 10 en simplifié, `null` en complet. */
   readonly power: number | null;
   readonly finesse: number | null;
   readonly resilience: number | null;
@@ -162,9 +162,9 @@ export interface Character {
   readonly sheets: readonly Sheet[];
   readonly expenses: readonly Expense[];
   readonly notes: readonly Note[];
-  /** Présent et vrai uniquement pour un personnage éveillé (05, ÉVEIL V4). */
+  /** Présent et vrai uniquement pour un personnage éveillé. */
   readonly awakened?: true;
-  /** Présent uniquement pour le MJ : date de l'éveil, ou `null` (05, ÉVEIL V5). */
+  /** Présent uniquement pour le MJ : date de l'éveil, ou `null`. */
   readonly awakened_at?: string | null;
   /** Profil du PNJ ; `null` ou absent pour un personnage joueur. */
   readonly npc?: NpcProfile | null;
@@ -175,14 +175,14 @@ export function npcProfile(character: Character): NpcProfile | null {
   return character.npc ?? null;
 }
 
-/** PNJ simplifié : ni attributs, ni compétences, ni base calculée (RM-022, C08). */
+/** PNJ simplifié : ni attributs, ni compétences, ni base calculée. */
 export function isSimplifiedNpc(character: Character): boolean {
   return character.npc?.model === "simplified";
 }
 
 /** Plafond des attributs de ce personnage, d'après ce que le serveur en dit au lecteur. */
 export function attributeMax(character: Character): number {
-  // Un PNJ a des points libres (US-039 · CA2) : attributs jusqu'à 10, comme après l'éveil.
+  // Un PNJ a des points libres : attributs jusqu'à 10, comme après l'éveil.
   return character.awakened === true ||
     typeof character.awakened_at === "string" ||
     character.npc != null

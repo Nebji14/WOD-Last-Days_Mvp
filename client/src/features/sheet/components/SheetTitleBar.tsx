@@ -4,7 +4,7 @@
  * Barre de titre de la fiche.
  *
  * Nom du personnage et de son joueur (pour un PNJ : catégorie et modèle),
- * bouton des dés (inactif, prévu après le MVP), choix de la face, bouton
+ * bouton du mode jet de dés, choix de la face, bouton
  * Modifier / Terminer et bouton Fermer (tout est déjà enregistré).
  */
 import type { NpcModel } from "@/features/characters/model";
@@ -26,10 +26,13 @@ interface SheetTitleBarProps {
   readonly onFace: (face: SheetFace) => void;
   readonly editing: boolean;
   readonly onEditing: (editing: boolean) => void;
+  /** Mode jet : les traits de la fiche se cliquent pour composer la réserve. */
+  readonly rolling: boolean;
+  readonly onRolling: (rolling: boolean) => void;
 }
 
 export function SheetTitleBar(props: SheetTitleBarProps) {
-  const { name, owner, npc, face, onFace, editing, onEditing } = props;
+  const { name, owner, npc, face, onFace, editing, onEditing, rolling, onRolling } = props;
   const text = labels.sheet;
 
   return (
@@ -47,14 +50,16 @@ export function SheetTitleBar(props: SheetTitleBarProps) {
 
       <button
         type="button"
-        disabled
-        title={text.rollDiceSoon}
-        className="border-gold font-display text-ink flex h-[34px] cursor-not-allowed items-center gap-2.5 rounded-xs border px-3.5 text-[11px] font-bold tracking-[2.5px] opacity-60"
+        aria-pressed={rolling}
+        onClick={() => onRolling(!rolling)}
+        className={`border-gold font-display flex h-[34px] cursor-pointer items-center gap-2.5 rounded-xs border px-3.5 text-[11px] font-bold tracking-[2.5px] hover:brightness-125 ${
+          rolling ? "bg-gold text-abyss" : "text-ink"
+        }`}
       >
-        <span aria-hidden="true" className="text-gold text-base">
+        <span aria-hidden="true" className={rolling ? "text-base" : "text-gold text-base"}>
           ⚄
         </span>
-        {text.rollDice}
+        {rolling ? labels.dice.closeRollMode : text.rollDice}
       </button>
 
       <div

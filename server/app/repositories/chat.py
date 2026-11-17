@@ -1,5 +1,7 @@
 """Accès aux données du chat général (table ``chat_message``)."""
 
+import json
+from typing import Any
 from uuid import UUID
 
 import asyncpg
@@ -10,7 +12,7 @@ from app.domain.chat import ChatMessage
 _SELECT = """
     select m.id, m.position, m.author_id, a.display_name as author_name,
            a.role as author_role, m.body, m.sent_at, m.edited_at,
-           d.role as deleted_by_role
+           d.role as deleted_by_role, m.roll
     from chat_message m
     join account a on a.id = m.author_id
     left join account d on d.id = m.deleted_by
@@ -52,8 +54,10 @@ class PgChatRepository:
         )
         return [_to_message(row) for row in rows]
 
-    async def create(self, author_id: UUID, client_token: UUID, body: str) -> ChatMessage:
-        """Enregistre un message.
+    async def create(
+        self, author_id: UUID, client_token: UUID, body: str, roll: dict[str, Any] | None = None
+    ) -> ChatMessage:
+        """Enregistre un message, ou le résultat d'un jet de dés avec son détail.
 
         L'envoi est idempotent : si l'auteur a déjà envoyé un message avec ce
         jeton, le message existant est retourné sans en créer un second.
@@ -61,14 +65,15 @@ class PgChatRepository:
         async with self._pool.acquire() as connection:
             message_id = await connection.fetchval(
                 """
-                insert into chat_message (author_id, client_token, body)
-                values ($1, $2, $3)
+                insert into chat_message (author_id, client_token, body, roll)
+                values ($1, $2, $3, $4::jsonb)
                 on conflict (author_id, client_token) do nothing
                 returning id
                 """,
                 author_id,
                 client_token,
                 body,
+                None if roll is None else json.dumps(roll),
             )
             if message_id is None:
                 message_id = await connection.fetchval(
@@ -127,4 +132,5 @@ def _to_message(row: asyncpg.Record) -> ChatMessage:
         sent_at=row["sent_at"],
         edited_at=row["edited_at"],
         deleted_by_role=Role(deleted_by_role) if deleted_by_role else None,
+        roll=json.loads(row["roll"]) if row["roll"] else None,
     )

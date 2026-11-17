@@ -18,6 +18,7 @@ from app.services.awakening import AwakeningService
 from app.services.character_access import CharacterAccess
 from app.services.characters import CharacterService
 from app.services.chat import ChatService
+from app.services.dice import DiceService
 from app.services.google_auth import GoogleAuthService
 from app.services.image_table import ImageTableService
 from app.services.images import ImageService
@@ -26,6 +27,7 @@ from app.services.players import PlayerService
 from app.services.sheet_items import SheetItemService
 from app.services.table import TableService
 from tests.fake_characters import FakeCharacterStore
+from tests.fake_dice import ScriptedDice
 from tests.fake_images import FakeFileStorage, FakeImageStore
 from tests.fake_npcs import FakeNpcStore
 from tests.fake_players import FakePlayerStore
@@ -53,6 +55,7 @@ class TestContext:
     characters: FakeCharacterStore
     images: FakeImageStore
     storage: FakeFileStorage
+    dice: ScriptedDice
 
 
 @pytest.fixture
@@ -82,6 +85,8 @@ def ctx(settings: Settings) -> Iterator[TestContext]:
     auth_service = AuthService(
         accounts, identity, settings.technical_email_domain, gm_access_path="mj-test"
     )
+    chat_service = ChatService(FakeMessageStore(accounts), hub)
+    dice = ScriptedDice()
     container = Container(
         settings=settings,
         auth_service=auth_service,
@@ -90,7 +95,7 @@ def ctx(settings: Settings) -> Iterator[TestContext]:
         ),
         token_verifier=FakeTokenVerifier(identity),
         rate_limiter=RateLimiter(),
-        chat_service=ChatService(FakeMessageStore(accounts), hub),
+        chat_service=chat_service,
         table_service=table_service,
         hub=hub,
         tickets=TicketStore(),
@@ -101,6 +106,9 @@ def ctx(settings: Settings) -> Iterator[TestContext]:
         image_service=ImageService(images, storage, hub),
         image_table_service=ImageTableService(images, storage, hub),
         npc_service=NpcService(FakeNpcStore(characters), characters, access, hub),
+        dice_service=DiceService(access, characters, hub, chat_service, roll_die=dice.roll),
     )
     with TestClient(create_app(settings, container), headers={"Origin": ORIGIN}) as client:
-        yield TestContext(client, accounts, identity, auth_service, characters, images, storage)
+        yield TestContext(
+            client, accounts, identity, auth_service, characters, images, storage, dice
+        )

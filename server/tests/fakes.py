@@ -3,6 +3,7 @@
 import time
 from dataclasses import dataclass, field, replace
 from datetime import UTC, datetime
+from typing import Any
 from uuid import UUID, uuid4
 
 from app.core.security import InvalidTokenError, SessionTokens, TokenClaims, pkce_challenge
@@ -153,7 +154,9 @@ class FakeMessageStore:
         ordered = sorted(self.messages.values(), key=lambda m: m.position, reverse=True)
         return [m for m in ordered if before is None or m.position < before][:limit]
 
-    async def create(self, author_id: UUID, client_token: UUID, body: str) -> ChatMessage:
+    async def create(
+        self, author_id: UUID, client_token: UUID, body: str, roll: dict[str, Any] | None = None
+    ) -> ChatMessage:
         existing = self._tokens.get((author_id, client_token))
         if existing is not None:
             return self.messages[existing]
@@ -168,6 +171,7 @@ class FakeMessageStore:
             sent_at=datetime.now(UTC),
             edited_at=None,
             deleted_by_role=None,
+            roll=roll,
         )
         self.messages[message.id] = message
         self._tokens[(author_id, client_token)] = message.id

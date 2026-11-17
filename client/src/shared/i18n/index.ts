@@ -1,6 +1,7 @@
 /** Point d'accès unique aux libellés de l'interface. */
 import { fr } from "./fr";
 import { frCreation } from "./fr-creation";
+import { frDice } from "./fr-dice";
 import { frImages } from "./fr-images";
 import { frNpcs } from "./fr-npcs";
 import { frPlayers } from "./fr-players";
@@ -15,6 +16,7 @@ export const labels = {
   ...frPlayers,
   ...frImages,
   ...frNpcs,
+  ...frDice,
 };
 
 export type ErrorLabelKey = keyof typeof fr.errors;

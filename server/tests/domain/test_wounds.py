@@ -52,9 +52,7 @@ def test_added_wound_is_filed_by_severity(track: str, wound: Wound, expected: st
         ("*XXXXXX", Wound.BASHING, "**XXXXX"),
     ],
 )
-def test_full_track_worsens_the_least_severe_wound(
-    track: str, wound: Wound, expected: str
-) -> None:
+def test_full_track_worsens_the_least_severe_wound(track: str, wound: Wound, expected: str) -> None:
     assert add_wound(track, wound, capacity=7) == expected
 
 

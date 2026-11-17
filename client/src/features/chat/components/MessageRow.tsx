@@ -9,12 +9,17 @@
  *   Un message déjà supprimé au chargement n'est pas affiché.
  * - « Modifier » et « Supprimer » apparaissent au survol : sur ses propres
  *   messages pour un joueur, sur tous pour le MJ. Le serveur revérifie ce droit.
+ *   Un jet de dés se supprime mais ne se modifie pas.
+ * - Un jet de dés reste masqué tant que les dés roulent à la table.
  */
 import { type FormEvent, useEffect, useState } from "react";
 
 import { ApiError } from "@/shared/api/client";
 import { errorLabel, labels } from "@/shared/i18n";
 import { ConfirmDialog } from "@/shared/ui/ConfirmDialog";
+
+import { RollMessage } from "@/features/dice/components/RollMessage";
+import { useDiceStore } from "@/features/dice/store";
 
 import { type ChatMessage, deleteMessage, editMessage, MESSAGE_MAX_LENGTH } from "../api";
 import { useChatStore } from "../store";
@@ -52,6 +57,9 @@ export function MessageRow({ message, canModerate, interactive }: MessageRowProp
   const isDeleted = message.deletedBy !== null;
   const [deletedOnArrival] = useState(isDeleted);
   const [traceExpired, setTraceExpired] = useState(false);
+  const rollPlaying = useDiceStore(
+    (state) => message.roll !== null && state.hidden.has(message.roll.id),
+  );
 
   useEffect(() => {
     if (!isDeleted || deletedOnArrival) {
@@ -61,6 +69,10 @@ export function MessageRow({ message, canModerate, interactive }: MessageRowProp
     return () => window.clearTimeout(timer);
   }, [isDeleted, deletedOnArrival]);
 
+  if (rollPlaying) {
+    // Le résultat n'arrive dans le chat qu'une fois les dés montrés à la table.
+    return null;
+  }
   if (isDeleted) {
     if (deletedOnArrival || traceExpired) {
       return null;
@@ -142,22 +154,24 @@ export function MessageRow({ message, canModerate, interactive }: MessageRowProp
     >
       <p className="text-ink text-[15px] leading-[19px] font-medium break-words">
         <AuthorName message={message} />
-        {message.body}
+        {message.roll === null ? message.body : <RollMessage roll={message.roll} />}
         {message.edited && <span className="text-ink-muted"> {text.edited}</span>}
       </p>
       {errorCode !== null && <p className="text-danger text-sm">{errorLabel(errorCode)}</p>}
       {showActions && mode === "idle" && (
         <div className="mt-1.5 hidden justify-end gap-[18px] group-focus-within:flex group-hover:flex">
-          <button
-            type="button"
-            onClick={() => {
-              setDraft(message.body ?? "");
-              setMode("editing");
-            }}
-            className={`${ACTION} text-gold`}
-          >
-            ✎ {text.edit}
-          </button>
+          {message.roll === null && (
+            <button
+              type="button"
+              onClick={() => {
+                setDraft(message.body ?? "");
+                setMode("editing");
+              }}
+              className={`${ACTION} text-gold`}
+            >
+              ✎ {text.edit}
+            </button>
+          )}
           <button
             type="button"
             onClick={() => setMode("confirming")}

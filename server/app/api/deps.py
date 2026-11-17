@@ -17,6 +17,7 @@ from app.services.auth import AuthService
 from app.services.awakening import AwakeningService
 from app.services.characters import CharacterService
 from app.services.chat import ChatService
+from app.services.dice import DiceService
 from app.services.google_auth import GoogleAuthService
 from app.services.image_table import ImageTableService
 from app.services.images import ImageService
@@ -46,6 +47,7 @@ class Container:
     image_service: ImageService
     image_table_service: ImageTableService
     npc_service: NpcService
+    dice_service: DiceService
 
 
 def get_container(request: Request) -> Container:

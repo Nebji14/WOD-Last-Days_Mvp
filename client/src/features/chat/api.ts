@@ -1,4 +1,5 @@
 /** Appels API et modèle du chat général. */
+import { parseRoll, type Roll } from "@/features/dice/model";
 import { ApiError, apiRequest, isRecord } from "@/shared/api/client";
 
 export interface ChatMessage {
@@ -16,6 +17,8 @@ export interface ChatMessage {
   readonly edited: boolean;
   /** Rôle de qui a supprimé le message, `null` s'il ne l'est pas. */
   readonly deletedBy: "player" | "gm" | null;
+  /** Détail d'un jet de dés publié dans le chat, `null` pour un message ordinaire. */
+  readonly roll: Roll | null;
 }
 
 export interface HistoryPage {
@@ -60,6 +63,7 @@ export function parseMessage(data: unknown): ChatMessage | null {
     sentAt: data.sent_at,
     edited: data.edited,
     deletedBy: data.deleted_by,
+    roll: data.roll === undefined || data.roll === null ? null : parseRoll(data.roll),
   };
 }
 

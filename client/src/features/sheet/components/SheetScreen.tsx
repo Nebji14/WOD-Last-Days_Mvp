@@ -10,6 +10,9 @@
 import { useEffect, useState } from "react";
 
 import { mainSheet } from "@/features/characters/model";
+import { RollDock } from "@/features/dice/components/RollDock";
+import { EMPTY_CHOICE, type RollChoice } from "@/features/dice/pool";
+import { RollModeProvider } from "@/features/dice/rollMode";
 import { categoryLabel } from "@/features/npcs/categories";
 import { labels } from "@/shared/i18n";
 
@@ -35,6 +38,8 @@ export function SheetScreen({ characterId, initialEditing = false }: SheetScreen
   const [face, setFace] = useState<SheetFace>("recto");
   const [editing, setEditing] = useState(initialEditing);
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [rolling, setRolling] = useState(false);
+  const [choice, setChoice] = useState<RollChoice>(EMPTY_CHOICE);
 
   const main = character === null ? null : mainSheet(character);
   const npc = character?.npc ?? null;
@@ -68,6 +73,14 @@ export function SheetScreen({ characterId, initialEditing = false }: SheetScreen
           onFace={setFace}
           editing={editing}
           onEditing={setEditing}
+          rolling={rolling}
+          onRolling={(next) => {
+            setRolling(next);
+            setChoice(EMPTY_CHOICE);
+            if (next) {
+              setFace("recto");
+            }
+          }}
         />
         {npc === null && (
           <FormTabs
@@ -106,10 +119,27 @@ export function SheetScreen({ characterId, initialEditing = false }: SheetScreen
             face === "notes" ? "overflow-hidden" : "overflow-y-auto"
           }`}
         >
-          {face === "recto" && <RectoFace />}
+          {face === "recto" &&
+            (rolling ? (
+              <RollModeProvider value={{ choice, onChoice: setChoice }}>
+                <RectoFace />
+              </RollModeProvider>
+            ) : (
+              <RectoFace />
+            ))}
           {face === "verso" && <VersoFace />}
           {face === "notes" && <NotesFace />}
         </main>
+        {rolling && (
+          <RollDock
+            character={character}
+            sheet={sheet}
+            choice={choice}
+            onChoice={setChoice}
+            // Seul le MJ reçoit la date de l'éveil, même absente.
+            isGm={character.awakened_at !== undefined}
+          />
+        )}
       </div>
     </SheetProvider>
   );

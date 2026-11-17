@@ -24,6 +24,7 @@ EVENT_CHAT_MESSAGE = "chat.message"
 EVENT_CHARACTER_CHANGED = "character.changed"
 EVENT_IMAGES_CHANGED = "images.changed"
 EVENT_NPCS_CHANGED = "npcs.changed"
+EVENT_DICE_ROLL = "dice.roll"
 
 # Codes de fermeture applicatifs (plage 4000-4999 réservée aux applications).
 CLOSE_UNAUTHENTICATED = 4401
@@ -86,6 +87,15 @@ class ConnectionHub:
         L'événement ne porte aucune donnée : l'outil PNJ relit la liste par l'API.
         """
         payload: dict[str, Any] = {"type": EVENT_NPCS_CHANGED, "data": {}}
+        targets = [ws for ws, owner in self._connections.items() if owner in recipients]
+        await asyncio.gather(*(self._send(ws, payload) for ws in targets))
+
+    async def dice_rolled(self, data: dict[str, Any], recipients: set[UUID] | None) -> None:
+        """Diffuse une vague de dés : à tous, ou aux seuls ``recipients`` (jet secret du MJ)."""
+        if recipients is None:
+            await self._broadcast(EVENT_DICE_ROLL, data)
+            return
+        payload = {"type": EVENT_DICE_ROLL, "data": data}
         targets = [ws for ws, owner in self._connections.items() if owner in recipients]
         await asyncio.gather(*(self._send(ws, payload) for ws in targets))
 

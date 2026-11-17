@@ -56,7 +56,6 @@ export const frSheet = {
     editing: "MODE MODIFICATION",
     close: "FERMER",
     rollDice: "LANCER LES DÉS",
-    rollDiceSoon: "Les dés arrivent juste après le MVP",
     mainForm: "FORME PRINCIPALE",
     otherForm: "FORME ALTERNATIVE",
     newForm: "+  Nouveau",

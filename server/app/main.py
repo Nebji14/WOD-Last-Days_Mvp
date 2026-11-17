@@ -14,6 +14,7 @@ from app.api import (
     auth,
     characters,
     chat,
+    dice,
     google_auth,
     health,
     images,
@@ -48,6 +49,7 @@ from app.services.awakening import AwakeningService
 from app.services.character_access import CharacterAccess
 from app.services.characters import CharacterService
 from app.services.chat import ChatService
+from app.services.dice import DiceService
 from app.services.google_auth import GoogleAuthService
 from app.services.image_table import ImageTableService
 from app.services.images import ImageService
@@ -55,6 +57,9 @@ from app.services.npcs import NpcService
 from app.services.players import PlayerService
 from app.services.sheet_items import SheetItemService
 from app.services.table import TableService
+
+# Relance automatique des 10 : animation et gros plan laissent le temps de cliquer.
+_AUTO_REROLL_SECONDS = 9.0
 
 
 def create_app(settings: Settings | None = None, container: Container | None = None) -> FastAPI:
@@ -86,6 +91,7 @@ def create_app(settings: Settings | None = None, container: Container | None = N
         async with httpx.AsyncClient() as http_client:
             storage = SupabaseStorageGateway(settings, http_client)
             identity = SupabaseAuthGateway(settings, http_client)
+            chat_service = ChatService(PgChatRepository(pool), hub)
             app.state.container = Container(
                 settings=settings,
                 auth_service=AuthService(
@@ -102,7 +108,7 @@ def create_app(settings: Settings | None = None, container: Container | None = N
                 ),
                 token_verifier=SupabaseTokenVerifier(settings.supabase_url),
                 rate_limiter=RateLimiter(),
-                chat_service=ChatService(PgChatRepository(pool), hub),
+                chat_service=chat_service,
                 table_service=table_service,
                 hub=hub,
                 tickets=TicketStore(),
@@ -113,6 +119,13 @@ def create_app(settings: Settings | None = None, container: Container | None = N
                 image_service=ImageService(image_repository, storage, hub),
                 image_table_service=ImageTableService(image_repository, storage, hub),
                 npc_service=NpcService(PgNpcRepository(pool), character_repository, access, hub),
+                dice_service=DiceService(
+                    access,
+                    character_repository,
+                    hub,
+                    chat_service,
+                    auto_reroll_seconds=_AUTO_REROLL_SECONDS,
+                ),
             )
             try:
                 yield
@@ -139,6 +152,7 @@ def create_app(settings: Settings | None = None, container: Container | None = N
     app.include_router(auth.router)
     app.include_router(google_auth.router)
     app.include_router(chat.router)
+    app.include_router(dice.router)
     app.include_router(characters.router)
     app.include_router(sheet_items.router)
     app.include_router(players.router)

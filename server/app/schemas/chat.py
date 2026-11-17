@@ -1,7 +1,7 @@
 """Modèles d'entrée et de sortie du chat général."""
 
 from datetime import datetime
-from typing import Literal
+from typing import Any, Literal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -48,6 +48,7 @@ class MessageResponse(BaseModel):
         body: ``None`` pour un message supprimé.
         edited: le message a été modifié (mention « (modifié) » visible par tous).
         deleted_by: rôle de qui a supprimé le message, ``None`` s'il ne l'est pas.
+        roll: détail d'un jet de dés, ``None`` pour un message ordinaire ou supprimé.
     """
 
     id: UUID
@@ -57,6 +58,7 @@ class MessageResponse(BaseModel):
     sent_at: datetime
     edited: bool
     deleted_by: Literal["player", "gm"] | None
+    roll: dict[str, Any] | None = None
 
     @classmethod
     def from_message(cls, message: ChatMessage) -> "MessageResponse":
@@ -73,6 +75,7 @@ class MessageResponse(BaseModel):
             sent_at=message.sent_at,
             edited=message.edited_at is not None and not message.is_deleted,
             deleted_by=message.deleted_by_role.value if message.deleted_by_role else None,
+            roll=None if message.is_deleted else message.roll,
         )
 
 

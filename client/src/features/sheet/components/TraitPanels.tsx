@@ -15,6 +15,7 @@ import {
   SKILL_MAX,
   SKILLS,
 } from "@/features/characters/model";
+import { TraitPick } from "@/features/dice/rollMode";
 import { labels } from "@/shared/i18n";
 
 import { Dots, Panel, TextValue, useSheet } from "./primitives";
@@ -33,9 +34,12 @@ export function AttributesPanel() {
             <p className={GROUP_LABEL}>{labels.categories[category]}</p>
             {ATTRIBUTES[category].map((name) => (
               <div key={name} className="flex h-[26px] items-center justify-between gap-2">
-                <span className="text-ink text-[17px] font-semibold">
+                <TraitPick
+                  pick={{ kind: "trait", name }}
+                  className="text-ink text-[17px] font-semibold"
+                >
                   {labels.attributes[name]}
-                </span>
+                </TraitPick>
                 <Dots
                   label={labels.attributes[name]}
                   value={sheet.attributes[name]}
@@ -79,9 +83,12 @@ export function SkillsPanel() {
                 key={name}
                 className="grid h-10 grid-cols-[minmax(0,1fr)_112px_62px] items-center gap-x-2.5"
               >
-                <span className="text-ink truncate text-base font-semibold">
+                <TraitPick
+                  pick={{ kind: "trait", name }}
+                  className="text-ink truncate text-base font-semibold"
+                >
                   {labels.skills[name]}
-                </span>
+                </TraitPick>
                 <TextValue
                   label={`${text.specialty} — ${labels.skills[name]}`}
                   value={(sheet.specialties[name] ?? []).join(", ")}

@@ -14,6 +14,7 @@ function message(id: string, sentAt: Date): ChatMessage {
     sentAt: sentAt.toISOString(),
     edited: false,
     deletedBy: null,
+    roll: null,
   };
 }
 

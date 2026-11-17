@@ -21,6 +21,7 @@ function message(position: number, body: string): ChatMessage {
     sentAt: "2026-11-16T20:00:00Z",
     edited: false,
     deletedBy: null,
+    roll: null,
   };
 }
 

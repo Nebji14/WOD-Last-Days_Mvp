@@ -119,16 +119,36 @@ export function HealthPanel() {
         </p>
       )}
       <div className="mt-2.5 flex flex-wrap gap-1.5">
-        <button type="button" onClick={act("add", "/")} disabled={state === "dead"} className={addAction}>
+        <button
+          type="button"
+          onClick={act("add", "/")}
+          disabled={state === "dead"}
+          className={addAction}
+        >
           {text.addBashing}
         </button>
-        <button type="button" onClick={act("add", "X")} disabled={state === "dead"} className={addAction}>
+        <button
+          type="button"
+          onClick={act("add", "X")}
+          disabled={state === "dead"}
+          className={addAction}
+        >
           {text.addLethal}
         </button>
-        <button type="button" onClick={act("add", "*")} disabled={state === "dead"} className={addAction}>
+        <button
+          type="button"
+          onClick={act("add", "*")}
+          disabled={state === "dead"}
+          className={addAction}
+        >
           {text.addAggravated}
         </button>
-        <button type="button" onClick={act("heal", null)} disabled={wounds === ""} className={addAction}>
+        <button
+          type="button"
+          onClick={act("heal", null)}
+          disabled={wounds === ""}
+          className={addAction}
+        >
           {text.heal}
         </button>
         <button

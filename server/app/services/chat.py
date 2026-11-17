@@ -3,12 +3,12 @@
 Messages des joueurs et du MJ, et modération par le MJ.
 """
 
-from typing import Protocol
+from typing import Any, Protocol
 from uuid import UUID
 
 from app.core.errors import AppError, ErrorCode
 from app.domain.accounts import Account
-from app.domain.chat import ChatMessage, can_moderate
+from app.domain.chat import ChatMessage, can_edit_body, can_moderate
 
 
 class MessageStore(Protocol):
@@ -18,7 +18,9 @@ class MessageStore(Protocol):
 
     async def list_page(self, before: int | None, limit: int) -> list[ChatMessage]: ...
 
-    async def create(self, author_id: UUID, client_token: UUID, body: str) -> ChatMessage: ...
+    async def create(
+        self, author_id: UUID, client_token: UUID, body: str, roll: dict[str, Any] | None = None
+    ) -> ChatMessage: ...
 
     async def update_body(self, message_id: UUID, body: str) -> ChatMessage | None: ...
 
@@ -73,6 +75,14 @@ class ChatService:
         await self._broadcaster.message_changed(message)
         return message
 
+    async def publish_roll(
+        self, author_id: UUID, roll_id: UUID, body: str, roll: dict[str, Any]
+    ) -> ChatMessage:
+        """Publie le résultat d'un jet de dés terminé et le diffuse."""
+        message = await self._messages.create(author_id, roll_id, body, roll)
+        await self._broadcaster.message_changed(message)
+        return message
+
     async def edit(self, actor: Account, message_id: UUID, body: str) -> ChatMessage:
         """Modifie un message et diffuse le changement.
 
@@ -81,7 +91,9 @@ class ChatService:
                 ``actor`` n'a pas le droit d'y toucher, ``message_deleted`` s'il
                 a été supprimé.
         """
-        await self._require_moderable(actor, message_id)
+        current = await self._require_moderable(actor, message_id)
+        if not can_edit_body(current):
+            raise AppError(ErrorCode.FORBIDDEN, "Un jet de dés ne se modifie pas.", status_code=403)
         message = await self._messages.update_body(message_id, body)
         if message is None:
             raise AppError(ErrorCode.MESSAGE_DELETED, "Ce message a été supprimé.", status_code=409)

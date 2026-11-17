@@ -7,6 +7,7 @@
 import { useState } from "react";
 
 import type { Character } from "@/features/characters/model";
+import { TraitPick } from "@/features/dice/rollMode";
 import { deleteNpc, setNpcField } from "@/features/npcs/api";
 import { categoryLabel } from "@/features/npcs/categories";
 import { fill, labels } from "@/shared/i18n";
@@ -34,7 +35,12 @@ export function SimplifiedTraitsPanel() {
           const value = npc[trait] ?? 1;
           return (
             <div key={trait} className="grid h-8 grid-cols-[180px_1fr_40px] items-center">
-              <span className="text-ink-bright text-lg font-semibold">{text.traits[trait]}</span>
+              <TraitPick
+                pick={{ kind: "npc", name: trait }}
+                className="text-ink-bright justify-self-start text-lg font-semibold"
+              >
+                {text.traits[trait]}
+              </TraitPick>
               <Dots
                 label={text.traits[trait]}
                 value={value}

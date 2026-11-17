@@ -99,3 +99,19 @@ def worsen_wound(track: str, wound: Wound) -> str:
     if worse is None or wound not in track:
         raise NoSuchWoundError
     return _sorted(track.replace(wound, worse, 1))
+
+
+# Les trois dernières cases portent un malus : −1, −2 puis −3.
+_PENALTY_BOXES = 3
+
+
+def wound_penalty(track: str, capacity: int) -> int:
+    """Malus de blessure : celui de la case blessée la plus à droite, sans cumul.
+
+    Il s'applique aux actions et à l'initiative, pas au jet de Vigueur pour
+    rester conscient.
+    """
+    if not track:
+        return 0
+    from_right = capacity - (len(track) - 1)
+    return from_right - _PENALTY_BOXES - 1 if from_right <= _PENALTY_BOXES else 0

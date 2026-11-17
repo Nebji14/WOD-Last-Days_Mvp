@@ -4,6 +4,12 @@
 /Hunter_MLD_*.dbml
 /*.figcraft
 /QUESTIONS.md
+/*.pdf
+
+# Notes de travail locales
+CLAUDE.md
+AGENTS.md
+.claude/
 
 # Secrets
 .env

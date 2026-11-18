@@ -3,9 +3,10 @@
 /**
  * Disposition des faces RECTO et VERSO de la fiche.
  *
- * Recto : identité, attributs, moralité, avantage surnaturel, santé, volonté,
- * caractéristiques, puis compétences. Verso : listes, tactiques et expérience à
- * gauche ; équipement et description à droite.
+ * Recto : identité, attributs, moralité, avantage surnaturel et ressources
+ * libres à gauche ; santé, volonté et caractéristiques à droite ; puis
+ * compétences. Verso : listes, tactiques et expérience à gauche ; équipement
+ * et description à droite.
  *
  * Pour un PNJ simplifié, Puissance / Finesse / Résilience et les notes du PNJ
  * remplacent attributs et compétences ; un PNJ complet garde le recto normal
@@ -20,10 +21,14 @@ import { HealthPanel, WillpowerPanel } from "./GaugePanels";
 import { IdentityPanel } from "./IdentityPanel";
 import { NpcDeleteLink, NpcNotesPanel, SimplifiedTraitsPanel } from "./NpcPanels";
 import { useSheet } from "./primitives";
+import { ResourcePanel } from "./ResourcePanel";
 import { MoralityPanel, SupernaturalPanel } from "./ScalePanels";
 import { StatsPanel } from "./StatsPanel";
 import { TacticsPanel } from "./TacticsPanel";
 import { AttributesPanel, SkillsPanel } from "./TraitPanels";
+
+/** Colonne du recto : son dernier panneau s'étire pour que les deux colonnes finissent ensemble. */
+const COLUMN = "flex flex-col gap-4 [&>*:last-child]:grow";
 
 export function RectoFace() {
   const { character } = useSheet();
@@ -34,13 +39,14 @@ export function RectoFace() {
       <div className="flex flex-col gap-4">
         <IdentityPanel />
         <div className="grid grid-cols-[minmax(0,1fr)_364px] gap-4">
-          <div className="flex flex-col gap-4">
+          <div className={COLUMN}>
             <SimplifiedTraitsPanel />
             <NpcNotesPanel />
           </div>
-          <div className="flex flex-col gap-4">
+          <div className={COLUMN}>
             <HealthPanel />
             <WillpowerPanel />
+            <ResourcePanel />
             <MoralityPanel />
             <StatsPanel />
           </div>
@@ -52,12 +58,13 @@ export function RectoFace() {
     <div className="flex flex-col gap-4">
       <IdentityPanel />
       <div className="grid grid-cols-[minmax(0,1fr)_364px] gap-4">
-        <div className="flex flex-col gap-4">
+        <div className={COLUMN}>
           <AttributesPanel />
           <MoralityPanel />
           <SupernaturalPanel />
+          <ResourcePanel />
         </div>
-        <div className="flex flex-col gap-4">
+        <div className={COLUMN}>
           <HealthPanel />
           <WillpowerPanel />
           <StatsPanel />

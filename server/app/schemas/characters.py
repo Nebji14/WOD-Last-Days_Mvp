@@ -17,6 +17,7 @@ from app.domain.character import Character, EntryKind, Sheet, can_manage_notes
 from app.domain.derived import base_values
 from app.domain.npc_profile import NpcModel, NpcProfile
 from app.domain.traits import ATTRIBUTE_NAMES, SKILL_NAMES
+from app.schemas.resources import ResourceResponse
 
 _EFFECTIVE_FIELDS = ("size", "speed", "defense", "initiative", "health_max", "willpower_max")
 
@@ -197,6 +198,7 @@ class CharacterResponse(BaseModel):
     expenses: list[ExpenseResponse]
     notes: list[NoteResponse]
     npc: NpcProfileResponse | None = None
+    resources: list[ResourceResponse] = []
 
 
 class AwakenedCharacterResponse(CharacterResponse):
@@ -246,6 +248,7 @@ def character_response(character: Character, viewer: Account) -> AnyCharacterRes
             for n in character.notes
         ],
         "npc": NpcProfileResponse.from_profile(character.npc) if character.npc else None,
+        "resources": [ResourceResponse.from_resource(r) for r in character.resources],
     }
     if viewer.role is Role.GM:
         return GmCharacterResponse(**fields, awakened_at=character.awakened_at)

@@ -231,3 +231,29 @@ export function updateNote(noteId: string, title: string, body: string): Promise
 export function deleteNote(noteId: string): Promise<Character> {
   return write("DELETE", `/api/notes/${noteId}`);
 }
+
+/** Ajoute une ressource libre, disponible à son maximum. */
+export function addResource(
+  characterId: string,
+  name: string,
+  maxValue: number,
+): Promise<Character> {
+  return write("POST", `/api/characters/${characterId}/resources`, {
+    name,
+    max_value: maxValue,
+  });
+}
+
+/** Modifie le nom, le maximum ou la valeur disponible d'une ressource. */
+export function setResourceField(
+  resourceId: string,
+  field: "name" | "max_value" | "current_value",
+  value: string | number,
+  expected: string | number,
+): Promise<Character> {
+  return write("PATCH", `/api/resources/${resourceId}`, { field, value, expected });
+}
+
+export function deleteResource(resourceId: string): Promise<Character> {
+  return write("DELETE", `/api/resources/${resourceId}`);
+}

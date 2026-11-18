@@ -16,7 +16,6 @@ from uuid import UUID, uuid4
 
 from app.core.errors import AppError, ErrorCode
 from app.domain.accounts import Account, Role
-from app.domain.character import Character, Sheet
 from app.domain.dice import (
     DIE_FACES,
     DiceRoll,
@@ -35,16 +34,9 @@ from app.domain.dice import (
 from app.domain.recipes import RollRecipe
 from app.services.character_access import CharacterAccess, rule_violation
 from app.services.dice_pools import RollInput, compose_pool, entry_of
+from app.services.roll_costs import RollCosts
 
 logger = logging.getLogger(__name__)
-
-
-class WillpowerStore(Protocol):
-    """Écriture de la volonté disponible, dépensée pour +3 dés."""
-
-    async def update_sheet_field(
-        self, sheet_id: UUID, field: str, value: str | int, expected: str | int
-    ) -> bool: ...
 
 
 class RollBroadcaster(Protocol):
@@ -78,7 +70,7 @@ class DiceService:
 
     Args:
         access: droits et lecture des personnages.
-        willpower: écriture de la volonté dépensée.
+        costs: dépense de la Volonté et des ressources avant le jet.
         broadcaster: diffusion des vagues de dés.
         publisher: publication du résultat dans le chat.
         roll_die: tirage d'un dé (remplacé dans les tests).
@@ -89,14 +81,14 @@ class DiceService:
     def __init__(
         self,
         access: CharacterAccess,
-        willpower: WillpowerStore,
+        costs: RollCosts,
         broadcaster: RollBroadcaster,
         publisher: RollPublisher,
         roll_die: DieRoller = _random_die,
         auto_reroll_seconds: float | None = None,
     ) -> None:
         self._access = access
-        self._willpower = willpower
+        self._costs = costs
         self._broadcaster = broadcaster
         self._publisher = publisher
         self._roll_die = roll_die
@@ -111,7 +103,8 @@ class DiceService:
         Raises:
             AppError: ``rule_violation`` pour une demande incohérente,
                 ``forbidden`` pour un jet réservé au MJ, ``not_found`` pour un
-                personnage inaccessible, ``edit_conflict`` si la volonté a changé.
+                personnage inaccessible, ``edit_conflict`` si la volonté ou une
+                ressource a changé.
         """
         options = request.options
         try:
@@ -155,7 +148,7 @@ class DiceService:
         return self._first_stage(actor, actor.display_name, None, request, parts)
 
     async def _character_roll(self, actor: Account, request: RollInput) -> DiceRoll:
-        """Jet tiré d'une feuille : réserve composée et volonté dépensée."""
+        """Jet tiré d'une feuille : réserve composée, Volonté et ressource dépensées."""
         character = await self._access.editable(actor, request.character_id)
         if request.sheet_id is None:
             raise rule_violation("sheet", "dice")
@@ -168,22 +161,10 @@ class DiceService:
         # Le coût du pouvoir et la Volonté dépensée pour +3 se cumulent.
         recipe = None if entry is None else RollRecipe.from_data(entry.roll)
         cost = (1 if request.options.willpower else 0) + (recipe.willpower_cost if recipe else 0)
-        if cost:
-            await self._spend_willpower(character, sheet, cost)
+        await self._costs.pay(character, sheet, cost, recipe)
         name = character.main_sheet.texts.get("name") or character.owner_name
         roll = self._first_stage(actor, name, character.id, request, parts)
         return replace(roll, base=base, label=None if entry is None else entry.name)
-
-    async def _spend_willpower(self, character: Character, sheet: Sheet, amount: int) -> None:
-        """Retire des points de volonté disponibles, sans écraser une modification concurrente."""
-        current = sheet.numbers["willpower_current"]
-        if current < amount:
-            raise rule_violation("no_willpower", "willpower_current")
-        if not await self._willpower.update_sheet_field(
-            sheet.id, "willpower_current", current - amount, current
-        ):
-            raise AppError(ErrorCode.EDIT_CONFLICT, "La volonté a changé.", status_code=409)
-        await self._access.changed(character.id)
 
     def _first_stage(
         self,

@@ -24,6 +24,8 @@ from app.services.image_table import ImageTableService
 from app.services.images import ImageService
 from app.services.npcs import NpcService
 from app.services.players import PlayerService
+from app.services.resources import ResourceService
+from app.services.roll_costs import RollCosts
 from app.services.sheet_items import SheetItemService
 from app.services.table import TableService
 from tests.fake_characters import FakeCharacterStore
@@ -31,6 +33,7 @@ from tests.fake_dice import ScriptedDice
 from tests.fake_images import FakeFileStorage, FakeImageStore
 from tests.fake_npcs import FakeNpcStore
 from tests.fake_players import FakePlayerStore
+from tests.fake_resources import FakeResourceStore
 from tests.fakes import (
     FakeAccountStore,
     FakeIdentityProvider,
@@ -78,6 +81,7 @@ def ctx(settings: Settings) -> Iterator[TestContext]:
     identity = FakeIdentityProvider()
     hub = ConnectionHub()
     characters = FakeCharacterStore(accounts)
+    resources = FakeResourceStore(characters)
     table_service = TableService(accounts, characters, hub)
     access = CharacterAccess(characters, accounts, hub, table_service.refresh)
     images = FakeImageStore()
@@ -101,12 +105,19 @@ def ctx(settings: Settings) -> Iterator[TestContext]:
         tickets=TicketStore(),
         character_service=CharacterService(characters, characters, access),
         sheet_item_service=SheetItemService(characters, access),
+        resource_service=ResourceService(resources, access),
         player_service=PlayerService(FakePlayerStore(accounts, characters), table_service),
         awakening_service=AwakeningService(characters, access),
         image_service=ImageService(images, storage, hub),
         image_table_service=ImageTableService(images, storage, hub),
         npc_service=NpcService(FakeNpcStore(characters), characters, access, hub),
-        dice_service=DiceService(access, characters, hub, chat_service, roll_die=dice.roll),
+        dice_service=DiceService(
+            access,
+            RollCosts(access, characters, resources),
+            hub,
+            chat_service,
+            roll_die=dice.roll,
+        ),
     )
     with TestClient(create_app(settings, container), headers={"Origin": ORIGIN}) as client:
         yield TestContext(

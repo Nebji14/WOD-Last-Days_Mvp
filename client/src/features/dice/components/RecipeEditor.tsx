@@ -4,13 +4,15 @@
  * Saisie de la recette de jet d'un pouvoir, d'une arme ou d'un atout.
  *
  * Deux traits au minimum à l'écran, d'autres s'ajoutent à la demande, puis
- * le coût en Volonté. Chaque trait montre sa valeur actuelle sur la fiche.
+ * le coût en Volonté et, si le personnage a des ressources libres (Mana…), un
+ * coût dans l'une d'elles : les deux coûts se cumulent. Chaque trait montre sa
+ * valeur actuelle sur la fiche.
  * Un pouvoir ajoute toujours l'Avantage surnaturel (niveau du recto) : il
  * s'affiche au bout de la formule, sans choix possible. Une recette sans aucun
  * trait choisi n'est pas enregistrée : l'élément n'a alors pas de jet. Le
  * malus et le bonus du MJ se saisissent au moment du jet, pas ici.
  */
-import type { EntryKind, RollRecipe } from "@/features/characters/model";
+import type { EntryKind, Resource, RollRecipe } from "@/features/characters/model";
 import { ATTRIBUTES, CATEGORIES, SKILLS } from "@/features/characters/model";
 import { labels } from "@/shared/i18n";
 
@@ -25,6 +27,9 @@ export interface RecipeDraft {
   readonly parts: readonly string[];
   readonly willpower_cost: number;
   readonly bonus: number;
+  /** Ressource libre dépensée ; chaîne vide sans ressource. */
+  readonly resource_id: string;
+  readonly resource_cost: number;
 }
 
 export function draftOf(recipe: RollRecipe | null | undefined): RecipeDraft {
@@ -32,13 +37,28 @@ export function draftOf(recipe: RollRecipe | null | undefined): RecipeDraft {
   while (parts.length < MIN_SLOTS) {
     parts.push("");
   }
-  return { parts, willpower_cost: recipe?.willpower_cost ?? 0, bonus: recipe?.bonus ?? 0 };
+  return {
+    parts,
+    willpower_cost: recipe?.willpower_cost ?? 0,
+    bonus: recipe?.bonus ?? 0,
+    resource_id: recipe?.resource_id ?? "",
+    resource_cost: recipe?.resource_cost ?? 0,
+  };
 }
 
 /** Recette à enregistrer, ou `null` si aucun trait n'est choisi. */
 export function recipeOf(draft: RecipeDraft): RollRecipe | null {
   const parts = draft.parts.filter((part) => part !== "");
-  return parts.length === 0 ? null : { ...draft, parts };
+  if (parts.length === 0) {
+    return null;
+  }
+  const spends = draft.resource_id !== "" && draft.resource_cost > 0;
+  return {
+    ...draft,
+    parts,
+    resource_id: spends ? draft.resource_id : null,
+    resource_cost: spends ? draft.resource_cost : 0,
+  };
 }
 
 const SELECT =
@@ -86,9 +106,11 @@ interface RecipeEditorProps {
   readonly onChange: (draft: RecipeDraft) => void;
   /** Valeur actuelle d'un trait sur la fiche, affichée dans la liste. */
   readonly valueOf: (part: string) => number;
+  /** Ressources libres du personnage, proposées comme coût. */
+  readonly resources: readonly Resource[];
 }
 
-export function RecipeEditor({ kind, draft, onChange, valueOf }: RecipeEditorProps) {
+export function RecipeEditor({ kind, draft, onChange, valueOf, resources }: RecipeEditorProps) {
   const text = labels.dice.recipe;
   const special = SPECIAL_PARTS.filter((part) => part !== "weapon_bonus" || kind === "weapon");
   const setPart = (index: number, value: string) =>
@@ -174,6 +196,39 @@ export function RecipeEditor({ kind, draft, onChange, valueOf }: RecipeEditorPro
           max={COST_MAX}
           onChange={(value) => onChange({ ...draft, willpower_cost: value })}
         />
+        {resources.length > 0 && (
+          <span className="text-ink flex items-center gap-1.5 text-[14px]">
+            <span className="text-ink-muted">+</span>
+            <select
+              value={draft.resource_id}
+              aria-label={text.resource}
+              onChange={(event) =>
+                onChange({
+                  ...draft,
+                  resource_id: event.target.value,
+                  resource_cost: event.target.value === "" ? 0 : Math.max(1, draft.resource_cost),
+                })
+              }
+              className={SELECT}
+            >
+              <option value="">{text.noResource}</option>
+              {resources.map((resource) => (
+                <option key={resource.id} value={resource.id}>
+                  {resource.name}
+                </option>
+              ))}
+            </select>
+            {draft.resource_id !== "" && (
+              <Stepper
+                label={text.resourceCost}
+                value={draft.resource_cost}
+                min={1}
+                max={COST_MAX}
+                onChange={(value) => onChange({ ...draft, resource_cost: value })}
+              />
+            )}
+          </span>
+        )}
       </div>
     </fieldset>
   );

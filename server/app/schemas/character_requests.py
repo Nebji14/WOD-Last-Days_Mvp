@@ -137,13 +137,15 @@ class MoralityNoteRequest(BaseModel):
 
 
 class RollRecipeInput(BaseModel):
-    """Recette de jet : traits de la réserve, coût en Volonté, bonus fixe."""
+    """Recette de jet : traits de la réserve, coûts en Volonté et en ressource, bonus fixe."""
 
     model_config = _STRICT
 
     parts: list[str] = Field(min_length=1, max_length=8)
     willpower_cost: int = Field(default=0, ge=0, le=5)
     bonus: int = Field(default=0, ge=-10, le=10)
+    resource_id: UUID | None = None
+    resource_cost: int = Field(default=0, ge=0, le=5)
 
 
 class EntryValuesInput(BaseModel):

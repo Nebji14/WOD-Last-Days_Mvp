@@ -98,6 +98,13 @@ class FakeCharacterStore:
     def set_npc(self, character_id: UUID, profile: NpcProfile) -> None:
         self._put(replace(self._characters[character_id], npc=profile))
 
+    def characters(self) -> list[Character]:
+        return list(self._characters.values())
+
+    def put(self, character: Character) -> None:
+        """Remplace un personnage, pour les doublures construites sur ce dépôt."""
+        self._put(character)
+
     def npcs(self) -> list[Character]:
         return [c for c in self._characters.values() if c.npc is not None]
 

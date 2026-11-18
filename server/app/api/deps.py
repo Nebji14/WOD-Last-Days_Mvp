@@ -23,6 +23,7 @@ from app.services.image_table import ImageTableService
 from app.services.images import ImageService
 from app.services.npcs import NpcService
 from app.services.players import PlayerService
+from app.services.resources import ResourceService
 from app.services.sheet_items import SheetItemService
 from app.services.table import TableService
 
@@ -42,6 +43,7 @@ class Container:
     tickets: TicketStore
     character_service: CharacterService
     sheet_item_service: SheetItemService
+    resource_service: ResourceService
     player_service: PlayerService
     awakening_service: AwakeningService
     image_service: ImageService

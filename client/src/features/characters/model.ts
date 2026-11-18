@@ -74,13 +74,28 @@ export type EntryNumberField = (typeof ENTRY_NUMBER_FIELDS)[number];
 /**
  * Recette de jet d'un pouvoir, d'une arme ou d'un atout : traits de la
  * réserve (attributs, compétences, `supernatural`, `entry_level`,
- * `weapon_bonus`), coût en Volonté et bonus fixe.
+ * `weapon_bonus`), coût en Volonté, coût dans une ressource libre et bonus
+ * fixe. Les deux coûts se cumulent.
  */
 export interface RollRecipe {
   readonly parts: readonly string[];
   readonly willpower_cost: number;
   readonly bonus: number;
+  /** Ressource libre dépensée ; absente ou `null` sans coût en ressource. */
+  readonly resource_id?: string | null;
+  readonly resource_cost?: number;
 }
+
+/** Ressource libre du personnage (Mana, Douleur…), commune à toutes ses formes. */
+export interface Resource {
+  readonly id: string;
+  readonly name: string;
+  readonly max_value: number;
+  readonly current_value: number;
+}
+
+export const RESOURCE_VALUE_MAX = 30;
+export const RESOURCE_NAME_MAX = 40;
 
 export type Entry = {
   readonly id: string;
@@ -181,6 +196,7 @@ export interface Character {
   readonly awakened_at?: string | null;
   /** Profil du PNJ ; `null` ou absent pour un personnage joueur. */
   readonly npc?: NpcProfile | null;
+  readonly resources: readonly Resource[];
 }
 
 /** Profil du PNJ, ou `null` pour un personnage joueur. */
@@ -257,7 +273,8 @@ export function parseCharacter(data: unknown): Character {
     data.sheets.length > 0 &&
     data.sheets.every(isSheet) &&
     Array.isArray(data.expenses) &&
-    Array.isArray(data.notes)
+    Array.isArray(data.notes) &&
+    Array.isArray(data.resources)
   ) {
     return data as unknown as Character;
   }

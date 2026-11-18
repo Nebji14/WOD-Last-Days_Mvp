@@ -3,10 +3,10 @@
 /**
  * Bouton 🎲 d'un pouvoir, d'une arme ou d'un atout qui a une recette de jet.
  *
- * Il ouvre un petit panneau : la réserve calculée depuis la fiche, le coût en
- * Volonté, et les réglages restants : la spécialité, si le MJ l'accorde, puis
- * le malus et le bonus qu'il annonce (défense ou résistance de la cible,
- * circonstances).
+ * Il ouvre un petit panneau : la réserve calculée depuis la fiche, les coûts
+ * en Volonté et en ressource libre, et les réglages restants : la spécialité,
+ * si le MJ l'accorde, puis le malus et le bonus qu'il annonce (défense ou
+ * résistance de la cible, circonstances).
  */
 import { useState } from "react";
 
@@ -35,9 +35,13 @@ export function EntryRoll({ character, sheet, entry }: EntryRollProps) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const cost = entry.roll?.willpower_cost ?? 0;
+  const resource = character.resources.find((r) => r.id === entry.roll?.resource_id);
+  const resourceCost = resource === undefined ? 0 : (entry.roll?.resource_cost ?? 0);
   const parts = recipeParts(character, sheet, entry, adjust);
   const size = poolSize(parts);
-  const affordable = sheet.willpower_current >= cost;
+  const enoughWillpower = sheet.willpower_current >= cost;
+  const enoughResource = resource === undefined || resource.current_value >= resourceCost;
+  const affordable = enoughWillpower && enoughResource;
   const rollLabel = fill(text.recipe.roll, { name: entry.name });
 
   async function roll(): Promise<void> {
@@ -91,8 +95,16 @@ export function EntryRoll({ character, sheet, entry }: EntryRollProps) {
             </strong>
           </p>
           {cost > 0 && (
-            <p className={`text-sm italic ${affordable ? "text-copper-light" : "text-danger"}`}>
-              {affordable ? fill(text.recipe.costNote, { cost }) : text.recipe.notEnough}
+            <p className={`text-sm italic ${enoughWillpower ? "text-copper-light" : "text-danger"}`}>
+              {enoughWillpower ? fill(text.recipe.costNote, { cost }) : text.recipe.notEnough}
+            </p>
+          )}
+          {resource !== undefined && resourceCost > 0 && (
+            <p className={`text-sm italic ${enoughResource ? "text-copper-light" : "text-danger"}`}>
+              {fill(enoughResource ? text.recipe.resourceNote : text.recipe.notEnoughResource, {
+                cost: resourceCost,
+                name: resource.name,
+              })}
             </p>
           )}
           <SpecialtyOption compact checked={specialty} onChange={() => setSpecialty(!specialty)} />

@@ -21,6 +21,7 @@ from app.domain.character import (
     Tactic,
 )
 from app.domain.npc_profile import NpcModel, NpcProfile
+from app.domain.resources import Resource
 from app.domain.sheet_fields import NUMBER_FIELDS, TEXT_FIELDS
 from app.domain.traits import ATTRIBUTE_NAMES, SKILL_NAMES
 
@@ -70,7 +71,11 @@ SELECT_DOCUMENT = """
         'notes', (
             select coalesce(jsonb_agg(to_jsonb(n)
                 order by n.updated_at desc, n.id), '[]'::jsonb)
-            from character_note n where n.character_id = c.id)
+            from character_note n where n.character_id = c.id),
+        'resources', (
+            select coalesce(jsonb_agg(to_jsonb(r)
+                order by r.created_at, r.id), '[]'::jsonb)
+            from character_resource r where r.character_id = c.id)
     ) as document
     from character c
     left join account a on a.id = c.owner_id
@@ -112,6 +117,15 @@ def to_character(raw: str) -> Character:
             for note in document["notes"]
         ],
         npc=to_npc_profile(document["npc"]) if document["npc"] else None,
+        resources=[
+            Resource(
+                id=UUID(resource["id"]),
+                name=resource["name"],
+                max_value=resource["max_value"],
+                current_value=resource["current_value"],
+            )
+            for resource in document["resources"]
+        ],
     )
 
 

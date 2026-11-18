@@ -4,13 +4,13 @@ Un personnage est un personnage joueur (avec propriétaire) ou un PNJ du MJ
 (sans propriétaire, avec un profil de PNJ).
 
 Un personnage porte ce qui est commun à toutes ses formes (expérience, notes,
-avantage surnaturel, éveil). Chaque forme est une feuille complète ; la forme
+avantage surnaturel, éveil, ressources libres). Chaque forme est une feuille complète ; la forme
 principale existe toujours.
 
 Module pur : aucun accès réseau ni base de données.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from enum import StrEnum
 from typing import Any
@@ -18,6 +18,7 @@ from uuid import UUID
 
 from app.domain.accounts import Account, Role
 from app.domain.npc_profile import NpcProfile
+from app.domain.resources import Resource
 
 
 class EntryKind(StrEnum):
@@ -131,6 +132,7 @@ class Character:
         is_played: personnage affiché sur le siège de son propriétaire.
         npc: profil du PNJ ; ``None`` pour un personnage joueur.
         sheets: formes du personnage, la principale en premier.
+        resources: ressources libres (Mana, Douleur…), dans l'ordre de création.
     """
 
     id: UUID
@@ -146,6 +148,11 @@ class Character:
     expenses: list[Expense]
     notes: list[Note]
     npc: NpcProfile | None = None
+    resources: list[Resource] = field(default_factory=list)
+
+    def resource(self, resource_id: UUID) -> Resource | None:
+        """Retourne la ressource portant cet identifiant, ou ``None``."""
+        return next((r for r in self.resources if r.id == resource_id), None)
 
     @property
     def is_npc(self) -> bool:

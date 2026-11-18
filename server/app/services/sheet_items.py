@@ -109,8 +109,8 @@ def _normalized_roll(roll: dict[str, Any] | None) -> dict[str, Any] | None:
     return None if recipe is None else recipe.as_data()
 
 
-def check_entry_roll(values: EntryValues) -> None:
-    """Refuse une recette de jet invalide.
+def check_entry_roll(values: EntryValues, character: Character) -> None:
+    """Refuse une recette de jet invalide, ou qui dépense une ressource absente du personnage.
 
     Raises:
         AppError: ``rule_violation`` avec la règle enfreinte.
@@ -122,6 +122,8 @@ def check_entry_roll(values: EntryValues) -> None:
         check_recipe(recipe)
     except DiceRuleError as error:
         raise rule_violation(str(error), "roll") from None
+    if recipe.resource_id is not None and character.resource(recipe.resource_id) is None:
+        raise rule_violation("recipe_resource", "roll")
 
 
 class SheetItemService:
@@ -191,7 +193,7 @@ class SheetItemService:
     ) -> Character:
         character = await self._sheet_owner(actor, sheet_id)
         normalized = normalize_entry(kind, values)
-        check_entry_roll(normalized)
+        check_entry_roll(normalized, character)
         await self._items.add_entry(sheet_id, kind, normalized)
         return await self._access.changed(character.id)
 
@@ -201,7 +203,7 @@ class SheetItemService:
         if kind is None:
             raise not_found()
         normalized = normalize_entry(kind, values)
-        check_entry_roll(normalized)
+        check_entry_roll(normalized, character)
         await self._items.update_entry(entry_id, normalized)
         return await self._access.changed(character.id)
 

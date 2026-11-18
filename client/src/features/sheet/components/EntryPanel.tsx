@@ -98,6 +98,7 @@ interface EntryFormProps {
 }
 
 function EntryForm({ kind, valueOf, layout, initial, onSubmit, onCancel }: EntryFormProps) {
+  const { character } = useSheet();
   const [recipe, setRecipe] = useState<RecipeDraft>(() => draftOf(initial?.roll));
   const [draft, setDraft] = useState<Record<string, string>>(() =>
     Object.fromEntries(
@@ -138,7 +139,13 @@ function EntryForm({ kind, valueOf, layout, initial, onSubmit, onCancel }: Entry
         ))}
       </div>
       {ROLLABLE.has(kind) && (
-        <RecipeEditor kind={kind} draft={recipe} onChange={setRecipe} valueOf={valueOf} />
+        <RecipeEditor
+          kind={kind}
+          draft={recipe}
+          onChange={setRecipe}
+          valueOf={valueOf}
+          resources={character.resources}
+        />
       )}
       <div className="mt-2 flex justify-end gap-4">
         <button type="submit" className={LINK_ACTION}>

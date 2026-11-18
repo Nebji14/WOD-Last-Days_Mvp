@@ -4,9 +4,9 @@
  * Panneau de jet, en bas de la fiche en mode jet.
  *
  * Il montre la réserve composée par les clics sur la fiche (malus de blessure
- * compris), les options (spécialité, laissée au jugement du MJ, volonté, malus ou bonus annoncé par le MJ,
- * relance, action assurée, jet secret pour le MJ) et les jets en un clic :
- * initiative et jet pour rester conscient.
+ * compris), les options (spécialité laissée au jugement du MJ, volonté, malus
+ * ou bonus annoncé par le MJ, relance, action assurée, jet secret pour le MJ)
+ * et les jets en un clic : initiative et jet pour rester conscient.
  */
 import { useState } from "react";
 

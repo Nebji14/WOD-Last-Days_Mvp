@@ -6,12 +6,6 @@
 /QUESTIONS.md
 /*.pdf
 
-# Notes de travail locales
-CLAUDE.md
-AGENTS.md
-SUIVI.md
-.claude/
-
 # Secrets
 .env
 .env.*

@@ -15,6 +15,7 @@ import { changeWounds, setSheetField, type WoundSymbol } from "@/features/charac
 import { fill, labels } from "@/shared/i18n";
 
 import { boxPenalty, healthState, woundPenalty } from "../health";
+import { GaugeDots } from "./GaugeDots";
 import { NumberValue, Panel, useSheet } from "./primitives";
 
 const WOUND_STYLE: Record<string, string> = {
@@ -169,7 +170,7 @@ export function WillpowerPanel() {
   const text = labels.sheet.willpower;
   const max = sheet.effective.willpower_max;
   const current = sheet.willpower_current;
-  const setCurrent = (value: number) => () =>
+  const setCurrent = (value: number) =>
     void run(() => setSheetField(sheet.id, "willpower_current", value, current));
 
   return (
@@ -191,31 +192,13 @@ export function WillpowerPanel() {
         </span>
       }
     >
-      <div className="flex items-center justify-between gap-4">
-        <span
-          role="group"
-          aria-label={fill(text.available, { current, max })}
-          className="flex flex-wrap gap-1.5"
-        >
-          {Array.from({ length: max }, (_, index) => index + 1).map((rank) => {
-            const dot = `size-[18px] rounded-full ${
-              rank <= current ? "bg-gold" : "border-gold/70 border-[1.5px]"
-            }`;
-            return (
-              <button
-                key={rank}
-                type="button"
-                aria-label={`${text.title} ${rank}`}
-                onClick={setCurrent(rank === current ? rank - 1 : rank)}
-                className={`${dot} cursor-pointer hover:brightness-150`}
-              />
-            );
-          })}
-        </span>
-        <span className="text-ink shrink-0 text-base font-semibold">
-          {fill(text.available, { current, max })}
-        </span>
-      </div>
+      <GaugeDots
+        label={text.title}
+        summary={fill(text.available, { current, max })}
+        current={current}
+        max={max}
+        onChange={setCurrent}
+      />
     </Panel>
   );
 }

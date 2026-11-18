@@ -114,6 +114,17 @@ export const frSheet = {
       title: "VOLONTÉ",
       available: "{current} disponibles sur {max}",
     },
+    resources: {
+      title: "RESSOURCES",
+      hint: "Mana, Douleur… : une jauge comme la Volonté, commune à toutes les formes.",
+      add: "+ RESSOURCE",
+      name: "Nom de la ressource",
+      namePlaceholder: "Mana, Douleur…",
+      max: "Maximum",
+      delete: "Supprimer la ressource {name}",
+      confirmDelete:
+        "Supprimer la ressource {name} ? Les pouvoirs qui la dépensaient n'auront plus ce coût.",
+    },
     morality: {
       title: "MORALITÉ",
       notes: "ANNOTATIONS (TARES)",
@@ -244,6 +255,13 @@ export const frSheet = {
       xp_total_below_spent: "Le total acquis ne peut pas descendre sous les points déjà dépensés.",
       main_form: "La fiche principale ne peut pas être supprimée.",
       npc_feature: "Un PNJ n'a ni expérience, ni tactiques, ni fiches alternatives.",
+      invalid_type: "Valeur invalide.",
+      resource_name: "Le nom de la ressource doit faire de 1 à 40 caractères.",
+      resource_name_taken: "Ce personnage a déjà une ressource de ce nom.",
+      resource_max: "Le maximum d'une ressource va de 0 à 30.",
+      resource_above_max: "La valeur disponible ne peut pas dépasser le maximum.",
+      resource_count: "Un personnage porte au plus dix ressources.",
+      recipe_resource: "Cette ressource n'existe pas sur ce personnage.",
     },
   },
 } as const;

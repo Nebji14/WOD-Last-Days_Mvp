@@ -138,3 +138,61 @@ def test_roll_message_cannot_be_edited(ctx: TestContext) -> None:
     response = lea.request("PATCH", f"/api/chat/messages/{message['id']}", json={"body": "triche"})
 
     assert response.status_code == 403
+
+
+# --- Pouvoirs, armes et atouts : recette de jet -----------------------------------------
+
+
+def _power(actor: Actor, character: dict[str, Any], **recipe: Any) -> dict[str, Any]:
+    """Ajoute un pouvoir avec sa recette et retourne l'élément créé."""
+    sheet_id = character["sheets"][0]["id"]
+    payload = {"kind": "power", "name": "Pensées et sentiments", "level": 2, "roll": recipe}
+    sheet = actor.request("POST", f"/api/sheets/{sheet_id}/entries", json=payload).json()
+    entry: dict[str, Any] = sheet["sheets"][0]["entries"][-1]
+    return entry
+
+
+def test_power_rolls_its_recipe_and_costs_willpower(ctx: TestContext) -> None:
+    lea = player(ctx, "lea.vale")
+    isaac = create(lea)
+    power = _power(lea, isaac, parts=["wits", "empathy", "supernatural"], willpower_cost=1)
+    before = isaac["sheets"][0]["willpower_current"]
+
+    roll = _roll(lea, isaac, kind="entry", entry_id=power["id"], modifier=-3).json()
+
+    assert roll["label"] == "Pensées et sentiments"
+    assert _parts(roll) == [("wits", 3), ("empathy", 2), ("supernatural", 1), ("modifier", -3)]
+    sheet = lea.request("GET", f"/api/characters/{isaac['id']}").json()["sheets"][0]
+    assert sheet["willpower_current"] == before - 1
+    assert _messages(lea)[-1]["body"].startswith("Isaac Thorne · Pensées et sentiments · ")
+
+
+def test_recipe_may_hold_more_than_two_traits(ctx: TestContext) -> None:
+    lea = player(ctx, "lea.vale")
+    isaac = create(lea)
+    parts = ["presence", "empathy", "occult", "supernatural", "entry_level"]
+    power = _power(lea, isaac, parts=parts, bonus=1)
+
+    roll = _roll(lea, isaac, kind="entry", entry_id=power["id"]).json()
+
+    assert [key for key, _ in _parts(roll)] == [*parts, "bonus"]
+
+
+def test_recipe_with_unknown_trait_is_refused(ctx: TestContext) -> None:
+    lea = player(ctx, "lea.vale")
+    sheet_id = create(lea)["sheets"][0]["id"]
+    payload = {"kind": "power", "name": "X", "roll": {"parts": ["telepathy"]}}
+
+    response = lea.request("POST", f"/api/sheets/{sheet_id}/entries", json=payload)
+
+    assert response.status_code == 422
+
+
+def test_power_cost_needs_enough_willpower(ctx: TestContext) -> None:
+    lea = player(ctx, "lea.vale")
+    isaac = create(lea)
+    power = _power(lea, isaac, parts=["wits", "empathy"], willpower_cost=5)
+
+    response = _roll(lea, isaac, kind="entry", entry_id=power["id"])
+
+    assert response.status_code == 422

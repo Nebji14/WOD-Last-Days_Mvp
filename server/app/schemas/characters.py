@@ -7,7 +7,7 @@ modèles portent cette règle : ``CharacterResponse`` (joueur, non éveillé),
 """
 
 from datetime import datetime
-from typing import Literal
+from typing import Any, Literal
 from uuid import UUID
 
 from pydantic import BaseModel
@@ -38,6 +38,7 @@ class EntryResponse(BaseModel):
     ballistic_protection: int | None
     min_strength: int | None
     defense_penalty: int | None
+    roll: dict[str, Any] | None = None
 
 
 class MoralityNoteResponse(BaseModel):
@@ -136,6 +137,7 @@ class SheetResponse(BaseModel):
                     ballistic_protection=e.ballistic_protection,
                     min_strength=e.min_strength,
                     defense_penalty=e.defense_penalty,
+                    roll=e.roll,
                 )
                 for e in sheet.entries
             ],

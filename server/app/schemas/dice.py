@@ -25,6 +25,7 @@ class RollRequest(BaseModel):
             (jet ``pool``).
         trait: Puissance, Finesse ou Résilience (jet ``trait`` d'un PNJ simplifié).
         dice: nombre de dés d'un jet libre du MJ.
+        entry_id: pouvoir, arme ou atout dont la recette compose la réserve.
         secret: jet du MJ montré au MJ seul.
     """
 
@@ -37,6 +38,7 @@ class RollRequest(BaseModel):
     second: str | None = Field(default=None, max_length=_TRAIT_MAX_LENGTH)
     trait: str | None = Field(default=None, max_length=_TRAIT_MAX_LENGTH)
     dice: int | None = Field(default=None, ge=1, le=FREE_POOL_MAX)
+    entry_id: UUID | None = None
     specialty: bool = False
     willpower: bool = False
     modifier: int = Field(default=0, ge=MODIFIER_MIN, le=MODIFIER_MAX)
@@ -79,6 +81,7 @@ class RollResponse(BaseModel):
     successes: int
     outcome: str | None
     total: int | None
+    label: str | None = None
 
     @classmethod
     def from_roll(cls, roll: DiceRoll) -> "RollResponse":

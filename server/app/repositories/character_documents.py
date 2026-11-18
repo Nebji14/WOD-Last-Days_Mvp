@@ -169,4 +169,5 @@ def _to_entry(row: dict[str, Any]) -> Entry:
         ballistic_protection=row["ballistic_protection"],
         min_strength=row["min_strength"],
         defense_penalty=row["defense_penalty"],
+        roll=row.get("roll"),
     )

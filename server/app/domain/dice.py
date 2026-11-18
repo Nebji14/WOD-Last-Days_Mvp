@@ -43,6 +43,7 @@ class RollKind(StrEnum):
     CONSCIOUSNESS = "consciousness"  # Vigueur, pour rester conscient
     TRAIT = "trait"  # Puissance, Finesse ou Résilience d'un PNJ simplifié
     FREE = "free"  # réserve libre du MJ
+    ENTRY = "entry"  # recette d'un pouvoir, d'une arme ou d'un atout
 
 
 class Outcome(StrEnum):
@@ -198,6 +199,7 @@ class DiceRoll:
         pending: dés qui restent à relancer ; 0 quand le jet est terminé.
         base: initiative ajoutée au dé, pour un jet d'initiative.
         secret: jet du MJ, montré au MJ seul.
+        label: nom du pouvoir, de l'arme ou de l'atout lancé.
     """
 
     id: UUID
@@ -214,6 +216,7 @@ class DiceRoll:
     stages: list[list[int]]
     pending: int
     base: int = 0
+    label: str | None = None
 
     @property
     def finished(self) -> bool:
@@ -257,4 +260,5 @@ def roll_detail(roll: DiceRoll) -> dict[str, Any]:
         "successes": roll.successes,
         "outcome": outcome(roll.stages, roll.chance).value if finished_pool else None,
         "total": roll.total,
+        "label": roll.label,
     }

@@ -1,0 +1,97 @@
+"""Recette de jet d'un pouvoir, d'une arme ou d'un atout.
+
+Le joueur, avec l'accord du MJ, choisit librement ce qui compose la réserve :
+attributs, compétences, Avantage surnaturel, niveau de l'élément, bonus de
+l'arme, et un bonus fixe. Il fixe aussi le coût en Volonté, dépensé à chaque
+utilisation. Au moment du jet, seul le malus ou bonus annoncé par le MJ reste
+à saisir.
+
+Module pur : aucun accès réseau ni base de données.
+"""
+
+from dataclasses import dataclass
+from typing import Any
+
+from app.domain.character import Entry, EntryKind
+from app.domain.dice import UNSKILLED_PENALTY, DiceRuleError, PoolPart, skill_category
+from app.domain.traits import ATTRIBUTE_NAMES, SKILL_NAMES
+
+SUPERNATURAL = "supernatural"
+ENTRY_LEVEL = "entry_level"
+WEAPON_BONUS = "weapon_bonus"
+RECIPE_KEYS = frozenset({*ATTRIBUTE_NAMES, *SKILL_NAMES, SUPERNATURAL, ENTRY_LEVEL, WEAPON_BONUS})
+# Éléments qui peuvent porter une recette.
+ROLLABLE_KINDS = frozenset({EntryKind.POWER, EntryKind.WEAPON, EntryKind.MERIT})
+
+PARTS_MAX = 8
+COST_MAX = 5
+BONUS_MIN = -10
+BONUS_MAX = 10
+
+
+@dataclass(frozen=True, slots=True)
+class RollRecipe:
+    """Composition de la réserve, coût en Volonté et bonus fixe."""
+
+    parts: tuple[str, ...]
+    willpower_cost: int = 0
+    bonus: int = 0
+
+    def as_data(self) -> dict[str, Any]:
+        """Forme enregistrée en base et renvoyée au client."""
+        return {
+            "parts": list(self.parts),
+            "willpower_cost": self.willpower_cost,
+            "bonus": self.bonus,
+        }
+
+    @classmethod
+    def from_data(cls, data: dict[str, Any] | None) -> "RollRecipe | None":
+        """Relit une recette enregistrée ; ``None`` sans recette."""
+        if not data:
+            return None
+        return cls(
+            parts=tuple(str(part) for part in data.get("parts", [])),
+            willpower_cost=int(data.get("willpower_cost", 0)),
+            bonus=int(data.get("bonus", 0)),
+        )
+
+
+def check_recipe(recipe: RollRecipe) -> None:
+    """Refuse une recette vide, trop longue, inconnue ou hors bornes.
+
+    Raises:
+        DiceRuleError: pour une recette invalide.
+    """
+    if not 1 <= len(recipe.parts) <= PARTS_MAX:
+        raise DiceRuleError("recipe_parts")
+    if any(part not in RECIPE_KEYS for part in recipe.parts):
+        raise DiceRuleError("recipe_parts")
+    if not 0 <= recipe.willpower_cost <= COST_MAX:
+        raise DiceRuleError("recipe_cost")
+    if not BONUS_MIN <= recipe.bonus <= BONUS_MAX:
+        raise DiceRuleError("recipe_bonus")
+
+
+def recipe_parts(
+    recipe: RollRecipe, traits: dict[str, int], supernatural_level: int, entry: Entry
+) -> list[PoolPart]:
+    """Réserve d'un élément : chaque trait de la recette, puis le bonus fixe.
+
+    Une compétence à 0 donne son malus de catégorie, comme pour tout jet.
+    """
+    parts: list[PoolPart] = []
+    for key in recipe.parts:
+        if key == SUPERNATURAL:
+            parts.append(PoolPart(key, supernatural_level))
+        elif key == ENTRY_LEVEL:
+            parts.append(PoolPart(key, entry.level or 0))
+        elif key == WEAPON_BONUS:
+            parts.append(PoolPart(key, entry.damage_modifier or 0))
+        else:
+            parts.append(PoolPart(key, traits[key]))
+            if key in SKILL_NAMES and traits[key] == 0:
+                parts.append(PoolPart("unskilled", UNSKILLED_PENALTY[skill_category(key)]))
+    if recipe.bonus:
+        parts.append(PoolPart("bonus", recipe.bonus))
+    return parts

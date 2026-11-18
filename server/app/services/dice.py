@@ -3,14 +3,14 @@
 Le serveur tire les dés, pour que personne ne puisse truquer un jet, puis
 diffuse chaque vague : le lancer, puis une seule vague de relance des 10 (ou
 9, 8). Le lanceur déclenche la relance quand ses dés passent à l'écran ; s'il
-est parti, le serveur relance seul après un long délai. Un jet terminé est publié dans le chat, sauf le jet secret du
-MJ, montré au MJ seul.
+est parti, le serveur relance seul après un long délai. Un jet terminé est
+publié dans le chat, sauf le jet secret du MJ, montré au MJ seul.
 """
 
 import asyncio
 import logging
 import secrets
-from dataclasses import dataclass, replace
+from dataclasses import replace
 from typing import Any, Protocol
 from uuid import UUID, uuid4
 
@@ -19,7 +19,6 @@ from app.domain.accounts import Account, Role
 from app.domain.character import Character, Sheet
 from app.domain.dice import (
     DIE_FACES,
-    NPC_TRAITS,
     DiceRoll,
     DiceRuleError,
     DieRoller,
@@ -28,14 +27,14 @@ from app.domain.dice import (
     RollKind,
     bonus_parts,
     check_options,
-    pool_parts,
     pool_size,
     rerolls_after,
     roll_detail,
     roll_dice,
 )
-from app.domain.wounds import wound_penalty
+from app.domain.recipes import RollRecipe
 from app.services.character_access import CharacterAccess, rule_violation
+from app.services.dice_pools import RollInput, compose_pool, entry_of
 
 logger = logging.getLogger(__name__)
 
@@ -60,21 +59,6 @@ class RollPublisher(Protocol):
     async def publish_roll(
         self, author_id: UUID, roll_id: UUID, body: str, roll: dict[str, Any]
     ) -> Any: ...
-
-
-@dataclass(frozen=True, slots=True)
-class RollInput:
-    """Demande de jet validée, transmise par la route."""
-
-    kind: RollKind
-    options: PoolOptions
-    character_id: UUID | None = None
-    sheet_id: UUID | None = None
-    attribute: str | None = None
-    second: str | None = None
-    trait: str | None = None
-    dice: int | None = None
-    secret: bool = False
 
 
 def _random_die() -> int:
@@ -177,54 +161,26 @@ class DiceService:
             raise rule_violation("sheet", "dice")
         sheet = self._access.sheet_of(character, request.sheet_id)
         try:
-            parts, base = self._compose(character, sheet, request)
+            entry = entry_of(sheet, request)
+            parts, base = compose_pool(character, sheet, request, entry)
         except DiceRuleError as error:
             raise rule_violation(str(error), "dice") from None
-        if request.options.willpower:
-            await self._spend_willpower(character, sheet)
+        # Le coût du pouvoir et la Volonté dépensée pour +3 se cumulent.
+        recipe = None if entry is None else RollRecipe.from_data(entry.roll)
+        cost = (1 if request.options.willpower else 0) + (recipe.willpower_cost if recipe else 0)
+        if cost:
+            await self._spend_willpower(character, sheet, cost)
         name = character.main_sheet.texts.get("name") or character.owner_name
         roll = self._first_stage(actor, name, character.id, request, parts)
-        return replace(roll, base=base)
+        return replace(roll, base=base, label=None if entry is None else entry.name)
 
-    @staticmethod
-    def _compose(
-        character: Character, sheet: Sheet, request: RollInput
-    ) -> tuple[list[PoolPart], int]:
-        """Réserve du jet et, pour l'initiative, la valeur ajoutée au dé."""
-        options = request.options
-        penalty = wound_penalty(sheet.wound_track, sheet.numbers["health_max"])
-        reflex = request.kind in (RollKind.INITIATIVE, RollKind.CONSCIOUSNESS)
-        if reflex and (options.willpower or options.specialty):
-            raise DiceRuleError("options")
-        if request.kind is RollKind.INITIATIVE:
-            base = sheet.numbers["initiative"]
-            return [PoolPart("initiative", base), *bonus_parts(PoolOptions(), penalty)], base
-        if request.kind is RollKind.CONSCIOUSNESS:
-            # Le malus de blessure ne s'applique pas à ce jet.
-            stamina = PoolPart("stamina", sheet.traits["stamina"])
-            return [stamina, *bonus_parts(PoolOptions(modifier=options.modifier), 0)], 0
-        if request.kind is RollKind.TRAIT:
-            profile = character.npc
-            if profile is None or not profile.is_simplified or request.trait not in NPC_TRAITS:
-                raise DiceRuleError("trait")
-            value = getattr(profile, request.trait) or 0
-            return [PoolPart(request.trait, value), *bonus_parts(options, penalty)], 0
-        if character.npc is not None and character.npc.is_simplified:
-            raise DiceRuleError("trait")
-        has_specialty = bool(sheet.specialties.get(request.second or ""))
-        attribute = request.attribute or ""
-        return (
-            pool_parts(sheet.traits, attribute, request.second, has_specialty, options, penalty),
-            0,
-        )
-
-    async def _spend_willpower(self, character: Character, sheet: Sheet) -> None:
-        """Retire un point de volonté disponible, sans écraser une modification concurrente."""
+    async def _spend_willpower(self, character: Character, sheet: Sheet, amount: int) -> None:
+        """Retire des points de volonté disponibles, sans écraser une modification concurrente."""
         current = sheet.numbers["willpower_current"]
-        if current < 1:
+        if current < amount:
             raise rule_violation("no_willpower", "willpower_current")
         if not await self._willpower.update_sheet_field(
-            sheet.id, "willpower_current", current - 1, current
+            sheet.id, "willpower_current", current - amount, current
         ):
             raise AppError(ErrorCode.EDIT_CONFLICT, "La volonté a changé.", status_code=409)
         await self._access.changed(character.id)
@@ -307,8 +263,9 @@ class DiceService:
 
 def roll_summary(roll: DiceRoll) -> str:
     """Texte du message de chat : il sert de repli au détail affiché par le client."""
+    who = roll.roller_name if roll.label is None else f"{roll.roller_name} · {roll.label}"
     if roll.total is not None:
-        return f"{roll.roller_name} · initiative {roll.total}"
+        return f"{who} · initiative {roll.total}"
     successes = roll.successes
     plural = "s" if successes > 1 else ""
-    return f"{roll.roller_name} · {successes} réussite{plural}"
+    return f"{who} · {successes} réussite{plural}"

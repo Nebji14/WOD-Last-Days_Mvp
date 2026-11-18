@@ -4,9 +4,11 @@ Spécialités, annotations de moralité, éléments de feuille (atouts, armes…
 tactiques, dépenses d'expérience et notes.
 """
 
+import json
 from collections.abc import Sequence
 from dataclasses import astuple, dataclass
 from enum import StrEnum
+from typing import Any
 from uuid import UUID
 
 import asyncpg
@@ -55,11 +57,17 @@ class EntryValues:
     ballistic_protection: int | None
     min_strength: int | None
     defense_penalty: int | None
+    roll: dict[str, Any] | None = None
+
+    def row(self) -> tuple[Any, ...]:
+        """Valeurs à écrire ; la recette de jet part en JSON."""
+        *columns, roll = astuple(self)
+        return (*columns, None if roll is None else json.dumps(roll))
 
 
 _ENTRY_COLUMNS = (
     "name, description, level, quantity, damage_modifier, range, size, initiative_penalty, "
-    "general_protection, ballistic_protection, min_strength, defense_penalty"
+    "general_protection, ballistic_protection, min_strength, defense_penalty, roll"
 )
 
 
@@ -109,10 +117,10 @@ class PgSheetItemRepository:
     async def add_entry(self, sheet_id: UUID, kind: EntryKind, values: EntryValues) -> None:
         await self._pool.execute(
             f"insert into sheet_entry (sheet_id, kind, {_ENTRY_COLUMNS}) "  # noqa: S608
-            "values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)",
+            "values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15::jsonb)",
             sheet_id,
             kind.value,
-            *astuple(values),
+            *values.row(),
         )
 
     async def get_entry_kind(self, entry_id: UUID) -> EntryKind | None:
@@ -122,9 +130,9 @@ class PgSheetItemRepository:
     async def update_entry(self, entry_id: UUID, values: EntryValues) -> None:
         await self._pool.execute(
             f"update sheet_entry set ({_ENTRY_COLUMNS}) = "  # noqa: S608
-            "($2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) where id = $1",
+            "($2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14::jsonb) where id = $1",
             entry_id,
-            *astuple(values),
+            *values.row(),
         )
 
     async def delete_entry(self, entry_id: UUID) -> None:

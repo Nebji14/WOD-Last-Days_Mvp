@@ -71,12 +71,25 @@ export const ENTRY_NUMBER_FIELDS = [
 ] as const;
 export type EntryNumberField = (typeof ENTRY_NUMBER_FIELDS)[number];
 
+/**
+ * Recette de jet d'un pouvoir, d'une arme ou d'un atout : traits de la
+ * réserve (attributs, compétences, `supernatural`, `entry_level`,
+ * `weapon_bonus`), coût en Volonté et bonus fixe.
+ */
+export interface RollRecipe {
+  readonly parts: readonly string[];
+  readonly willpower_cost: number;
+  readonly bonus: number;
+}
+
 export type Entry = {
   readonly id: string;
   readonly kind: EntryKind;
   readonly name: string;
   readonly description: string;
   readonly range: string | null;
+  /** Absente pour un élément sans jet. */
+  readonly roll?: RollRecipe | null;
 } & { readonly [field in EntryNumberField]: number | null };
 
 export interface MoralityNote {

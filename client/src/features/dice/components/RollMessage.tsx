@@ -12,6 +12,7 @@ export function RollMessage({ roll }: { readonly roll: Roll }) {
   const counted = roll.kind !== "initiative";
   return (
     <span className="flex flex-col gap-1">
+      {roll.label != null && <span className="text-copper-light font-bold">{roll.label}</span>}
       <span className="text-ink-muted text-sm italic">{describeParts(roll.parts)}</span>
       <span className="flex flex-wrap items-center gap-1">
         {roll.stages.map((faces, stage) => (

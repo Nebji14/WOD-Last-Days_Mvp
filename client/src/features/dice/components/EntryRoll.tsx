@@ -1,0 +1,140 @@
+"use client";
+
+/**
+ * Bouton 🎲 d'un pouvoir, d'une arme ou d'un atout qui a une recette de jet.
+ *
+ * Il ouvre un petit panneau : la réserve calculée depuis la fiche, le coût en
+ * Volonté, et le seul réglage restant, le malus ou bonus annoncé par le MJ
+ * (défense ou résistance de la cible, circonstances).
+ */
+import { useState } from "react";
+
+import type { Character, Entry, Sheet } from "@/features/characters/model";
+import { ApiError } from "@/shared/api/client";
+import { errorLabel, fill, labels } from "@/shared/i18n";
+
+import { startRoll } from "../api";
+import { describeParts } from "../format";
+import { poolSize } from "../model";
+import { MODIFIER_MAX, MODIFIER_MIN, recipeParts } from "../pool";
+
+const STEP =
+  "border-line-strong text-gold hover:border-gold size-7 cursor-pointer rounded-xs border text-base leading-none font-bold disabled:cursor-not-allowed disabled:opacity-35";
+
+interface EntryRollProps {
+  readonly character: Character;
+  readonly sheet: Sheet;
+  readonly entry: Entry;
+}
+
+export function EntryRoll({ character, sheet, entry }: EntryRollProps) {
+  const text = labels.dice;
+  const [open, setOpen] = useState(false);
+  const [modifier, setModifier] = useState(0);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const cost = entry.roll?.willpower_cost ?? 0;
+  const parts = recipeParts(character, sheet, entry, modifier);
+  const size = poolSize(parts);
+  const affordable = sheet.willpower_current >= cost;
+  const rollLabel = fill(text.recipe.roll, { name: entry.name });
+
+  async function roll(): Promise<void> {
+    setBusy(true);
+    setError(null);
+    try {
+      await startRoll({
+        kind: "entry",
+        character_id: character.id,
+        sheet_id: sheet.id,
+        entry_id: entry.id,
+        modifier,
+      });
+      setOpen(false);
+      setModifier(0);
+    } catch (caught) {
+      setError(errorLabel(caught instanceof ApiError ? caught.code : "internal_error"));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <span className="relative">
+      <button
+        type="button"
+        aria-label={rollLabel}
+        aria-expanded={open}
+        title={describeParts(parts)}
+        onClick={() => setOpen(!open)}
+        className="text-gold cursor-pointer px-1 text-base hover:brightness-125"
+      >
+        🎲
+      </button>
+      {open && (
+        <div className="border-gold/60 bg-panel absolute top-8 right-0 z-30 flex w-[340px] flex-col gap-3 rounded-md border p-4 shadow-[0_10px_32px_rgb(0_0_0/0.7)]">
+          <p className="font-display text-gold text-[11px] font-bold tracking-[3px]">
+            {entry.name.toUpperCase()}
+          </p>
+          <p className="text-ink text-base">
+            {describeParts(parts)} ={" "}
+            <strong className="text-gold">
+              {size === 0
+                ? text.chanceDie
+                : size === 1
+                  ? text.poolOne
+                  : fill(text.pool, { count: size })}
+            </strong>
+          </p>
+          {cost > 0 && (
+            <p className={`text-sm italic ${affordable ? "text-copper-light" : "text-danger"}`}>
+              {affordable ? fill(text.recipe.costNote, { cost }) : text.recipe.notEnough}
+            </p>
+          )}
+          <span className="text-ink flex items-center gap-2 text-[15px]">
+            {text.modifier}
+            <button
+              type="button"
+              aria-label={`${text.modifier} −1`}
+              disabled={modifier <= MODIFIER_MIN}
+              onClick={() => setModifier(modifier - 1)}
+              className={STEP}
+            >
+              −
+            </button>
+            <strong className={`w-8 text-center ${modifier < 0 ? "text-danger" : "text-gold"}`}>
+              {modifier > 0 ? `+${modifier}` : modifier}
+            </strong>
+            <button
+              type="button"
+              aria-label={`${text.modifier} +1`}
+              disabled={modifier >= MODIFIER_MAX}
+              onClick={() => setModifier(modifier + 1)}
+              className={STEP}
+            >
+              +
+            </button>
+          </span>
+          {error !== null && <p className="text-danger text-sm">{error}</p>}
+          <div className="flex justify-end gap-3">
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              className="font-display text-ink-muted cursor-pointer text-[10px] font-bold tracking-[2px]"
+            >
+              {labels.sheet.cancel}
+            </button>
+            <button
+              type="button"
+              disabled={busy || !affordable}
+              onClick={() => void roll()}
+              className="font-display h-9 cursor-pointer rounded-xs border border-[#D8352C] bg-gradient-to-b from-[#B3261F] to-[#7A1512] px-6 text-xs font-bold tracking-[3px] text-white hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {text.roll}
+            </button>
+          </div>
+        </div>
+      )}
+    </span>
+  );
+}

@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, status
 from app.api.deps import ContainerDep, CurrentAccount, rate_limit
 from app.domain.dice import PoolOptions
 from app.schemas.dice import RollRequest, RollResponse
-from app.services.dice import RollInput
+from app.services.dice_pools import RollInput
 
 router = APIRouter(prefix="/api/dice", tags=["dice"])
 
@@ -38,6 +38,7 @@ async def roll(
         second=payload.second,
         trait=payload.trait,
         dice=payload.dice,
+        entry_id=payload.entry_id,
         secret=payload.secret,
     )
     result = await container.dice_service.start(account, request)

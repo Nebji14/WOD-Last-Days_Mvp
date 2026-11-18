@@ -13,6 +13,7 @@ Module pur : aucun accès réseau ni base de données.
 from dataclasses import dataclass
 from datetime import datetime
 from enum import StrEnum
+from typing import Any
 from uuid import UUID
 
 from app.domain.accounts import Account, Role
@@ -35,6 +36,7 @@ class Entry:
     """Atout, handicap, pouvoir, objet, arme ou armure.
 
     Les champs propres à un autre type que ``kind`` valent ``None``.
+    ``roll`` porte la recette de jet d'un pouvoir, d'une arme ou d'un atout.
     """
 
     id: UUID
@@ -51,6 +53,7 @@ class Entry:
     ballistic_protection: int | None
     min_strength: int | None
     defense_penalty: int | None
+    roll: dict[str, Any] | None = None
 
 
 @dataclass(frozen=True, slots=True)

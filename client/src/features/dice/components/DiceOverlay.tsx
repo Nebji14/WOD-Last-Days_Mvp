@@ -127,6 +127,7 @@ function RollPlayer({ roll, viewerId }: { roll: Roll; viewerId: string }) {
       <header className="relative mt-10 flex flex-col items-center gap-1 text-center">
         <p className="font-display text-gold text-sm font-bold tracking-[4px]">
           {fill(labels.dice.rolledBy, { name: roll.roller_name })}
+          {roll.label != null && ` · ${roll.label.toUpperCase()}`}
           {roll.secret && (
             <span className="border-gold ml-3 rounded-xs border px-2 py-0.5 text-[10px]">
               {labels.dice.secretBadge}

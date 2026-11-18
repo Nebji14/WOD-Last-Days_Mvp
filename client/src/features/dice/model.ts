@@ -1,7 +1,7 @@
 /** Jet de dés tel qu'il arrive du serveur, et lecture de ses faces. */
 import { isRecord } from "@/shared/api/client";
 
-export type RollKind = "pool" | "initiative" | "consciousness" | "trait" | "free";
+export type RollKind = "pool" | "initiative" | "consciousness" | "trait" | "free" | "entry";
 export type Outcome = "dramatic_failure" | "failure" | "success" | "exceptional";
 
 export interface RollPart {
@@ -28,10 +28,19 @@ export interface Roll {
   readonly successes: number;
   readonly outcome: Outcome | null;
   readonly total: number | null;
+  /** Nom du pouvoir, de l'arme ou de l'atout lancé. */
+  readonly label?: string | null;
 }
 
 const SUCCESS_THRESHOLD = 8;
-const KINDS: readonly RollKind[] = ["pool", "initiative", "consciousness", "trait", "free"];
+const KINDS: readonly RollKind[] = [
+  "pool",
+  "initiative",
+  "consciousness",
+  "trait",
+  "free",
+  "entry",
+];
 
 function isFaces(value: unknown): value is readonly number[] {
   return Array.isArray(value) && value.every((face) => typeof face === "number");

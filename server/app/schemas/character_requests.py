@@ -136,6 +136,16 @@ class MoralityNoteRequest(BaseModel):
     body: str = Field(min_length=1, max_length=500)
 
 
+class RollRecipeInput(BaseModel):
+    """Recette de jet : traits de la réserve, coût en Volonté, bonus fixe."""
+
+    model_config = _STRICT
+
+    parts: list[str] = Field(min_length=1, max_length=8)
+    willpower_cost: int = Field(default=0, ge=0, le=5)
+    bonus: int = Field(default=0, ge=-10, le=10)
+
+
 class EntryValuesInput(BaseModel):
     """Valeurs d'un atout, handicap, pouvoir, objet, d'une arme ou d'une armure."""
 
@@ -153,6 +163,7 @@ class EntryValuesInput(BaseModel):
     ballistic_protection: int | None = Field(default=None, ge=0, le=20)
     min_strength: int | None = Field(default=None, ge=0, le=10)
     defense_penalty: int | None = Field(default=None, ge=-20, le=20)
+    roll: RollRecipeInput | None = None
 
     def to_values(self) -> EntryValues:
         return EntryValues(**self.model_dump())

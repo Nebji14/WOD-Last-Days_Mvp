@@ -11,6 +11,8 @@ from uuid import UUID
 from app.core.errors import AppError, ErrorCode
 from app.domain.accounts import Account
 from app.domain.character import Character, EntryKind, Tactic, can_manage_notes
+from app.domain.dice import DiceRuleError
+from app.domain.recipes import ROLLABLE_KINDS, RollRecipe, check_recipe
 from app.domain.traits import SKILL_NAMES, SPECIALTY_MAX_LENGTH, parse_specialties
 from app.repositories.sheet_items import EntryValues, ItemKind
 from app.services.character_access import (
@@ -97,7 +99,23 @@ def normalize_entry(kind: EntryKind, values: EntryValues) -> EntryValues:
         ballistic_protection=values.ballistic_protection if is_armor else None,
         min_strength=values.min_strength if is_armor else None,
         defense_penalty=values.defense_penalty if is_armor else None,
+        roll=values.roll if kind in ROLLABLE_KINDS else None,
     )
+
+
+def check_entry_roll(values: EntryValues) -> None:
+    """Refuse une recette de jet invalide.
+
+    Raises:
+        AppError: ``rule_violation`` avec la règle enfreinte.
+    """
+    recipe = RollRecipe.from_data(values.roll)
+    if recipe is None:
+        return
+    try:
+        check_recipe(recipe)
+    except DiceRuleError as error:
+        raise rule_violation(str(error), "roll") from None
 
 
 class SheetItemService:
@@ -166,7 +184,9 @@ class SheetItemService:
         self, actor: Account, sheet_id: UUID, kind: EntryKind, values: EntryValues
     ) -> Character:
         character = await self._sheet_owner(actor, sheet_id)
-        await self._items.add_entry(sheet_id, kind, normalize_entry(kind, values))
+        normalized = normalize_entry(kind, values)
+        check_entry_roll(normalized)
+        await self._items.add_entry(sheet_id, kind, normalized)
         return await self._access.changed(character.id)
 
     async def update_entry(self, actor: Account, entry_id: UUID, values: EntryValues) -> Character:
@@ -174,7 +194,9 @@ class SheetItemService:
         kind = await self._items.get_entry_kind(entry_id)
         if kind is None:
             raise not_found()
-        await self._items.update_entry(entry_id, normalize_entry(kind, values))
+        normalized = normalize_entry(kind, values)
+        check_entry_roll(normalized)
+        await self._items.update_entry(entry_id, normalized)
         return await self._access.changed(character.id)
 
     async def delete_entry(self, actor: Account, entry_id: UUID) -> Character:

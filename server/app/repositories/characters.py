@@ -29,7 +29,7 @@ _COPIED_SHEET_COLUMNS = ", ".join([*sorted(SHEET_FIELDS - {"form_name"}), "wound
 _COPIED_ENTRY_COLUMNS = (
     "kind, name, description, level, quantity, damage_modifier, range, size, "
     "initiative_penalty, general_protection, ballistic_protection, min_strength, "
-    "defense_penalty, created_at"
+    "defense_penalty, roll, created_at"
 )
 
 

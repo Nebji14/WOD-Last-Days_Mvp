@@ -11,6 +11,7 @@ export interface RollRequest {
   readonly second?: string;
   readonly trait?: string;
   readonly dice?: number;
+  readonly entry_id?: string;
   readonly specialty?: boolean;
   readonly willpower?: boolean;
   readonly modifier?: number;

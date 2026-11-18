@@ -8,14 +8,27 @@
  * moment pour l'équipement, qui change en cours de partie, et seulement en mode
  * modification pour les atouts, handicaps et pouvoirs, qui ne progressent
  * qu'avec l'accord du MJ.
+ *
+ * Un pouvoir, une arme ou un atout peut porter une recette de jet : le bouton
+ * 🎲 de sa ligne lance alors les dés en un clic.
  */
 import { type FormEvent, useState } from "react";
 
 import { addEntry, deleteEntry, type EntryValues, updateEntry } from "@/features/characters/api";
 import type { Entry, EntryKind, EntryNumberField } from "@/features/characters/model";
+import { EntryRoll } from "@/features/dice/components/EntryRoll";
+import {
+  draftOf,
+  type RecipeDraft,
+  RecipeEditor,
+  recipeOf,
+} from "@/features/dice/components/RecipeEditor";
 import { labels } from "@/shared/i18n";
 
 import { COLUMN_LABEL, ConfirmDelete, LINK_ACTION, Panel, useSheet } from "./primitives";
+
+/** Éléments qui peuvent porter une recette de jet. */
+const ROLLABLE: ReadonlySet<EntryKind> = new Set<EntryKind>(["power", "weapon", "merit"]);
 
 /** Listes d'équipement, modifiables sans passer en mode modification. */
 const EQUIPMENT: ReadonlySet<EntryKind> = new Set<EntryKind>(["weapon", "armor", "item"]);
@@ -74,13 +87,15 @@ function display(entry: Entry, column: Column): string {
 }
 
 interface EntryFormProps {
+  readonly kind: EntryKind;
   readonly layout: KindLayout;
   readonly initial: Entry | null;
   readonly onSubmit: (values: EntryValues) => void;
   readonly onCancel: () => void;
 }
 
-function EntryForm({ layout, initial, onSubmit, onCancel }: EntryFormProps) {
+function EntryForm({ kind, layout, initial, onSubmit, onCancel }: EntryFormProps) {
+  const [recipe, setRecipe] = useState<RecipeDraft>(() => draftOf(initial?.roll));
   const [draft, setDraft] = useState<Record<string, string>>(() =>
     Object.fromEntries(
       layout.columns.map((column) => [column, initial ? String(initial[column] ?? "") : ""]),
@@ -99,7 +114,7 @@ function EntryForm({ layout, initial, onSubmit, onCancel }: EntryFormProps) {
         values[column] = Number.isNaN(parsed) ? null : parsed;
       }
     }
-    onSubmit(values);
+    onSubmit(ROLLABLE.has(kind) ? { ...values, roll: recipeOf(recipe) } : values);
   }
 
   return (
@@ -119,6 +134,7 @@ function EntryForm({ layout, initial, onSubmit, onCancel }: EntryFormProps) {
           />
         ))}
       </div>
+      {ROLLABLE.has(kind) && <RecipeEditor kind={kind} draft={recipe} onChange={setRecipe} />}
       <div className="mt-2 flex justify-end gap-4">
         <button type="submit" className={LINK_ACTION}>
           {labels.sheet.save}
@@ -132,7 +148,7 @@ function EntryForm({ layout, initial, onSubmit, onCancel }: EntryFormProps) {
 }
 
 export function EntryPanel({ kind }: { readonly kind: EntryKind }) {
-  const { sheet, editing, run } = useSheet();
+  const { character, sheet, editing, run } = useSheet();
   const text = labels.sheet.entries[kind];
   const layout = LAYOUTS[kind];
   const entries = sheet.entries.filter((entry) => entry.kind === kind);
@@ -165,6 +181,7 @@ export function EntryPanel({ kind }: { readonly kind: EntryKind }) {
           open === entry.id && changeable ? (
             <li key={entry.id}>
               <EntryForm
+                kind={kind}
                 layout={layout}
                 initial={entry}
                 onCancel={() => setOpen(null)}
@@ -195,6 +212,11 @@ export function EntryPanel({ kind }: { readonly kind: EntryKind }) {
                   </span>
                 ))}
               </div>
+              {entry.roll != null && (
+                <span className="ml-2 shrink-0">
+                  <EntryRoll character={character} sheet={sheet} entry={entry} />
+                </span>
+              )}
               {changeable && (
                 <span className="ml-2 flex shrink-0 items-center gap-1">
                   <button
@@ -222,6 +244,7 @@ export function EntryPanel({ kind }: { readonly kind: EntryKind }) {
       {open === "new" && (
         <div className="mt-1.5">
           <EntryForm
+            kind={kind}
             layout={layout}
             initial={null}
             onCancel={() => setOpen(null)}

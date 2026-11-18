@@ -98,7 +98,7 @@ interface EntryFormProps {
 }
 
 function EntryForm({ kind, valueOf, layout, initial, onSubmit, onCancel }: EntryFormProps) {
-  const [recipe, setRecipe] = useState<RecipeDraft>(() => draftOf(initial?.roll, kind));
+  const [recipe, setRecipe] = useState<RecipeDraft>(() => draftOf(initial?.roll));
   const [draft, setDraft] = useState<Record<string, string>>(() =>
     Object.fromEntries(
       layout.columns.map((column) => [column, initial ? String(initial[column] ?? "") : ""]),

@@ -1,10 +1,10 @@
 """Recette de jet d'un pouvoir, d'une arme ou d'un atout.
 
 Le joueur, avec l'accord du MJ, choisit librement ce qui compose la réserve :
-attributs, compétences, Avantage surnaturel, niveau de l'élément, bonus de
-l'arme, et un bonus fixe. Il fixe aussi le coût en Volonté, dépensé à chaque
-utilisation. Au moment du jet, seul le malus ou bonus annoncé par le MJ reste
-à saisir.
+attributs, compétences, niveau de l'élément, bonus de l'arme. Il fixe aussi le
+coût en Volonté, dépensé à chaque utilisation. Un pouvoir ajoute toujours
+l'Avantage surnaturel du personnage (son niveau au recto) : ce n'est pas un
+choix. Au moment du jet, seuls le malus et le bonus du MJ restent à saisir.
 
 Module pur : aucun accès réseau ni base de données.
 """
@@ -19,7 +19,7 @@ from app.domain.traits import ATTRIBUTE_NAMES, SKILL_NAMES
 SUPERNATURAL = "supernatural"
 ENTRY_LEVEL = "entry_level"
 WEAPON_BONUS = "weapon_bonus"
-RECIPE_KEYS = frozenset({*ATTRIBUTE_NAMES, *SKILL_NAMES, SUPERNATURAL, ENTRY_LEVEL, WEAPON_BONUS})
+RECIPE_KEYS = frozenset({*ATTRIBUTE_NAMES, *SKILL_NAMES, ENTRY_LEVEL, WEAPON_BONUS})
 # Éléments qui peuvent porter une recette.
 ROLLABLE_KINDS = frozenset({EntryKind.POWER, EntryKind.WEAPON, EntryKind.MERIT})
 
@@ -50,8 +50,9 @@ class RollRecipe:
         """Relit une recette enregistrée ; ``None`` sans recette."""
         if not data:
             return None
+        # L'Avantage surnaturel ne se choisit pas : il est ajouté à tout pouvoir.
         return cls(
-            parts=tuple(str(part) for part in data.get("parts", [])),
+            parts=tuple(str(part) for part in data.get("parts", []) if part != SUPERNATURAL),
             willpower_cost=int(data.get("willpower_cost", 0)),
             bonus=int(data.get("bonus", 0)),
         )
@@ -76,15 +77,14 @@ def check_recipe(recipe: RollRecipe) -> None:
 def recipe_parts(
     recipe: RollRecipe, traits: dict[str, int], supernatural_level: int, entry: Entry
 ) -> list[PoolPart]:
-    """Réserve d'un élément : chaque trait de la recette, puis le bonus fixe.
+    """Réserve d'un élément : chaque trait de la recette, l'Avantage surnaturel
+    pour un pouvoir, puis le bonus fixe éventuel.
 
     Une compétence à 0 donne son malus de catégorie, comme pour tout jet.
     """
     parts: list[PoolPart] = []
     for key in recipe.parts:
-        if key == SUPERNATURAL:
-            parts.append(PoolPart(key, supernatural_level))
-        elif key == ENTRY_LEVEL:
+        if key == ENTRY_LEVEL:
             parts.append(PoolPart(key, entry.level or 0))
         elif key == WEAPON_BONUS:
             parts.append(PoolPart(key, entry.damage_modifier or 0))
@@ -92,6 +92,8 @@ def recipe_parts(
             parts.append(PoolPart(key, traits[key]))
             if key in SKILL_NAMES and traits[key] == 0:
                 parts.append(PoolPart("unskilled", UNSKILLED_PENALTY[skill_category(key)]))
+    if entry.kind is EntryKind.POWER:
+        parts.append(PoolPart(SUPERNATURAL, supernatural_level))
     if recipe.bonus:
         parts.append(PoolPart("bonus", recipe.bonus))
     return parts

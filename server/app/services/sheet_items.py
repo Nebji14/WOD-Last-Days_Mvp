@@ -5,7 +5,7 @@ pouvoirs, objets, armes et armures, tactiques partagées,
 dépenses d'expérience et notes de la fiche.
 """
 
-from typing import Protocol
+from typing import Any, Protocol
 from uuid import UUID
 
 from app.core.errors import AppError, ErrorCode
@@ -99,8 +99,14 @@ def normalize_entry(kind: EntryKind, values: EntryValues) -> EntryValues:
         ballistic_protection=values.ballistic_protection if is_armor else None,
         min_strength=values.min_strength if is_armor else None,
         defense_penalty=values.defense_penalty if is_armor else None,
-        roll=values.roll if kind in ROLLABLE_KINDS else None,
+        roll=_normalized_roll(values.roll) if kind in ROLLABLE_KINDS else None,
     )
+
+
+def _normalized_roll(roll: dict[str, Any] | None) -> dict[str, Any] | None:
+    """Recette telle qu'elle est enregistrée : sans l'Avantage surnaturel, ajouté d'office."""
+    recipe = RollRecipe.from_data(roll)
+    return None if recipe is None else recipe.as_data()
 
 
 def check_entry_roll(values: EntryValues) -> None:

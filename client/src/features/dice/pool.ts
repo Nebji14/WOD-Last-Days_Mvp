@@ -128,8 +128,8 @@ export function pickTrait(choice: RollChoice, name: AttributeName | SkillName): 
   return { ...choice, second: name, trait: null, specialty: false };
 }
 
-/** Traits proposés hors attributs et compétences. */
-export const SPECIAL_PARTS = ["supernatural", "entry_level", "weapon_bonus"] as const;
+/** Traits proposés dans la recette hors attributs et compétences. */
+export const SPECIAL_PARTS = ["entry_level", "weapon_bonus"] as const;
 
 /**
  * Valeur actuelle d'un trait de recette : attribut ou compétence de la fiche,
@@ -165,13 +165,17 @@ export function recipeParts(
     return [];
   }
   const parts: RollPart[] = [];
-  for (const key of recipe.parts) {
+  // L'Avantage surnaturel ne se choisit pas : il est ajouté à tout pouvoir.
+  for (const key of recipe.parts.filter((part) => part !== "supernatural")) {
     const value = traitValue(character, sheet, key, entry);
     parts.push({ key, value });
     const special = (SPECIAL_PARTS as readonly string[]).includes(key);
     if (!special && !isAttribute(key) && value === 0) {
       parts.push({ key: "unskilled", value: unskilledPenalty(key as SkillName) });
     }
+  }
+  if (entry.kind === "power") {
+    parts.push({ key: "supernatural", value: character.supernatural_level });
   }
   if (recipe.bonus !== 0) {
     parts.push({ key: "bonus", value: recipe.bonus });

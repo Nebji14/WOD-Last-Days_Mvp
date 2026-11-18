@@ -4,10 +4,10 @@
  * Saisie de la recette de jet d'un pouvoir, d'une arme ou d'un atout.
  *
  * Deux traits au minimum à l'écran, d'autres s'ajoutent à la demande, puis
- * le coût en Volonté. Chaque trait montre sa valeur actuelle sur la fiche ;
- * l'Avantage surnaturel vaut le niveau inscrit au recto. Un nouveau pouvoir
- * le propose d'office. Une recette sans aucun trait choisi n'est pas
- * enregistrée : l'élément n'a alors pas de jet. Le malus et le bonus du MJ
+ * le coût en Volonté. Chaque trait montre sa valeur actuelle sur la fiche.
+ * Un pouvoir ajoute toujours l'Avantage surnaturel (niveau du recto) : il
+ * s'affiche au bout de la formule, sans choix possible. Une recette sans aucun
+ * trait choisi n'est pas enregistrée : l'élément n'a alors pas de jet. Le malus et le bonus du MJ
  * se saisissent au moment du jet, pas ici.
  */
 import type { EntryKind, RollRecipe } from "@/features/characters/model";
@@ -27,9 +27,8 @@ export interface RecipeDraft {
   readonly bonus: number;
 }
 
-export function draftOf(recipe: RollRecipe | null | undefined, kind: EntryKind): RecipeDraft {
-  const parts =
-    recipe == null && kind === "power" ? ["", "", "supernatural"] : [...(recipe?.parts ?? [])];
+export function draftOf(recipe: RollRecipe | null | undefined): RecipeDraft {
+  const parts = (recipe?.parts ?? []).filter((part) => part !== "supernatural");
   while (parts.length < MIN_SLOTS) {
     parts.push("");
   }
@@ -148,6 +147,15 @@ export function RecipeEditor({ kind, draft, onChange, valueOf }: RecipeEditorPro
             )}
           </span>
         ))}
+        {kind === "power" && (
+          <span className="text-ink flex items-center gap-1 text-[14px]">
+            <span className="text-ink-muted">+</span>
+            <strong className="text-gold">
+              {labels.dice.parts.supernatural} · {valueOf("supernatural")}
+            </strong>
+            <span className="text-ink-muted italic">({text.always})</span>
+          </span>
+        )}
         {draft.parts.length < MAX_SLOTS && (
           <button
             type="button"

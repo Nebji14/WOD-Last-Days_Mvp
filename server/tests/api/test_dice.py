@@ -155,7 +155,7 @@ def _power(actor: Actor, character: dict[str, Any], **recipe: Any) -> dict[str, 
 def test_power_rolls_its_recipe_and_costs_willpower(ctx: TestContext) -> None:
     lea = player(ctx, "lea.vale")
     isaac = create(lea)
-    power = _power(lea, isaac, parts=["wits", "empathy", "supernatural"], willpower_cost=1)
+    power = _power(lea, isaac, parts=["wits", "empathy"], willpower_cost=1)
     before = isaac["sheets"][0]["willpower_current"]
 
     roll = _roll(lea, isaac, kind="entry", entry_id=power["id"], modifier=-3).json()
@@ -170,12 +170,23 @@ def test_power_rolls_its_recipe_and_costs_willpower(ctx: TestContext) -> None:
 def test_recipe_may_hold_more_than_two_traits(ctx: TestContext) -> None:
     lea = player(ctx, "lea.vale")
     isaac = create(lea)
-    parts = ["presence", "empathy", "occult", "supernatural", "entry_level"]
-    power = _power(lea, isaac, parts=parts, bonus=1)
+    parts = ["presence", "empathy", "occult", "entry_level"]
+    power = _power(lea, isaac, parts=parts)
 
     roll = _roll(lea, isaac, kind="entry", entry_id=power["id"]).json()
 
-    assert [key for key, _ in _parts(roll)] == [*parts, "bonus"]
+    assert [key for key, _ in _parts(roll)] == [*parts, "supernatural"]
+
+
+def test_supernatural_advantage_is_added_once_and_never_stored(ctx: TestContext) -> None:
+    lea = player(ctx, "lea.vale")
+    isaac = create(lea)
+    power = _power(lea, isaac, parts=["wits", "supernatural"])
+
+    roll = _roll(lea, isaac, kind="entry", entry_id=power["id"]).json()
+
+    assert power["roll"]["parts"] == ["wits"]
+    assert [key for key, _ in _parts(roll)] == ["wits", "supernatural"]
 
 
 def test_recipe_with_unknown_trait_is_refused(ctx: TestContext) -> None:

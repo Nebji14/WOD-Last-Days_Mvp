@@ -50,7 +50,8 @@ export const frDice = {
     },
     recipe: {
       title: "JET",
-      hint: "Traits lancés, choisis avec le MJ ; au moment du jet, seul son malus ou bonus reste à saisir.",
+      hint: "Traits lancés, choisis avec le MJ ; au moment du jet, seuls son malus et son bonus restent à saisir.",
+      always: "toujours inclus",
       none: "— trait —",
       addPart: "+ TRAIT",
       removePart: "Retirer ce trait",

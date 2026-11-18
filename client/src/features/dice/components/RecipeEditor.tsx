@@ -7,8 +7,8 @@
  * le coût en Volonté. Chaque trait montre sa valeur actuelle sur la fiche.
  * Un pouvoir ajoute toujours l'Avantage surnaturel (niveau du recto) : il
  * s'affiche au bout de la formule, sans choix possible. Une recette sans aucun
- * trait choisi n'est pas enregistrée : l'élément n'a alors pas de jet. Le malus et le bonus du MJ
- * se saisissent au moment du jet, pas ici.
+ * trait choisi n'est pas enregistrée : l'élément n'a alors pas de jet. Le
+ * malus et le bonus du MJ se saisissent au moment du jet, pas ici.
  */
 import type { EntryKind, RollRecipe } from "@/features/characters/model";
 import { ATTRIBUTES, CATEGORIES, SKILLS } from "@/features/characters/model";

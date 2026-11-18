@@ -6,7 +6,8 @@
  */
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
-import { type Camera, type Mesh, Quaternion, Vector3 } from "three";
+import { type Camera, type Mesh, PMREMGenerator, Quaternion, Vector3 } from "three";
+import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 
 import { buildGeometry, faceNormal, faceOf, faceUp } from "./d10";
 import { type DieStyle, faceMaterials, highlightedMaterials } from "./materials";
@@ -190,11 +191,16 @@ export default function DiceScene({ throwSpec, closeup, onThrowEnd }: DiceSceneP
       dpr={[1, 2]}
       gl={{ alpha: true, antialias: true }}
       camera={{ position: CAMERA_POSITION, fov: 40 }}
-      onCreated={({ camera }) => camera.lookAt(0, 0, 0)}
+      onCreated={({ camera, gl, scene }) => {
+        camera.lookAt(0, 0, 0);
+        // Reflets d'un studio : le métal et le vernis prennent vie.
+        scene.environment = new PMREMGenerator(gl).fromScene(new RoomEnvironment(), 0.04).texture;
+      }}
     >
-      <ambientLight intensity={0.7} />
-      <directionalLight position={[3, 10, 4]} intensity={2.2} castShadow />
-      <pointLight position={[-4, 4, 3]} intensity={18} color="#e6b493" />
+      <ambientLight intensity={0.25} />
+      <directionalLight position={[3, 10, 4]} intensity={2.4} castShadow />
+      <pointLight position={[-4, 4, 3]} intensity={14} color="#e6b493" />
+      <pointLight position={[4, 2.5, -3]} intensity={10} color="#b3261f" />
       <mesh rotation-x={-Math.PI / 2} receiveShadow>
         <planeGeometry args={[20, 20]} />
         <shadowMaterial opacity={0.45} />

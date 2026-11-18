@@ -4,8 +4,8 @@
  * Jets de dés joués devant toute la table, l'un après l'autre.
  *
  * Chaque vague roule sur la table puis vient en gros plan, réussites en
- * lumière. S'il reste des dés à relancer, le lanceur clique « Relancer » (le
- * serveur relance seul après un délai) ; les autres voient l'attente. Le
+ * lumière. S'il reste des dés à relancer, le lanceur clique « Relancer » (son
+ * écran relance seul après quelques secondes) ; les autres voient l'attente. Le
  * résultat reste affiché quelques secondes, puis le jet passe dans le chat.
  */
 import dynamic from "next/dynamic";
@@ -31,9 +31,26 @@ const OUTCOME_STYLE: Record<string, string> = {
   dramatic_failure: "text-danger-bright drop-shadow-[0_0_14px_rgb(232_87_74/0.7)]",
 };
 
+/** Délai avant que l'écran du lanceur relance de lui-même. */
+const AUTO_REROLL_MS = 6000;
+
 function RerollAction({ roll, isRoller }: { roll: Roll; isRoller: boolean }) {
   const [sending, setSending] = useState(false);
   const text = labels.dice;
+
+  // Le délai court à partir du moment où ses dés passent à l'écran, même si
+  // d'autres jets sont passés avant.
+  useEffect(() => {
+    if (!isRoller) {
+      return;
+    }
+    const timer = window.setTimeout(() => {
+      setSending(true);
+      rerollDice(roll.id).catch(() => setSending(false));
+    }, AUTO_REROLL_MS);
+    return () => window.clearTimeout(timer);
+  }, [isRoller, roll.id]);
+
   if (!isRoller) {
     return (
       <p className="text-ink-muted text-lg italic">

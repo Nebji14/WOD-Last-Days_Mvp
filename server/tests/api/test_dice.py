@@ -43,10 +43,10 @@ def test_roll_is_built_from_the_sheet_and_published_in_chat(ctx: TestContext) ->
     assert published["body"] == "Isaac Thorne · 2 réussites"
 
 
-def test_tens_wait_for_the_roller_then_finish(ctx: TestContext) -> None:
+def test_tens_are_rerolled_once_only(ctx: TestContext) -> None:
     lea = player(ctx, "lea.vale")
     isaac = create(lea)
-    ctx.dice.faces = [10, 10, 3, 4, 2, 10, 6]
+    ctx.dice.faces = [10, 10, 3, 4, 2, 10]
 
     first = _roll(lea, isaac, attribute="strength", second="athletics").json()
     assert first["stages"] == [[10, 10, 3, 4]]
@@ -54,14 +54,14 @@ def test_tens_wait_for_the_roller_then_finish(ctx: TestContext) -> None:
     assert first["outcome"] is None
     assert _messages(lea) == []
 
-    second = lea.request("POST", f"/api/dice/rolls/{first['id']}/reroll").json()
-    assert second["stages"][1] == [2, 10]
-    assert second["pending"] == 1
-
     last = lea.request("POST", f"/api/dice/rolls/{first['id']}/reroll").json()
-    assert last["pending"] == 0
+    assert last["stages"][1] == [2, 10]
+    assert last["pending"] == 0  # le nouveau 10 ne se relance pas
     assert last["successes"] == 3
-    assert _messages(lea)[-1]["roll"]["stages"] == [[10, 10, 3, 4], [2, 10], [6]]
+    assert _messages(lea)[-1]["roll"]["stages"] == [[10, 10, 3, 4], [2, 10]]
+
+    again = lea.request("POST", f"/api/dice/rolls/{first['id']}/reroll")
+    assert again.status_code == 404
 
 
 def test_only_the_roller_rerolls(ctx: TestContext) -> None:

@@ -1,9 +1,9 @@
 """Jets de dés lancés devant toute la table.
 
 Le serveur tire les dés, pour que personne ne puisse truquer un jet, puis
-diffuse chaque vague : le lancer, puis les relances des 10 (ou 9, 8). Le
-lanceur déclenche les relances ; sans action de sa part, elles partent seules
-après un délai. Un jet terminé est publié dans le chat, sauf le jet secret du
+diffuse chaque vague : le lancer, puis une seule vague de relance des 10 (ou
+9, 8). Le lanceur déclenche la relance quand ses dés passent à l'écran ; s'il
+est parti, le serveur relance seul après un long délai. Un jet terminé est publié dans le chat, sauf le jet secret du
 MJ, montré au MJ seul.
 """
 
@@ -266,9 +266,9 @@ class DiceService:
             roll = self._rolls.get(roll_id)
             if roll is None or roll.finished or len(roll.stages) != stage_count:
                 return None
+            # Un dé ne se relance qu'une fois : la vague de relance clôt le jet.
             faces = roll_dice(roll.pending, self._roll_die)
-            pending = rerolls_after(faces, roll.again, False, roll.chance)
-            roll = replace(roll, stages=[*roll.stages, faces], pending=pending)
+            roll = replace(roll, stages=[*roll.stages, faces], pending=0)
             self._rolls[roll_id] = roll
         await self._announce(roll)
         return roll

@@ -1,7 +1,8 @@
 """Jets de dés des Chroniques des Ténèbres.
 
 On lance une réserve de d10. Un dé réussit sur 8, 9 ou 10, et un dé égal ou
-supérieur au seuil de relance (10, ou 9 et 8 avec les options) se relance.
+supérieur au seuil de relance (10, ou 9 et 8 avec les options) se relance une
+seule fois : un dé relancé ne se relance plus, même sur un nouveau 10.
 Une réserve vide devient un dé de chance : seul un 10 réussit, et un 1 est un
 échec dramatique. Cinq réussites ou plus font une réussite exceptionnelle.
 

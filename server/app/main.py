@@ -58,8 +58,10 @@ from app.services.players import PlayerService
 from app.services.sheet_items import SheetItemService
 from app.services.table import TableService
 
-# Relance automatique des 10 : animation et gros plan laissent le temps de cliquer.
-_AUTO_REROLL_SECONDS = 9.0
+# Relance de secours, si le lanceur a quitté la table : son écran relance de
+# lui-même quelques secondes après avoir montré les dés, même si d'autres jets
+# passent avant le sien.
+_AUTO_REROLL_SECONDS = 60.0
 
 
 def create_app(settings: Settings | None = None, container: Container | None = None) -> FastAPI:

@@ -127,9 +127,24 @@ export function symmetryBetween(from: number, to: number): Quaternion {
 }
 
 /**
- * Géométrie affichable : deux triangles par face, un groupe de matériau par
- * face, et une texture centrée sur la face, chiffre lisible de la pointe vers le pôle.
+ * Coordonnées de texture des quatre coins d'une face (pôle, sommet, pointe,
+ * sommet) : la texture est centrée sur la face, chiffre de la pointe vers le pôle.
  */
+export function faceUvs(face: number): [number, number][] {
+  const corners = at(FACES, face);
+  const normal = faceNormal(face);
+  const up = faceUp(face);
+  const right = new Vector3().crossVectors(up, normal).normalize();
+  const center = new Vector3()
+    .addVectors(vertex(corners[0]), vertex(corners[2]))
+    .multiplyScalar(0.5);
+  return corners.map((index): [number, number] => {
+    const offset = new Vector3().subVectors(vertex(index), center);
+    return [0.5 + offset.dot(right) / UV_SPAN, 0.5 + offset.dot(up) / UV_SPAN];
+  });
+}
+
+/** Géométrie affichable : deux triangles par face et un groupe de matériau par face. */
 export function buildGeometry(): BufferGeometry {
   const positions: number[] = [];
   const normals: number[] = [];
@@ -137,17 +152,14 @@ export function buildGeometry(): BufferGeometry {
   const geometry = new BufferGeometry();
   FACES.forEach((face, faceIndex) => {
     const normal = faceNormal(faceIndex);
-    const up = faceUp(faceIndex);
-    const right = new Vector3().crossVectors(up, normal).normalize();
-    const center = new Vector3().addVectors(vertex(face[0]), vertex(face[2])).multiplyScalar(0.5);
-    const corner = (index: number) => {
-      const point = vertex(index);
-      const offset = new Vector3().subVectors(point, center);
+    const corners = faceUvs(faceIndex);
+    [0, 1, 2, 0, 2, 3].forEach((corner) => {
+      const point = vertex(at(face, corner));
+      const [u, v] = at(corners, corner);
       positions.push(point.x * DIE_SCALE, point.y * DIE_SCALE, point.z * DIE_SCALE);
       normals.push(normal.x, normal.y, normal.z);
-      uvs.push(0.5 + offset.dot(right) / UV_SPAN, 0.5 + offset.dot(up) / UV_SPAN);
-    };
-    [face[0], face[1], face[2], face[0], face[2], face[3]].forEach(corner);
+      uvs.push(u, v);
+    });
     geometry.addGroup(faceIndex * 6, 6, faceIndex);
   });
   geometry.setAttribute("position", new Float32BufferAttribute(positions, 3));

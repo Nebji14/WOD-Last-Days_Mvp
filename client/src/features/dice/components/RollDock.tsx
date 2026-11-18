@@ -26,7 +26,7 @@ import {
   type RollChoice,
 } from "../pool";
 
-const OPTION = "text-ink flex items-center gap-2 text-[15px] select-none";
+const OPTION = "text-ink flex items-center gap-2 text-base select-none";
 const SMALL_BUTTON =
   "border-line-strong font-display text-ink hover:border-gold h-8 cursor-pointer rounded-xs border px-3 text-[10px] font-bold tracking-[2px] disabled:cursor-not-allowed disabled:opacity-40";
 const STATUS_MS = 3000;
@@ -163,7 +163,7 @@ export function RollDock({ character, sheet, choice, onChoice, isGm }: RollDockP
           </button>
         </span>
         <label className={OPTION}>
-          {text.again}
+          <span title={text.againHint}>{text.again}</span>
           <select
             value={choice.again}
             onChange={(event) => set({ again: Number(event.target.value) as RollChoice["again"] })}
@@ -182,7 +182,9 @@ export function RollDock({ character, sheet, choice, onChoice, isGm }: RollDockP
             checked={choice.rote}
             onChange={() => set({ rote: !choice.rote })}
           />
-          {text.rote}
+          <span title={text.roteHint}>
+            {text.rote} <span className="text-ink-muted text-sm italic">({text.roteShort})</span>
+          </span>
         </label>
         {isGm && (
           <label className={OPTION}>

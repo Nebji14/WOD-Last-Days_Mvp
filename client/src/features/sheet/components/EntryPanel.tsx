@@ -75,6 +75,8 @@ const LAYOUTS: Record<EntryKind, KindLayout> = {
   },
 };
 const TEXT_COLUMNS: readonly Column[] = ["name", "description", "range"];
+/** Un niveau est toujours positif : 1 au minimum, une case vide veut dire « sans niveau ». */
+const LEVEL_MIN = 1;
 const FIELD =
   "border-line-strong bg-panel text-ink focus:border-gold h-7 w-full min-w-0 rounded-xs border px-1.5 text-[15px] outline-none";
 
@@ -115,7 +117,8 @@ function EntryForm({ kind, valueOf, layout, initial, onSubmit, onCancel }: Entry
         values[column] = raw;
       } else {
         const parsed = Number.parseInt(raw, 10);
-        values[column] = Number.isNaN(parsed) ? null : parsed;
+        const tooLow = column === "level" && parsed < LEVEL_MIN;
+        values[column] = Number.isNaN(parsed) || tooLow ? null : parsed;
       }
     }
     onSubmit(ROLLABLE.has(kind) ? { ...values, roll: recipeOf(recipe) } : values);
@@ -133,6 +136,12 @@ function EntryForm({ kind, valueOf, layout, initial, onSubmit, onCancel }: Entry
             aria-label={labels.sheet.columns[column]}
             placeholder={labels.sheet.columns[column]}
             maxLength={column === "description" ? 4000 : 120}
+            min={column === "level" ? LEVEL_MIN : undefined}
+            onKeyDown={(event) => {
+              if (column === "level" && (event.key === "-" || event.key === "e")) {
+                event.preventDefault();
+              }
+            }}
             autoFocus={index === 0}
             className={FIELD}
           />

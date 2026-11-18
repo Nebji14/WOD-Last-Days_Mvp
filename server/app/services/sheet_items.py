@@ -85,7 +85,8 @@ def normalize_entry(kind: EntryKind, values: EntryValues) -> EntryValues:
     """
     is_weapon = kind is EntryKind.WEAPON
     is_armor = kind is EntryKind.ARMOR
-    level = values.level if kind in _LEVELLED_KINDS else None
+    # Un niveau est toujours positif : 0 vaut « sans niveau ».
+    level = values.level if kind in _LEVELLED_KINDS and values.level else None
     return EntryValues(
         name=values.name.strip(),
         description=values.description.strip(),

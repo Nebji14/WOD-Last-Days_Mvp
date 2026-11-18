@@ -273,10 +273,11 @@ export function parseCharacter(data: unknown): Character {
     data.sheets.length > 0 &&
     data.sheets.every(isSheet) &&
     Array.isArray(data.expenses) &&
-    Array.isArray(data.notes) &&
-    Array.isArray(data.resources)
+    Array.isArray(data.notes)
   ) {
-    return data as unknown as Character;
+    // Un serveur pas encore à jour n'envoie pas les ressources : la fiche s'affiche sans.
+    const resources = Array.isArray(data.resources) ? data.resources : [];
+    return { ...data, resources } as unknown as Character;
   }
   throw new ApiError(502, "internal_error");
 }

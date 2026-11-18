@@ -122,6 +122,18 @@ def test_entry_keeps_only_the_fields_of_its_kind(ctx: TestContext) -> None:
     assert flaw["level"] is None  # facultatif pour un handicap
 
 
+def test_entry_level_is_always_positive(ctx: TestContext) -> None:
+    lea = player(ctx, "lea.vale")
+    sheet_id = _sheet(create(lea))["id"]
+    url = f"/api/sheets/{sheet_id}/entries"
+
+    negative = lea.request("POST", url, json={"kind": "power", "name": "Vision", "level": -2})
+    zero = lea.request("POST", url, json={"kind": "power", "name": "Vision", "level": 0})
+
+    assert negative.status_code == 422
+    assert _sheet(zero.json())["entries"][-1]["level"] is None
+
+
 def test_entry_is_edited_in_place_and_deleted(ctx: TestContext) -> None:
     lea = player(ctx, "lea.vale")
     sheet_id = _sheet(create(lea))["id"]

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="copper" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e6b493"/>
+      <stop offset="0.55" stop-color="#b7774d"/>
+      <stop offset="1" stop-color="#6e3a1f"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="12" fill="#120e0c"/>
+  <rect x="2" y="2" width="60" height="60" rx="10" fill="none" stroke="#b7774d" stroke-opacity="0.55" stroke-width="2"/>
+  <path d="M32 6 L55 26 L48 54 L16 54 L9 26 Z" fill="url(#copper)"/>
+  <path d="M32 6 L20 31 L32 40 L44 31 Z" fill="#c9895c"/>
+  <path d="M32 6 L20 31 L32 40 L44 31 Z M20 31 L9 26 M44 31 L55 26 M32 40 L32 54 M20 31 L16 54 M44 31 L48 54"
+        fill="none" stroke="#2a150a" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M32 6 L55 26 L48 54 L16 54 L9 26 Z" fill="none" stroke="#2a150a" stroke-width="2.5" stroke-linejoin="round"/>
+  <text x="32" y="33" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-weight="700" font-size="13" fill="#fff3da">10</text>
+</svg>

@@ -21,7 +21,7 @@ describe("aperçu de la réserve", () => {
       second: "brawl",
       specialty: true,
       willpower: true,
-      modifier: -2,
+      malus: 2,
     } as const;
     expect(previewParts(character, sheet, choice)).toEqual([
       { key: "strength", value: 3 },

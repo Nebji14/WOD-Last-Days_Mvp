@@ -24,8 +24,10 @@ SUCCESS_THRESHOLD = 8
 EXCEPTIONAL_SUCCESSES = 5
 SPECIALTY_BONUS = 1
 WILLPOWER_BONUS = 3
+# Malus annoncé par le MJ (défense ou résistance de l'adversaire…) et bonus.
 MODIFIER_MIN = -10
-MODIFIER_MAX = 5
+MODIFIER_MAX = 10
+GM_BONUS_MAX = 10
 FREE_POOL_MAX = 30
 # Compétence à 0 : malus selon sa catégorie.
 UNSKILLED_PENALTY = {Category.MENTAL: -3, Category.PHYSICAL: -1, Category.SOCIAL: -1}
@@ -74,6 +76,7 @@ class PoolOptions:
     specialty: bool = False
     willpower: bool = False
     modifier: int = 0
+    gm_bonus: int = 0
     again: int = 10
     rote: bool = False
 
@@ -88,6 +91,8 @@ def check_options(options: PoolOptions) -> None:
         raise DiceRuleError("again")
     if not MODIFIER_MIN <= options.modifier <= MODIFIER_MAX:
         raise DiceRuleError("modifier")
+    if not 0 <= options.gm_bonus <= GM_BONUS_MAX:
+        raise DiceRuleError("gm_bonus")
 
 
 def skill_category(skill: str) -> Category:
@@ -133,7 +138,7 @@ def pool_parts(
 
 
 def bonus_parts(options: PoolOptions, wound_penalty: int) -> list[PoolPart]:
-    """Volonté, malus de blessure et modificateur du MJ, quand ils comptent."""
+    """Volonté, malus de blessure, malus et bonus du MJ, quand ils comptent."""
     parts: list[PoolPart] = []
     if options.willpower:
         parts.append(PoolPart("willpower", WILLPOWER_BONUS))
@@ -141,6 +146,8 @@ def bonus_parts(options: PoolOptions, wound_penalty: int) -> list[PoolPart]:
         parts.append(PoolPart("wounds", wound_penalty))
     if options.modifier:
         parts.append(PoolPart("modifier", options.modifier))
+    if options.gm_bonus:
+        parts.append(PoolPart("gm_bonus", options.gm_bonus))
     return parts
 
 

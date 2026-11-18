@@ -196,3 +196,13 @@ def test_power_cost_needs_enough_willpower(ctx: TestContext) -> None:
     response = _roll(lea, isaac, kind="entry", entry_id=power["id"])
 
     assert response.status_code == 422
+
+
+def test_gm_malus_and_bonus_both_count(ctx: TestContext) -> None:
+    lea = player(ctx, "lea.vale")
+
+    roll = _roll(
+        lea, create(lea), attribute="strength", second="athletics", modifier=-4, gm_bonus=2
+    ).json()
+
+    assert _parts(roll)[-2:] == [("modifier", -4), ("gm_bonus", 2)]

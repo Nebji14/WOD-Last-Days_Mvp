@@ -17,6 +17,7 @@ import { type FormEvent, useState } from "react";
 import { addEntry, deleteEntry, type EntryValues, updateEntry } from "@/features/characters/api";
 import type { Entry, EntryKind, EntryNumberField } from "@/features/characters/model";
 import { EntryRoll } from "@/features/dice/components/EntryRoll";
+import { traitValue } from "@/features/dice/pool";
 import {
   draftOf,
   type RecipeDraft,
@@ -88,14 +89,16 @@ function display(entry: Entry, column: Column): string {
 
 interface EntryFormProps {
   readonly kind: EntryKind;
+  /** Valeur actuelle d'un trait de la fiche, pour la recette de jet. */
+  readonly valueOf: (part: string) => number;
   readonly layout: KindLayout;
   readonly initial: Entry | null;
   readonly onSubmit: (values: EntryValues) => void;
   readonly onCancel: () => void;
 }
 
-function EntryForm({ kind, layout, initial, onSubmit, onCancel }: EntryFormProps) {
-  const [recipe, setRecipe] = useState<RecipeDraft>(() => draftOf(initial?.roll));
+function EntryForm({ kind, valueOf, layout, initial, onSubmit, onCancel }: EntryFormProps) {
+  const [recipe, setRecipe] = useState<RecipeDraft>(() => draftOf(initial?.roll, kind));
   const [draft, setDraft] = useState<Record<string, string>>(() =>
     Object.fromEntries(
       layout.columns.map((column) => [column, initial ? String(initial[column] ?? "") : ""]),
@@ -134,7 +137,9 @@ function EntryForm({ kind, layout, initial, onSubmit, onCancel }: EntryFormProps
           />
         ))}
       </div>
-      {ROLLABLE.has(kind) && <RecipeEditor kind={kind} draft={recipe} onChange={setRecipe} />}
+      {ROLLABLE.has(kind) && (
+        <RecipeEditor kind={kind} draft={recipe} onChange={setRecipe} valueOf={valueOf} />
+      )}
       <div className="mt-2 flex justify-end gap-4">
         <button type="submit" className={LINK_ACTION}>
           {labels.sheet.save}
@@ -155,6 +160,13 @@ export function EntryPanel({ kind }: { readonly kind: EntryKind }) {
   const changeable = editing || EQUIPMENT.has(kind);
   /** Ligne en cours de saisie : `"new"`, l'identifiant d'un élément, ou aucune. */
   const [open, setOpen] = useState<string | null>(null);
+  const valueOf = (part: string) =>
+    traitValue(
+      character,
+      sheet,
+      part,
+      sheet.entries.find((entry) => entry.id === open),
+    );
 
   return (
     <Panel
@@ -182,6 +194,7 @@ export function EntryPanel({ kind }: { readonly kind: EntryKind }) {
             <li key={entry.id}>
               <EntryForm
                 kind={kind}
+                valueOf={valueOf}
                 layout={layout}
                 initial={entry}
                 onCancel={() => setOpen(null)}
@@ -245,6 +258,7 @@ export function EntryPanel({ kind }: { readonly kind: EntryKind }) {
         <div className="mt-1.5">
           <EntryForm
             kind={kind}
+            valueOf={valueOf}
             layout={layout}
             initial={null}
             onCancel={() => setOpen(null)}

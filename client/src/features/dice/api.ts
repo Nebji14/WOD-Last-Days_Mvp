@@ -15,6 +15,7 @@ export interface RollRequest {
   readonly specialty?: boolean;
   readonly willpower?: boolean;
   readonly modifier?: number;
+  readonly gm_bonus?: number;
   readonly again?: number;
   readonly rote?: boolean;
   readonly secret?: boolean;

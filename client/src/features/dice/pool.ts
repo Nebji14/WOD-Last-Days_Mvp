@@ -17,8 +17,6 @@ import { woundPenalty } from "@/features/sheet/health";
 
 import type { RollPart } from "./model";
 
-export const MODIFIER_MIN = -10;
-export const MODIFIER_MAX = 5;
 const SPECIALTY_BONUS = 1;
 const WILLPOWER_BONUS = 3;
 
@@ -32,7 +30,10 @@ export interface RollChoice {
   readonly trait: NpcTrait | null;
   readonly specialty: boolean;
   readonly willpower: boolean;
-  readonly modifier: number;
+  /** Malus annoncé par le MJ, en dés retirés. */
+  readonly malus: number;
+  /** Bonus annoncé par le MJ, en dés ajoutés. */
+  readonly bonus: number;
   readonly again: 8 | 9 | 10;
   readonly rote: boolean;
   readonly secret: boolean;
@@ -44,7 +45,8 @@ export const EMPTY_CHOICE: RollChoice = {
   trait: null,
   specialty: false,
   willpower: false,
-  modifier: 0,
+  malus: 0,
+  bonus: 0,
   again: 10,
   rote: false,
   secret: false,
@@ -66,7 +68,7 @@ export function canUseSpecialty(sheet: Sheet, second: RollChoice["second"]): boo
   return second !== null && !isAttribute(second) && (sheet.specialties[second]?.length ?? 0) > 0;
 }
 
-/** Volonté, blessures et modificateur, comme le serveur les ajoute. */
+/** Volonté, blessures, malus et bonus du MJ, comme le serveur les ajoute. */
 export function bonusParts(choice: RollChoice, penalty: number): RollPart[] {
   const parts: RollPart[] = [];
   if (choice.willpower) {
@@ -75,8 +77,11 @@ export function bonusParts(choice: RollChoice, penalty: number): RollPart[] {
   if (penalty !== 0) {
     parts.push({ key: "wounds", value: penalty });
   }
-  if (choice.modifier !== 0) {
-    parts.push({ key: "modifier", value: choice.modifier });
+  if (choice.malus !== 0) {
+    parts.push({ key: "modifier", value: -choice.malus });
+  }
+  if (choice.bonus !== 0) {
+    parts.push({ key: "gm_bonus", value: choice.bonus });
   }
   return parts;
 }
@@ -126,12 +131,34 @@ export function pickTrait(choice: RollChoice, name: AttributeName | SkillName): 
 /** Traits proposés hors attributs et compétences. */
 export const SPECIAL_PARTS = ["supernatural", "entry_level", "weapon_bonus"] as const;
 
-/** Réserve d'un pouvoir, d'une arme ou d'un atout, avec le malus ou bonus du MJ. */
+/**
+ * Valeur actuelle d'un trait de recette : attribut ou compétence de la fiche,
+ * niveau d'Avantage surnaturel (recto), niveau ou bonus de l'élément.
+ */
+export function traitValue(
+  character: Character,
+  sheet: Sheet,
+  key: string,
+  entry: Entry | undefined,
+): number {
+  if (key === "supernatural") {
+    return character.supernatural_level;
+  }
+  if (key === "entry_level") {
+    return entry?.level ?? 0;
+  }
+  if (key === "weapon_bonus") {
+    return entry?.damage_modifier ?? 0;
+  }
+  return isAttribute(key) ? sheet.attributes[key] : (sheet.skills[key as SkillName] ?? 0);
+}
+
+/** Réserve d'un pouvoir, d'une arme ou d'un atout, avec le malus et le bonus du MJ. */
 export function recipeParts(
   character: Character,
   sheet: Sheet,
   entry: Entry,
-  modifier: number,
+  adjust: { readonly malus: number; readonly bonus: number },
 ): RollPart[] {
   const recipe = entry.roll;
   if (recipe == null) {
@@ -139,25 +166,16 @@ export function recipeParts(
   }
   const parts: RollPart[] = [];
   for (const key of recipe.parts) {
-    if (key === "supernatural") {
-      parts.push({ key, value: character.supernatural_level });
-    } else if (key === "entry_level") {
-      parts.push({ key, value: entry.level ?? 0 });
-    } else if (key === "weapon_bonus") {
-      parts.push({ key, value: entry.damage_modifier ?? 0 });
-    } else if (isAttribute(key)) {
-      parts.push({ key, value: sheet.attributes[key] });
-    } else {
-      const value = sheet.skills[key as SkillName];
-      parts.push({ key, value });
-      if (value === 0) {
-        parts.push({ key: "unskilled", value: unskilledPenalty(key as SkillName) });
-      }
+    const value = traitValue(character, sheet, key, entry);
+    parts.push({ key, value });
+    const special = (SPECIAL_PARTS as readonly string[]).includes(key);
+    if (!special && !isAttribute(key) && value === 0) {
+      parts.push({ key: "unskilled", value: unskilledPenalty(key as SkillName) });
     }
   }
   if (recipe.bonus !== 0) {
     parts.push({ key: "bonus", value: recipe.bonus });
   }
   const penalty = woundPenalty(sheet.wound_track, sheet.effective.health_max);
-  return [...parts, ...bonusParts({ ...EMPTY_CHOICE, modifier }, penalty)];
+  return [...parts, ...bonusParts({ ...EMPTY_CHOICE, ...adjust }, penalty)];
 }

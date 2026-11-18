@@ -150,8 +150,8 @@ class DiceService:
         """Réserve libre du MJ : un nombre de dés, sans personnage."""
         if actor.role is not Role.GM or request.dice is None:
             raise _forbidden("La réserve libre est réservée au MJ.")
-        modifier = PoolOptions(modifier=request.options.modifier)
-        parts = [PoolPart("dice", request.dice), *bonus_parts(modifier, 0)]
+        adjust = PoolOptions(modifier=request.options.modifier, gm_bonus=request.options.gm_bonus)
+        parts = [PoolPart("dice", request.dice), *bonus_parts(adjust, 0)]
         return self._first_stage(actor, actor.display_name, None, request, parts)
 
     async def _character_roll(self, actor: Account, request: RollInput) -> DiceRoll:

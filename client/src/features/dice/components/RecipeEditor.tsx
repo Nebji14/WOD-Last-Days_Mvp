@@ -3,9 +3,12 @@
 /**
  * Saisie de la recette de jet d'un pouvoir, d'une arme ou d'un atout.
  *
- * Deux traits au minimum à l'écran, d'autres s'ajoutent à la demande ; coût
- * en Volonté et bonus fixe. Une recette sans aucun trait choisi n'est pas
- * enregistrée : l'élément n'a alors pas de jet.
+ * Deux traits au minimum à l'écran, d'autres s'ajoutent à la demande, puis
+ * le coût en Volonté. Chaque trait montre sa valeur actuelle sur la fiche ;
+ * l'Avantage surnaturel vaut le niveau inscrit au recto. Un nouveau pouvoir
+ * le propose d'office. Une recette sans aucun trait choisi n'est pas
+ * enregistrée : l'élément n'a alors pas de jet. Le malus et le bonus du MJ
+ * se saisissent au moment du jet, pas ici.
  */
 import type { EntryKind, RollRecipe } from "@/features/characters/model";
 import { ATTRIBUTES, CATEGORIES, SKILLS } from "@/features/characters/model";
@@ -16,8 +19,6 @@ import { SPECIAL_PARTS } from "../pool";
 const MIN_SLOTS = 2;
 const MAX_SLOTS = 8;
 const COST_MAX = 5;
-const BONUS_MIN = -10;
-const BONUS_MAX = 10;
 
 /** Recette en cours de saisie : des emplacements vides sont permis. */
 export interface RecipeDraft {
@@ -26,8 +27,9 @@ export interface RecipeDraft {
   readonly bonus: number;
 }
 
-export function draftOf(recipe: RollRecipe | null | undefined): RecipeDraft {
-  const parts = [...(recipe?.parts ?? [])];
+export function draftOf(recipe: RollRecipe | null | undefined, kind: EntryKind): RecipeDraft {
+  const parts =
+    recipe == null && kind === "power" ? ["", "", "supernatural"] : [...(recipe?.parts ?? [])];
   while (parts.length < MIN_SLOTS) {
     parts.push("");
   }
@@ -83,9 +85,11 @@ interface RecipeEditorProps {
   readonly kind: EntryKind;
   readonly draft: RecipeDraft;
   readonly onChange: (draft: RecipeDraft) => void;
+  /** Valeur actuelle d'un trait sur la fiche, affichée dans la liste. */
+  readonly valueOf: (part: string) => number;
 }
 
-export function RecipeEditor({ kind, draft, onChange }: RecipeEditorProps) {
+export function RecipeEditor({ kind, draft, onChange, valueOf }: RecipeEditorProps) {
   const text = labels.dice.recipe;
   const special = SPECIAL_PARTS.filter((part) => part !== "weapon_bonus" || kind === "weapon");
   const setPart = (index: number, value: string) =>
@@ -108,24 +112,24 @@ export function RecipeEditor({ kind, draft, onChange }: RecipeEditorProps) {
               className={SELECT}
             >
               <option value="">{text.none}</option>
+              <optgroup label={text.groups.special}>
+                {special.map((name) => (
+                  <option key={name} value={name}>
+                    {labels.dice.parts[name]} · {valueOf(name)}
+                  </option>
+                ))}
+              </optgroup>
               <optgroup label={text.groups.attributes}>
                 {CATEGORIES.flatMap((category) => ATTRIBUTES[category]).map((name) => (
                   <option key={name} value={name}>
-                    {labels.attributes[name]}
+                    {labels.attributes[name]} · {valueOf(name)}
                   </option>
                 ))}
               </optgroup>
               <optgroup label={text.groups.skills}>
                 {CATEGORIES.flatMap((category) => SKILLS[category]).map((name) => (
                   <option key={name} value={name}>
-                    {labels.skills[name]}
-                  </option>
-                ))}
-              </optgroup>
-              <optgroup label={text.groups.special}>
-                {special.map((name) => (
-                  <option key={name} value={name}>
-                    {labels.dice.parts[name]}
+                    {labels.skills[name]} · {valueOf(name)}
                   </option>
                 ))}
               </optgroup>
@@ -161,13 +165,6 @@ export function RecipeEditor({ kind, draft, onChange }: RecipeEditorProps) {
           min={0}
           max={COST_MAX}
           onChange={(value) => onChange({ ...draft, willpower_cost: value })}
-        />
-        <Stepper
-          label={text.bonus}
-          value={draft.bonus}
-          min={BONUS_MIN}
-          max={BONUS_MAX}
-          onChange={(value) => onChange({ ...draft, bonus: value })}
         />
       </div>
     </fieldset>

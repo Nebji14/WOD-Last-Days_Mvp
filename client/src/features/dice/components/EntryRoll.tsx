@@ -4,8 +4,8 @@
  * Bouton 🎲 d'un pouvoir, d'une arme ou d'un atout qui a une recette de jet.
  *
  * Il ouvre un petit panneau : la réserve calculée depuis la fiche, le coût en
- * Volonté, et le seul réglage restant, le malus ou bonus annoncé par le MJ
- * (défense ou résistance de la cible, circonstances).
+ * Volonté, et le seul réglage restant : le malus et le bonus annoncés par le
+ * MJ (défense ou résistance de la cible, circonstances).
  */
 import { useState } from "react";
 
@@ -16,10 +16,8 @@ import { errorLabel, fill, labels } from "@/shared/i18n";
 import { startRoll } from "../api";
 import { describeParts } from "../format";
 import { poolSize } from "../model";
-import { MODIFIER_MAX, MODIFIER_MIN, recipeParts } from "../pool";
-
-const STEP =
-  "border-line-strong text-gold hover:border-gold size-7 cursor-pointer rounded-xs border text-base leading-none font-bold disabled:cursor-not-allowed disabled:opacity-35";
+import { recipeParts } from "../pool";
+import { GmAdjust } from "./GmAdjust";
 
 interface EntryRollProps {
   readonly character: Character;
@@ -30,11 +28,11 @@ interface EntryRollProps {
 export function EntryRoll({ character, sheet, entry }: EntryRollProps) {
   const text = labels.dice;
   const [open, setOpen] = useState(false);
-  const [modifier, setModifier] = useState(0);
+  const [adjust, setAdjust] = useState({ malus: 0, bonus: 0 });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const cost = entry.roll?.willpower_cost ?? 0;
-  const parts = recipeParts(character, sheet, entry, modifier);
+  const parts = recipeParts(character, sheet, entry, adjust);
   const size = poolSize(parts);
   const affordable = sheet.willpower_current >= cost;
   const rollLabel = fill(text.recipe.roll, { name: entry.name });
@@ -48,10 +46,11 @@ export function EntryRoll({ character, sheet, entry }: EntryRollProps) {
         character_id: character.id,
         sheet_id: sheet.id,
         entry_id: entry.id,
-        modifier,
+        modifier: -adjust.malus,
+        gm_bonus: adjust.bonus,
       });
       setOpen(false);
-      setModifier(0);
+      setAdjust({ malus: 0, bonus: 0 });
     } catch (caught) {
       setError(errorLabel(caught instanceof ApiError ? caught.code : "internal_error"));
     } finally {
@@ -91,30 +90,11 @@ export function EntryRoll({ character, sheet, entry }: EntryRollProps) {
               {affordable ? fill(text.recipe.costNote, { cost }) : text.recipe.notEnough}
             </p>
           )}
-          <span className="text-ink flex items-center gap-2 text-[15px]">
-            {text.modifier}
-            <button
-              type="button"
-              aria-label={`${text.modifier} −1`}
-              disabled={modifier <= MODIFIER_MIN}
-              onClick={() => setModifier(modifier - 1)}
-              className={STEP}
-            >
-              −
-            </button>
-            <strong className={`w-8 text-center ${modifier < 0 ? "text-danger" : "text-gold"}`}>
-              {modifier > 0 ? `+${modifier}` : modifier}
-            </strong>
-            <button
-              type="button"
-              aria-label={`${text.modifier} +1`}
-              disabled={modifier >= MODIFIER_MAX}
-              onClick={() => setModifier(modifier + 1)}
-              className={STEP}
-            >
-              +
-            </button>
-          </span>
+          <GmAdjust
+            malus={adjust.malus}
+            bonus={adjust.bonus}
+            onChange={(malus, bonus) => setAdjust({ malus, bonus })}
+          />
           {error !== null && <p className="text-danger text-sm">{error}</p>}
           <div className="flex justify-end gap-3">
             <button

@@ -26,6 +26,7 @@ async def roll(
         specialty=payload.specialty,
         willpower=payload.willpower,
         modifier=payload.modifier,
+        gm_bonus=payload.gm_bonus,
         again=payload.again,
         rote=payload.rote,
     )

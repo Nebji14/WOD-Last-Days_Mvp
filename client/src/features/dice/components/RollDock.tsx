@@ -16,15 +16,9 @@ import { errorLabel, fill, labels } from "@/shared/i18n";
 
 import { type RollRequest, startRoll } from "../api";
 import { describeParts } from "../format";
+import { GmAdjust } from "./GmAdjust";
 import { poolSize } from "../model";
-import {
-  canUseSpecialty,
-  EMPTY_CHOICE,
-  MODIFIER_MAX,
-  MODIFIER_MIN,
-  previewParts,
-  type RollChoice,
-} from "../pool";
+import { canUseSpecialty, EMPTY_CHOICE, previewParts, type RollChoice } from "../pool";
 
 const OPTION = "text-ink flex items-center gap-2 text-base select-none";
 const SMALL_BUTTON =
@@ -78,7 +72,8 @@ export function RollDock({ character, sheet, choice, onChoice, isGm }: RollDockP
         trait: choice.trait ?? undefined,
         specialty: choice.specialty,
         willpower: choice.willpower,
-        modifier: choice.modifier,
+        modifier: -choice.malus,
+        gm_bonus: choice.bonus,
         again: choice.again,
         rote: choice.rote,
         secret: isGm && choice.secret,
@@ -136,32 +131,11 @@ export function RollDock({ character, sheet, choice, onChoice, isGm }: RollDockP
           />
           {text.willpower}
         </label>
-        <span className={OPTION}>
-          {text.modifier}
-          <button
-            type="button"
-            aria-label={`${text.modifier} −1`}
-            disabled={choice.modifier <= MODIFIER_MIN}
-            onClick={() => set({ modifier: choice.modifier - 1 })}
-            className={SMALL_BUTTON}
-          >
-            −
-          </button>
-          <strong
-            className={`w-8 text-center ${choice.modifier < 0 ? "text-danger" : "text-gold"}`}
-          >
-            {choice.modifier > 0 ? `+${choice.modifier}` : choice.modifier}
-          </strong>
-          <button
-            type="button"
-            aria-label={`${text.modifier} +1`}
-            disabled={choice.modifier >= MODIFIER_MAX}
-            onClick={() => set({ modifier: choice.modifier + 1 })}
-            className={SMALL_BUTTON}
-          >
-            +
-          </button>
-        </span>
+        <GmAdjust
+          malus={choice.malus}
+          bonus={choice.bonus}
+          onChange={(malus, bonus) => set({ malus, bonus })}
+        />
         <label className={OPTION}>
           <span title={text.againHint}>{text.again}</span>
           <select
@@ -222,7 +196,15 @@ export function RollDock({ character, sheet, choice, onChoice, isGm }: RollDockP
               title={text.consciousnessHint}
               disabled={busy}
               onClick={() =>
-                void send({ kind: "consciousness", ...target, modifier: choice.modifier }, false)
+                void send(
+                  {
+                    kind: "consciousness",
+                    ...target,
+                    modifier: -choice.malus,
+                    gm_bonus: choice.bonus,
+                  },
+                  false,
+                )
               }
               className={SMALL_BUTTON}
             >

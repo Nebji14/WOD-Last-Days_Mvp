@@ -73,7 +73,8 @@ def compose_pool(
     if request.kind is RollKind.CONSCIOUSNESS:
         # Le malus de blessure ne s'applique pas à ce jet.
         stamina = PoolPart("stamina", sheet.traits["stamina"])
-        return [stamina, *bonus_parts(PoolOptions(modifier=options.modifier), 0)], 0
+        adjust = PoolOptions(modifier=options.modifier, gm_bonus=options.gm_bonus)
+        return [stamina, *bonus_parts(adjust, 0)], 0
     if request.kind is RollKind.TRAIT:
         profile = character.npc
         if profile is None or not profile.is_simplified or request.trait not in NPC_TRAITS:

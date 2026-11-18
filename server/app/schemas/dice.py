@@ -7,6 +7,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from app.domain.accounts import Role
 from app.domain.dice import (
     FREE_POOL_MAX,
+    GM_BONUS_MAX,
     MODIFIER_MAX,
     MODIFIER_MIN,
     DiceRoll,
@@ -42,6 +43,7 @@ class RollRequest(BaseModel):
     specialty: bool = False
     willpower: bool = False
     modifier: int = Field(default=0, ge=MODIFIER_MIN, le=MODIFIER_MAX)
+    gm_bonus: int = Field(default=0, ge=0, le=GM_BONUS_MAX)
     again: int = Field(default=10, ge=8, le=10)
     rote: bool = False
     secret: bool = False

@@ -185,32 +185,70 @@ interface NumberValueProps {
   readonly className?: string;
 }
 
-/** Nombre d'un champ : affiché en consultation, saisi en modification. */
+const STEP_BUTTON =
+  "border-line-strong text-gold hover:border-gold flex size-7 cursor-pointer items-center justify-center rounded-xs border text-base leading-none font-bold disabled:cursor-not-allowed disabled:opacity-35";
+/** Délai après lequel un clic sans réponse du serveur libère les boutons. */
+const STEP_RELEASE_MS = 3000;
+
+/**
+ * Nombre d'un champ : affiché en consultation ; en modification, boutons − et +
+ * enregistrés à chaque clic, et saisie directe enregistrée dès qu'on quitte le
+ * champ ou qu'on appuie sur Entrée.
+ */
 export function NumberValue(props: NumberValueProps) {
   const { label, value, editing, onCommit, min, max, className = "" } = props;
+  // Valeur demandée au serveur : les boutons attendent qu'elle revienne.
+  const [requested, setRequested] = useState<number | null>(null);
+  const waiting = requested !== null && requested !== value;
 
   if (!editing) {
     return <span className={className}>{value}</span>;
   }
+
+  function step(next: number): void {
+    setRequested(next);
+    window.setTimeout(() => setRequested(null), STEP_RELEASE_MS);
+    onCommit(next);
+  }
+
   return (
-    <input
-      key={value}
-      type="number"
-      defaultValue={value}
-      aria-label={label}
-      min={min}
-      max={max}
-      onBlur={(event) => {
-        const next = Number.parseInt(event.target.value, 10);
-        if (Number.isNaN(next)) {
-          event.target.value = String(value);
-        } else if (next !== value) {
-          onCommit(next);
-        }
-      }}
-      onKeyDown={(event) => event.key === "Enter" && event.currentTarget.blur()}
-      className={`${FIELD_FRAME} ${className} w-14 text-center`}
-    />
+    <span className="inline-flex items-center gap-1">
+      <button
+        type="button"
+        aria-label={`${label} −1`}
+        disabled={waiting || value <= min}
+        onClick={() => step(value - 1)}
+        className={STEP_BUTTON}
+      >
+        −
+      </button>
+      <input
+        key={value}
+        type="text"
+        inputMode="numeric"
+        defaultValue={value}
+        aria-label={label}
+        onBlur={(event) => {
+          const next = Number.parseInt(event.target.value, 10);
+          if (Number.isNaN(next) || next < min || next > max) {
+            event.target.value = String(value);
+          } else if (next !== value) {
+            onCommit(next);
+          }
+        }}
+        onKeyDown={(event) => event.key === "Enter" && event.currentTarget.blur()}
+        className={`${FIELD_FRAME} ${className} h-7 w-11 text-center`}
+      />
+      <button
+        type="button"
+        aria-label={`${label} +1`}
+        disabled={waiting || value >= max}
+        onClick={() => step(value + 1)}
+        className={STEP_BUTTON}
+      >
+        +
+      </button>
+    </span>
   );
 }
 

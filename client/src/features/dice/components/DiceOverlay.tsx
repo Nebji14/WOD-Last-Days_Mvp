@@ -110,7 +110,13 @@ function RollPlayer({ roll, viewerId }: { roll: Roll; viewerId: string }) {
 
   return (
     <div className="pointer-events-none fixed inset-0 z-[60] flex flex-col">
-      <div aria-hidden="true" className="animate-fade-to-black absolute inset-0 bg-black/55" />
+      {/* Au gros plan, la table s'efface derrière les dés pour que le résultat se lise. */}
+      <div
+        aria-hidden="true"
+        className={`animate-fade-to-black absolute inset-0 transition-[background-color,backdrop-filter] duration-500 ${
+          throwing ? "bg-black/50" : "bg-black/80 backdrop-blur-md"
+        }`}
+      />
       <div className="absolute inset-0">
         <DiceScene
           throwSpec={throwSpec}
@@ -134,17 +140,19 @@ function RollPlayer({ roll, viewerId }: { roll: Roll; viewerId: string }) {
       {!throwing && (
         <footer
           role="status"
-          className="relative mt-auto mb-16 flex flex-col items-center gap-3 text-center"
+          className="relative mt-auto mb-12 flex flex-col items-center gap-3 text-center"
         >
           <p
-            className={`font-display text-4xl font-bold tracking-[4px] ${
+            className={`font-display rounded-md border border-white/10 bg-black/70 px-10 py-4 text-6xl font-black tracking-[5px] shadow-[0_0_40px_rgb(0_0_0/0.9)] [text-shadow:0_3px_10px_rgb(0_0_0/0.95)] ${
               final ? (OUTCOME_STYLE[roll.outcome ?? "success"] ?? "") : "text-ink-bright"
             }`}
           >
             {final ? resultLabel(roll) : successesLabel(roll.successes)}
           </p>
           {final && roll.total === null && roll.outcome !== "failure" && (
-            <p className="text-ink text-xl">{successesLabel(roll.successes)}</p>
+            <p className="text-ink-bright text-3xl font-bold [text-shadow:0_2px_8px_rgb(0_0_0/0.95)]">
+              {successesLabel(roll.successes)}
+            </p>
           )}
           {!final && (
             <RerollAction

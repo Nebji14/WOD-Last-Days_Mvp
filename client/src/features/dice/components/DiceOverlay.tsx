@@ -14,7 +14,7 @@ import { useEffect, useMemo, useState } from "react";
 import { fill, labels } from "@/shared/i18n";
 
 import { rerollDice } from "../api";
-import { describeParts, resultLabel, successesLabel } from "../format";
+import { describeParts, doubledLabel, resultLabel, successesLabel } from "../format";
 import { isSuccess, type Roll } from "../model";
 import { useDiceStore } from "../store";
 import type { DieStyle } from "../three/materials";
@@ -167,6 +167,11 @@ function RollPlayer({ roll, viewerId }: { roll: Roll; viewerId: string }) {
           {final && roll.total === null && roll.outcome !== "failure" && (
             <p className="text-ink-bright text-3xl font-bold [text-shadow:0_2px_8px_rgb(0_0_0/0.95)]">
               {successesLabel(roll.successes)}
+            </p>
+          )}
+          {final && doubledLabel(roll) !== null && (
+            <p className="text-gold text-2xl italic [text-shadow:0_2px_8px_rgb(0_0_0/0.95)]">
+              {doubledLabel(roll)}
             </p>
           )}
           {!final && (

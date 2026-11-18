@@ -14,7 +14,7 @@ const sheet = {
 const character = { npc: null } as unknown as Character;
 
 describe("aperçu de la réserve", () => {
-  it("additionne attribut, compétence, spécialité, volonté et malus du MJ", () => {
+  it("additionne attribut, compétence, volonté et malus du MJ, sans dé de spécialité", () => {
     const choice = {
       ...EMPTY_CHOICE,
       attribute: "strength",
@@ -26,7 +26,6 @@ describe("aperçu de la réserve", () => {
     expect(previewParts(character, sheet, choice)).toEqual([
       { key: "strength", value: 3 },
       { key: "brawl", value: 2 },
-      { key: "specialty", value: 1 },
       { key: "willpower", value: 3 },
       { key: "modifier", value: -2 },
     ]);

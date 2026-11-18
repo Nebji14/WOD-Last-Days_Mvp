@@ -1,8 +1,8 @@
 "use client";
 
 /**
- * Dés libres du MJ, depuis la table : un nombre de dés, la relance, l'action
- * assurée et, au choix, un jet secret montré au MJ seul.
+ * Dés libres du MJ, depuis la table : un nombre de dés, la relance, la
+ * spécialité, l'action assurée et, au choix, un jet secret montré au MJ seul.
  */
 import { useState } from "react";
 
@@ -10,6 +10,7 @@ import { ApiError } from "@/shared/api/client";
 import { errorLabel, labels } from "@/shared/i18n";
 
 import { startRoll } from "../api";
+import { SpecialtyOption } from "./SpecialtyOption";
 
 const FIELD =
   "border-line-strong bg-panel text-ink focus:border-gold h-8 rounded-xs border px-2 text-[15px] outline-none";
@@ -22,6 +23,7 @@ export function GmDice() {
   const [dice, setDice] = useState(5);
   const [again, setAgain] = useState<8 | 9 | 10>(10);
   const [rote, setRote] = useState(false);
+  const [specialty, setSpecialty] = useState(false);
   const [secret, setSecret] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,7 +32,7 @@ export function GmDice() {
     setBusy(true);
     setError(null);
     try {
-      await startRoll({ kind: "free", dice, again, rote, secret });
+      await startRoll({ kind: "free", dice, again, specialty, rote, secret });
       setOpen(false);
     } catch (caught) {
       setError(caught instanceof ApiError ? caught.code : "internal_error");
@@ -73,6 +75,7 @@ export function GmDice() {
               ))}
             </select>
           </label>
+          <SpecialtyOption compact checked={specialty} onChange={() => setSpecialty(!specialty)} />
           <label className="text-ink flex items-center gap-2 text-[15px]">
             <input type="checkbox" checked={rote} onChange={() => setRote(!rote)} />
             {text.rote}

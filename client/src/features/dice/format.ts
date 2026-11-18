@@ -37,6 +37,15 @@ export function successesLabel(count: number): string {
   return count === 1 ? labels.dice.successOne : fill(labels.dice.successes, { count });
 }
 
+/** « dont 2 dés comptés double » ; `null` sans dé doublé. */
+export function doubledLabel(roll: Roll): string | null {
+  const count = roll.doubled ?? 0;
+  if (count === 0) {
+    return null;
+  }
+  return count === 1 ? labels.dice.doubledOne : fill(labels.dice.doubled, { count });
+}
+
 /** Résultat final : issue du jet, ou total d'initiative. */
 export function resultLabel(roll: Roll): string {
   if (roll.total !== null) {

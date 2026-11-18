@@ -4,8 +4,9 @@
  * Bouton 🎲 d'un pouvoir, d'une arme ou d'un atout qui a une recette de jet.
  *
  * Il ouvre un petit panneau : la réserve calculée depuis la fiche, le coût en
- * Volonté, et le seul réglage restant : le malus et le bonus annoncés par le
- * MJ (défense ou résistance de la cible, circonstances).
+ * Volonté, et les réglages restants : la spécialité, si le MJ l'accorde, puis
+ * le malus et le bonus qu'il annonce (défense ou résistance de la cible,
+ * circonstances).
  */
 import { useState } from "react";
 
@@ -18,6 +19,7 @@ import { describeParts } from "../format";
 import { poolSize } from "../model";
 import { recipeParts } from "../pool";
 import { GmAdjust } from "./GmAdjust";
+import { SpecialtyOption } from "./SpecialtyOption";
 
 interface EntryRollProps {
   readonly character: Character;
@@ -29,6 +31,7 @@ export function EntryRoll({ character, sheet, entry }: EntryRollProps) {
   const text = labels.dice;
   const [open, setOpen] = useState(false);
   const [adjust, setAdjust] = useState({ malus: 0, bonus: 0 });
+  const [specialty, setSpecialty] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const cost = entry.roll?.willpower_cost ?? 0;
@@ -46,11 +49,13 @@ export function EntryRoll({ character, sheet, entry }: EntryRollProps) {
         character_id: character.id,
         sheet_id: sheet.id,
         entry_id: entry.id,
+        specialty,
         modifier: -adjust.malus,
         gm_bonus: adjust.bonus,
       });
       setOpen(false);
       setAdjust({ malus: 0, bonus: 0 });
+      setSpecialty(false);
     } catch (caught) {
       setError(errorLabel(caught instanceof ApiError ? caught.code : "internal_error"));
     } finally {
@@ -90,6 +95,7 @@ export function EntryRoll({ character, sheet, entry }: EntryRollProps) {
               {affordable ? fill(text.recipe.costNote, { cost }) : text.recipe.notEnough}
             </p>
           )}
+          <SpecialtyOption compact checked={specialty} onChange={() => setSpecialty(!specialty)} />
           <GmAdjust
             malus={adjust.malus}
             bonus={adjust.bonus}

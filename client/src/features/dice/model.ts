@@ -26,6 +26,10 @@ export interface Roll {
   /** Dés qui restent à relancer ; 0 quand le jet est terminé. */
   readonly pending: number;
   readonly successes: number;
+  /** Jet sous spécialité : les dés au seuil de relance comptent deux réussites. */
+  readonly specialty?: boolean;
+  /** Nombre de dés qui ont compté deux réussites. */
+  readonly doubled?: number;
   readonly outcome: Outcome | null;
   readonly total: number | null;
   /** Nom du pouvoir, de l'arme ou de l'atout lancé. */
@@ -71,9 +75,17 @@ export function isSuccess(face: number, chance: boolean): boolean {
   return chance ? face === 10 : face >= SUCCESS_THRESHOLD;
 }
 
-/** Le dé repart à la vague suivante (10, ou 9 et 8 avec les options). */
+/** Le dé compte deux réussites : jet sous spécialité, face au seuil de relance. */
+export function isDoubled(face: number, roll: Roll): boolean {
+  return roll.specialty === true && !roll.chance && face >= roll.again;
+}
+
+/** Le dé repart à la vague suivante (10, ou 9 et 8 avec les options), sauf s'il compte double. */
 export function isReroll(face: number, roll: Roll): boolean {
-  return roll.kind !== "initiative" && face >= (roll.chance ? 10 : roll.again);
+  if (roll.kind === "initiative" || isDoubled(face, roll)) {
+    return false;
+  }
+  return face >= (roll.chance ? 10 : roll.again);
 }
 
 /** Réserve affichée : somme des éléments, 0 au minimum. */

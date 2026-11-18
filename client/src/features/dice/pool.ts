@@ -17,7 +17,6 @@ import { woundPenalty } from "@/features/sheet/health";
 
 import type { RollPart } from "./model";
 
-const SPECIALTY_BONUS = 1;
 const WILLPOWER_BONUS = 3;
 
 export type NpcTrait = "power" | "finesse" | "resilience";
@@ -63,11 +62,6 @@ export function unskilledPenalty(skill: SkillName): number {
   return (SKILLS.mental as readonly string[]).includes(skill) ? -3 : -1;
 }
 
-/** La spécialité se coche seulement sur une compétence qui en porte une. */
-export function canUseSpecialty(sheet: Sheet, second: RollChoice["second"]): boolean {
-  return second !== null && !isAttribute(second) && (sheet.specialties[second]?.length ?? 0) > 0;
-}
-
 /** Volonté, blessures, malus et bonus du MJ, comme le serveur les ajoute. */
 export function bonusParts(choice: RollChoice, penalty: number): RollPart[] {
   const parts: RollPart[] = [];
@@ -105,9 +99,6 @@ export function previewParts(character: Character, sheet: Sheet, choice: RollCho
       parts.push({ key: "unskilled", value: unskilledPenalty(second) });
     }
   }
-  if (choice.specialty && canUseSpecialty(sheet, second)) {
-    parts.push({ key: "specialty", value: SPECIALTY_BONUS });
-  }
   return [...parts, ...bonusParts(choice, penalty)];
 }
 
@@ -117,15 +108,15 @@ export function previewParts(character: Character, sheet: Sheet, choice: RollCho
  */
 export function pickTrait(choice: RollChoice, name: AttributeName | SkillName): RollChoice {
   if (choice.attribute === name) {
-    return { ...choice, attribute: null, specialty: false };
+    return { ...choice, attribute: null };
   }
   if (choice.second === name) {
-    return { ...choice, second: null, specialty: false };
+    return { ...choice, second: null };
   }
   if (choice.attribute === null && isAttribute(name)) {
     return { ...choice, attribute: name, trait: null };
   }
-  return { ...choice, second: name, trait: null, specialty: false };
+  return { ...choice, second: name, trait: null };
 }
 
 /** Traits proposés dans la recette hors attributs et compétences. */

@@ -4,7 +4,7 @@
  * Panneau de jet, en bas de la fiche en mode jet.
  *
  * Il montre la réserve composée par les clics sur la fiche (malus de blessure
- * compris), les options (spécialité, volonté, malus ou bonus annoncé par le MJ,
+ * compris), les options (spécialité, laissée au jugement du MJ, volonté, malus ou bonus annoncé par le MJ,
  * relance, action assurée, jet secret pour le MJ) et les jets en un clic :
  * initiative et jet pour rester conscient.
  */
@@ -18,7 +18,8 @@ import { type RollRequest, startRoll } from "../api";
 import { describeParts } from "../format";
 import { GmAdjust } from "./GmAdjust";
 import { poolSize } from "../model";
-import { canUseSpecialty, EMPTY_CHOICE, previewParts, type RollChoice } from "../pool";
+import { EMPTY_CHOICE, previewParts, type RollChoice } from "../pool";
+import { SpecialtyOption } from "./SpecialtyOption";
 
 const OPTION = "text-ink flex items-center gap-2 text-base select-none";
 const SMALL_BUTTON =
@@ -112,16 +113,10 @@ export function RollDock({ character, sheet, choice, onChoice, isGm }: RollDockP
       </div>
 
       <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
-        {canUseSpecialty(sheet, choice.second) && (
-          <label className={OPTION}>
-            <input
-              type="checkbox"
-              checked={choice.specialty}
-              onChange={() => set({ specialty: !choice.specialty })}
-            />
-            {text.specialty}
-          </label>
-        )}
+        <SpecialtyOption
+          checked={choice.specialty}
+          onChange={() => set({ specialty: !choice.specialty })}
+        />
         <label className={OPTION} title={sheet.willpower_current < 1 ? text.noWillpower : ""}>
           <input
             type="checkbox"

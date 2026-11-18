@@ -65,6 +65,8 @@ class RollResponse(BaseModel):
         outcome: issue du jet de réussites, ``None`` tant qu'il n'est pas terminé
             ou pour l'initiative.
         total: résultat d'un jet d'initiative.
+        specialty: jet sous spécialité.
+        doubled: nombre de dés qui ont compté deux réussites.
     """
 
     id: UUID
@@ -81,6 +83,8 @@ class RollResponse(BaseModel):
     stages: list[list[int]]
     pending: int
     successes: int
+    specialty: bool = False
+    doubled: int = 0
     outcome: str | None
     total: int | None
     label: str | None = None

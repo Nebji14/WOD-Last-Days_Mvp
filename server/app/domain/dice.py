@@ -3,8 +3,10 @@
 On lance une réserve de d10. Un dé réussit sur 8, 9 ou 10, et un dé égal ou
 supérieur au seuil de relance (10, ou 9 et 8 avec les options) se relance une
 seule fois : un dé relancé ne se relance plus, même sur un nouveau 10.
-Une réserve vide devient un dé de chance : seul un 10 réussit, et un 1 est un
-échec dramatique. Cinq réussites ou plus font une réussite exceptionnelle.
+Sur un jet sous spécialité, ces dés ne se relancent pas : chacun compte
+directement deux réussites. Une réserve vide devient un dé de chance : seul
+un 10 réussit, et un 1 est un échec dramatique. Cinq réussites ou plus font
+une réussite exceptionnelle.
 
 Module pur : aucun accès réseau ni base de données. Le hasard est fourni par
 l'appelant.
@@ -22,7 +24,6 @@ from app.domain.traits import ATTRIBUTE_NAMES, SKILL_NAMES, SKILLS, Category
 DIE_FACES = 10
 SUCCESS_THRESHOLD = 8
 EXCEPTIONAL_SUCCESSES = 5
-SPECIALTY_BONUS = 1
 WILLPOWER_BONUS = 3
 # Malus annoncé par le MJ (défense ou résistance de l'adversaire…) et bonus.
 MODIFIER_MIN = -10
@@ -104,36 +105,29 @@ def pool_parts(
     traits: dict[str, int],
     attribute: str,
     second: str | None,
-    has_specialty: bool,
     options: PoolOptions,
     wound_penalty: int,
 ) -> list[PoolPart]:
     """Compose la réserve d'un jet : un attribut, plus une compétence ou un second attribut.
 
-    Une compétence à 0 donne son malus de catégorie ; la spécialité ne vaut
-    que pour une compétence qui en porte une.
+    Une compétence à 0 donne son malus de catégorie. La spécialité n'ajoute
+    pas de dé : elle change le compte des réussites.
 
     Args:
         traits: valeurs des attributs et compétences de la feuille.
-        has_specialty: la compétence choisie porte au moins une spécialité.
         wound_penalty: malus de blessure en cours (0 ou négatif).
 
     Raises:
-        DiceRuleError: pour un trait inconnu, ou une spécialité impossible.
+        DiceRuleError: pour un trait inconnu.
     """
     known = (*ATTRIBUTE_NAMES, *SKILL_NAMES)
     if attribute not in ATTRIBUTE_NAMES or (second is not None and second not in known):
         raise DiceRuleError("trait")
     parts = [PoolPart(attribute, traits[attribute])]
-    is_skill = second in SKILL_NAMES
     if second is not None:
         parts.append(PoolPart(second, traits[second]))
-        if is_skill and traits[second] == 0:
+        if second in SKILL_NAMES and traits[second] == 0:
             parts.append(PoolPart("unskilled", UNSKILLED_PENALTY[skill_category(second)]))
-    if options.specialty:
-        if not (is_skill and has_specialty):
-            raise DiceRuleError("specialty")
-        parts.append(PoolPart("specialty", SPECIALTY_BONUS))
     return parts + bonus_parts(options, wound_penalty)
 
 
@@ -166,27 +160,48 @@ def is_success(face: int, chance: bool) -> bool:
     return face == DIE_FACES if chance else face >= SUCCESS_THRESHOLD
 
 
-def rerolls_after(faces: list[int], again: int, rote_applies: bool, chance: bool) -> int:
+def double_threshold(again: int, specialty: bool, chance: bool) -> int | None:
+    """Face à partir de laquelle un dé compte deux réussites ; ``None`` sans spécialité.
+
+    Un dé de chance n'en profite jamais.
+    """
+    return again if specialty and not chance else None
+
+
+def rerolls_after(
+    faces: list[int], again: int, rote_applies: bool, chance: bool, specialty: bool = False
+) -> int:
     """Nombre de dés à relancer après une vague.
 
-    Les dés au seuil de relance repartent ; avec l'action assurée, les échecs
-    de la première vague repartent aussi. Un dé de chance ne se relance que sur 10.
+    Les dés au seuil de relance repartent, sauf sous spécialité où ils comptent
+    double ; avec l'action assurée, les échecs de la première vague repartent
+    aussi. Un dé de chance ne se relance que sur 10.
     """
-    threshold = DIE_FACES if chance else again
-    count = sum(1 for face in faces if face >= threshold)
+    count = 0
+    if double_threshold(again, specialty, chance) is None:
+        threshold = DIE_FACES if chance else again
+        count = sum(1 for face in faces if face >= threshold)
     if rote_applies and not chance:
         count += sum(1 for face in faces if not is_success(face, chance))
     return count
 
 
-def count_successes(stages: list[list[int]], chance: bool) -> int:
-    """Total des réussites, relances comprises."""
-    return sum(1 for faces in stages for face in faces if is_success(face, chance))
+def doubled_count(stages: list[list[int]], doubled_from: int | None) -> int:
+    """Nombre de dés qui ont compté deux réussites."""
+    if doubled_from is None:
+        return 0
+    return sum(1 for faces in stages for face in faces if face >= doubled_from)
 
 
-def outcome(stages: list[list[int]], chance: bool) -> Outcome:
+def count_successes(stages: list[list[int]], chance: bool, doubled_from: int | None = None) -> int:
+    """Total des réussites, relances comprises, dés doublés par la spécialité compris."""
+    simple = sum(1 for faces in stages for face in faces if is_success(face, chance))
+    return simple + doubled_count(stages, doubled_from)
+
+
+def outcome(stages: list[list[int]], chance: bool, doubled_from: int | None = None) -> Outcome:
     """Issue du jet : un 1 au premier dé de chance est un échec dramatique."""
-    successes = count_successes(stages, chance)
+    successes = count_successes(stages, chance, doubled_from)
     if chance and successes == 0 and stages and stages[0][:1] == [1]:
         return Outcome.DRAMATIC_FAILURE
     if successes == 0:
@@ -207,6 +222,7 @@ class DiceRoll:
         base: initiative ajoutée au dé, pour un jet d'initiative.
         secret: jet du MJ, montré au MJ seul.
         label: nom du pouvoir, de l'arme ou de l'atout lancé.
+        specialty: jet sous spécialité : les dés au seuil comptent double.
     """
 
     id: UUID
@@ -224,6 +240,7 @@ class DiceRoll:
     pending: int
     base: int = 0
     label: str | None = None
+    specialty: bool = False
 
     @property
     def finished(self) -> bool:
@@ -231,9 +248,19 @@ class DiceRoll:
         return self.pending == 0
 
     @property
+    def doubled_from(self) -> int | None:
+        """Face à partir de laquelle un dé compte double ; ``None`` sans spécialité."""
+        return double_threshold(self.again, self.specialty, self.chance)
+
+    @property
+    def doubled(self) -> int:
+        """Nombre de dés qui ont compté deux réussites."""
+        return doubled_count(self.stages, self.doubled_from)
+
+    @property
     def successes(self) -> int:
         """Réussites totales ; sans objet pour l'initiative."""
-        return count_successes(self.stages, self.chance)
+        return count_successes(self.stages, self.chance, self.doubled_from)
 
     @property
     def total(self) -> int | None:
@@ -250,6 +277,7 @@ def roll_detail(roll: DiceRoll) -> dict[str, Any]:
     ``outcome`` reste ``None`` tant que le jet n'est pas terminé, et pour l'initiative.
     """
     finished_pool = roll.finished and roll.kind is not RollKind.INITIATIVE
+    result = outcome(roll.stages, roll.chance, roll.doubled_from) if finished_pool else None
     return {
         "id": str(roll.id),
         "roller_id": str(roll.roller_id),
@@ -265,7 +293,9 @@ def roll_detail(roll: DiceRoll) -> dict[str, Any]:
         "stages": [list(faces) for faces in roll.stages],
         "pending": roll.pending,
         "successes": roll.successes,
-        "outcome": outcome(roll.stages, roll.chance).value if finished_pool else None,
+        "specialty": roll.specialty,
+        "doubled": roll.doubled,
+        "outcome": result.value if result is not None else None,
         "total": roll.total,
         "label": roll.label,
     }

@@ -30,12 +30,12 @@ def test_roll_is_built_from_the_sheet_and_published_in_chat(ctx: TestContext) ->
     isaac = create(lea)
     ctx.dice.faces = [8, 9, 2, 5, 1, 3, 4]
 
-    response = _roll(lea, isaac, attribute="dexterity", second="firearms", specialty=True)
+    response = _roll(lea, isaac, attribute="dexterity", second="firearms")
 
     assert response.status_code == 201, response.text
     roll = response.json()
-    assert _parts(roll) == [("dexterity", 3), ("firearms", 3), ("specialty", 1)]
-    assert roll["stages"] == [[8, 9, 2, 5, 1, 3, 4]]
+    assert _parts(roll) == [("dexterity", 3), ("firearms", 3)]
+    assert roll["stages"] == [[8, 9, 2, 5, 1, 3]]
     assert roll["successes"] == 2
     assert roll["outcome"] == "success"
     published = _messages(lea)[-1]
@@ -62,6 +62,42 @@ def test_tens_are_rerolled_once_only(ctx: TestContext) -> None:
 
     again = lea.request("POST", f"/api/dice/rolls/{first['id']}/reroll")
     assert again.status_code == 404
+
+
+def test_specialty_counts_tens_twice_instead_of_rerolling(ctx: TestContext) -> None:
+    lea = player(ctx, "lea.vale")
+    isaac = create(lea)
+    ctx.dice.faces = [10, 10, 9, 3]
+
+    roll = _roll(lea, isaac, attribute="strength", second="athletics", specialty=True).json()
+
+    assert _parts(roll) == [("strength", 2), ("athletics", 2)]
+    assert roll["pending"] == 0
+    assert roll["specialty"] is True
+    assert roll["doubled"] == 2
+    assert roll["successes"] == 5
+    assert roll["outcome"] == "exceptional"
+    assert _messages(lea)[-1]["body"] == "Isaac Thorne · 5 réussites (2 dés comptés double)"
+
+
+def test_specialty_needs_no_specialty_written_on_the_skill(ctx: TestContext) -> None:
+    lea = player(ctx, "lea.vale")
+    ctx.dice.faces = [9, 9, 1, 1]
+
+    roll = _roll(
+        lea, create(lea), attribute="strength", second="stealth", specialty=True, again=9
+    ).json()
+
+    assert roll["doubled"] == 2
+    assert roll["successes"] == 4
+
+
+def test_specialty_is_refused_on_initiative(ctx: TestContext) -> None:
+    lea = player(ctx, "lea.vale")
+
+    response = _roll(lea, create(lea), kind="initiative", specialty=True)
+
+    assert response.status_code == 422
 
 
 def test_only_the_roller_rerolls(ctx: TestContext) -> None:
@@ -165,6 +201,19 @@ def test_power_rolls_its_recipe_and_costs_willpower(ctx: TestContext) -> None:
     sheet = lea.request("GET", f"/api/characters/{isaac['id']}").json()["sheets"][0]
     assert sheet["willpower_current"] == before - 1
     assert _messages(lea)[-1]["body"].startswith("Isaac Thorne · Pensées et sentiments · ")
+
+
+def test_power_can_be_rolled_under_specialty(ctx: TestContext) -> None:
+    lea = player(ctx, "lea.vale")
+    isaac = create(lea)
+    power = _power(lea, isaac, parts=["wits", "empathy"])
+    ctx.dice.faces = [10, 2, 2, 2, 2, 2]
+
+    roll = _roll(lea, isaac, kind="entry", entry_id=power["id"], specialty=True).json()
+
+    assert roll["pending"] == 0
+    assert roll["doubled"] == 1
+    assert roll["successes"] == 2
 
 
 def test_recipe_may_hold_more_than_two_traits(ctx: TestContext) -> None:

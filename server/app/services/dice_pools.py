@@ -60,7 +60,7 @@ def compose_pool(
     penalty = wound_penalty(sheet.wound_track, sheet.numbers["health_max"])
     if entry is not None:
         recipe = RollRecipe.from_data(entry.roll)
-        if recipe is None or options.specialty:
+        if recipe is None:
             raise DiceRuleError("recipe")
         parts = recipe_parts(recipe, sheet.traits, character.supernatural_level, entry)
         return [*parts, *bonus_parts(options, penalty)], 0
@@ -83,9 +83,5 @@ def compose_pool(
         return [PoolPart(request.trait, value), *bonus_parts(options, penalty)], 0
     if character.npc is not None and character.npc.is_simplified:
         raise DiceRuleError("trait")
-    has_specialty = bool(sheet.specialties.get(request.second or ""))
     attribute = request.attribute or ""
-    return (
-        pool_parts(sheet.traits, attribute, request.second, has_specialty, options, penalty),
-        0,
-    )
+    return pool_parts(sheet.traits, attribute, request.second, options, penalty), 0

@@ -199,7 +199,11 @@ class DiceService:
         size = 1 if initiative else pool_size(parts)
         chance = not initiative and size == 0
         faces = roll_dice(max(size, 1), self._roll_die)
-        pending = 0 if initiative else rerolls_after(faces, options.again, options.rote, chance)
+        pending = (
+            0
+            if initiative
+            else rerolls_after(faces, options.again, options.rote, chance, options.specialty)
+        )
         return DiceRoll(
             id=uuid4(),
             roller_id=actor.id,
@@ -214,6 +218,7 @@ class DiceService:
             secret=request.secret,
             stages=[faces],
             pending=pending,
+            specialty=options.specialty and not initiative,
         )
 
     async def _advance(self, roll_id: UUID, stage_count: int) -> DiceRoll | None:
@@ -268,4 +273,8 @@ def roll_summary(roll: DiceRoll) -> str:
         return f"{who} · initiative {roll.total}"
     successes = roll.successes
     plural = "s" if successes > 1 else ""
-    return f"{who} · {successes} réussite{plural}"
+    summary = f"{who} · {successes} réussite{plural}"
+    if roll.doubled:
+        doubled_plural = "s" if roll.doubled > 1 else ""
+        summary += f" ({roll.doubled} dé{doubled_plural} compté{doubled_plural} double)"
+    return summary

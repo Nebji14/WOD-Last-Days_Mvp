@@ -9,7 +9,7 @@
  * résultat reste affiché quelques secondes, puis le jet passe dans le chat.
  */
 import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { fill, labels } from "@/shared/i18n";
 
@@ -78,7 +78,10 @@ function RerollAction({ roll, isRoller }: { roll: Roll; isRoller: boolean }) {
 
 function RollPlayer({ roll, viewerId }: { roll: Roll; viewerId: string }) {
   const done = useDiceStore((state) => state.done);
-  const [thrown, setThrown] = useState(0);
+  // Vagues déjà roulées pour ce jet. Le composant n'est pas recréé d'un jet à
+  // l'autre : la scène 3D reste en place quand plusieurs jets s'enchaînent.
+  const [progress, setProgress] = useState({ rollId: roll.id, thrown: 0 });
+  const thrown = progress.rollId === roll.id ? progress.thrown : 0;
   const style: DieStyle = roll.roller_role === "gm" ? "gm" : "player";
   const throwing = thrown < roll.stages.length;
   const final = !throwing && roll.pending === 0;
@@ -91,22 +94,28 @@ function RollPlayer({ roll, viewerId }: { roll: Roll; viewerId: string }) {
     return () => window.clearTimeout(timer);
   }, [final, done, roll.id]);
 
-  const throwSpec = throwing
-    ? { key: `${roll.id}:${thrown}`, values: roll.stages[thrown] ?? [], style }
-    : null;
-  const closeup = throwing
-    ? null
-    : {
-        key: `${roll.id}:closeup:${roll.stages.length}`,
-        style,
-        dice: roll.stages.flatMap((faces, stage) =>
-          faces.map((value) => ({
-            value,
-            success: roll.kind === "initiative" || isSuccess(value, roll.chance),
-            fresh: stage === roll.stages.length - 1,
-          })),
-        ),
-      };
+  const throwSpec = useMemo(
+    () =>
+      throwing ? { key: `${roll.id}:${thrown}`, values: roll.stages[thrown] ?? [], style } : null,
+    [throwing, roll, thrown, style],
+  );
+  const closeup = useMemo(
+    () =>
+      throwing
+        ? null
+        : {
+            key: `${roll.id}:closeup:${roll.stages.length}`,
+            style,
+            dice: roll.stages.flatMap((faces, stage) =>
+              faces.map((value) => ({
+                value,
+                success: roll.kind === "initiative" || isSuccess(value, roll.chance),
+                fresh: stage === roll.stages.length - 1,
+              })),
+            ),
+          },
+    [throwing, roll, style],
+  );
 
   return (
     <div className="pointer-events-none fixed inset-0 z-[60] flex flex-col">
@@ -121,7 +130,12 @@ function RollPlayer({ roll, viewerId }: { roll: Roll; viewerId: string }) {
         <DiceScene
           throwSpec={throwSpec}
           closeup={closeup}
-          onThrowEnd={() => setThrown((count) => count + 1)}
+          onThrowEnd={() =>
+            setProgress((current) => ({
+              rollId: roll.id,
+              thrown: (current.rollId === roll.id ? current.thrown : 0) + 1,
+            }))
+          }
         />
       </div>
       <header className="relative mt-10 flex flex-col items-center gap-1 text-center">
@@ -157,7 +171,7 @@ function RollPlayer({ roll, viewerId }: { roll: Roll; viewerId: string }) {
           )}
           {!final && (
             <RerollAction
-              key={roll.stages.length}
+              key={`${roll.id}:${roll.stages.length}`}
               roll={roll}
               isRoller={roll.roller_id === viewerId}
             />
@@ -171,7 +185,5 @@ function RollPlayer({ roll, viewerId }: { roll: Roll; viewerId: string }) {
 /** Le jet en tête de file, s'il y en a un. */
 export function DiceOverlay({ viewerId }: { viewerId: string }) {
   const current = useDiceStore((state) => state.queue[0] ?? null);
-  return current === null ? null : (
-    <RollPlayer key={current.id} roll={current} viewerId={viewerId} />
-  );
+  return current === null ? null : <RollPlayer roll={current} viewerId={viewerId} />;
 }

@@ -113,7 +113,12 @@ function facingCamera(value: number, toCamera: Vector3, cameraUp: Vector3): Quat
   return new Quaternion().setFromAxisAngle(toCamera, angle).multiply(turn);
 }
 
-function closeupLayout(count: number, camera: Camera) {
+/**
+ * Place et oriente chaque dé du gros plan une fois pour toutes : l'animation
+ * ne fait ensuite que les recopier, sans rien recalculer à chaque image.
+ */
+function closeupLayout(dice: readonly CloseupDie[], camera: Camera) {
+  const count = dice.length;
   const columns = Math.min(count, MAX_COLUMNS);
   const rows = Math.ceil(count / columns);
   const spacing = Math.min(1.3, 6.4 / columns, 3.2 / rows);
@@ -131,13 +136,14 @@ function closeupLayout(count: number, camera: Camera) {
       .add(right.clone().multiplyScalar((column - (inRow - 1) / 2) * spacing))
       .add(up.clone().multiplyScalar(((rows - 1) / 2 - row) * spacing));
     const toCamera = camera.position.clone().sub(position).normalize();
-    return { position, toCamera, up, scale: spacing / 1.3 };
+    const orientation = facingCamera(dice[index]?.value ?? 1, toCamera, up);
+    return { position, orientation, up, scale: spacing / 1.3 };
   });
 }
 
 function CloseupDice({ spec }: { spec: CloseupSpec }) {
   const camera = useThree((state) => state.camera);
-  const layout = useMemo(() => closeupLayout(spec.dice.length, camera), [spec, camera]);
+  const layout = useMemo(() => closeupLayout(spec.dice, camera), [spec, camera]);
   const materials = useMemo(
     () => spec.dice.map((die) => highlightedMaterials(spec.style, die.success)),
     [spec],
@@ -161,8 +167,8 @@ function CloseupDice({ spec }: { spec: CloseupSpec }) {
         return;
       }
       const bob = die.success ? Math.sin(elapsed.current * 3 + index) * 0.04 : 0;
-      mesh.position.copy(slot.position).add(slot.up.clone().multiplyScalar(bob));
-      mesh.quaternion.copy(facingCamera(die.value, slot.toCamera, slot.up));
+      mesh.position.copy(slot.position).addScaledVector(slot.up, bob);
+      mesh.quaternion.copy(slot.orientation);
       const size = slot.scale * (die.fresh ? eased : 1) * (die.success ? 1.08 : 0.92);
       mesh.scale.setScalar(Math.max(size, 0.001));
     });
@@ -194,7 +200,9 @@ export default function DiceScene({ throwSpec, closeup, onThrowEnd }: DiceSceneP
       onCreated={({ camera, gl, scene }) => {
         camera.lookAt(0, 0, 0);
         // Reflets d'un studio : le métal et le vernis prennent vie.
-        scene.environment = new PMREMGenerator(gl).fromScene(new RoomEnvironment(), 0.04).texture;
+        const generator = new PMREMGenerator(gl);
+        scene.environment = generator.fromScene(new RoomEnvironment(), 0.04).texture;
+        generator.dispose();
       }}
     >
       <ambientLight intensity={0.25} />

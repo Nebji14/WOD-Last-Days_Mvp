@@ -131,6 +131,10 @@ class SupabaseAuthGateway:
         """Révoque toutes les autres sessions de l'utilisateur."""
         await self._sign_out(access_token, "others")
 
+    async def sign_out_everywhere(self, access_token: str) -> None:
+        """Révoque toutes les sessions de l'utilisateur, celle-ci comprise."""
+        await self._sign_out(access_token, "global")
+
     async def set_password(self, user_id: UUID, password: str, email: str | None = None) -> None:
         """Définit le mot de passe d'un utilisateur.
 

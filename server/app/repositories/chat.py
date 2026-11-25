@@ -7,14 +7,14 @@ from uuid import UUID
 import asyncpg
 
 from app.domain.accounts import Role
-from app.domain.chat import ChatMessage
+from app.domain.chat import ChatMessage, Notice
 
 _SELECT = """
-    select m.id, m.position, m.author_id, a.display_name as author_name,
-           a.role as author_role, m.body, m.sent_at, m.edited_at,
-           d.role as deleted_by_role, m.roll
+    select m.id, m.position, m.author_id, coalesce(a.display_name, '') as author_name,
+           coalesce(a.role, 'player') as author_role, m.body, m.sent_at, m.edited_at,
+           m.deleted_at, d.role as deleted_by_role, m.roll, m.notice
     from chat_message m
-    join account a on a.id = m.author_id
+    left join account a on a.id = m.author_id
     left join account d on d.id = m.deleted_by
 """
 
@@ -121,7 +121,8 @@ class PgChatRepository:
 
 def _to_message(row: asyncpg.Record) -> ChatMessage:
     """Convertit une ligne de la requête en objet du domaine."""
-    deleted_by_role = row["deleted_by_role"]
+    # Le compte qui a supprimé un message peut avoir disparu : la date en fait foi.
+    deleted_by_role = row["deleted_by_role"] or (Role.PLAYER if row["deleted_at"] else None)
     return ChatMessage(
         id=row["id"],
         position=row["position"],
@@ -133,4 +134,5 @@ def _to_message(row: asyncpg.Record) -> ChatMessage:
         edited_at=row["edited_at"],
         deleted_by_role=Role(deleted_by_role) if deleted_by_role else None,
         roll=json.loads(row["roll"]) if row["roll"] else None,
+        notice=Notice(row["notice"]) if row["notice"] else None,
     )

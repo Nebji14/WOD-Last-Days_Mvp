@@ -63,7 +63,13 @@ export function PlayerList({ players, selectedId, onSelect }: PlayerListProps) {
                       : player.characterNames.join(", ")}
                   </span>
                 </span>
-                <PresenceStatus online={player.online} />
+                {player.status === "disabled" ? (
+                  <span className="text-ink-faint text-sm italic">
+                    {labels.playersTool.account.disabled}
+                  </span>
+                ) : (
+                  <PresenceStatus online={player.online} />
+                )}
               </button>
             </li>
           );

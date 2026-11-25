@@ -7,7 +7,7 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.domain.accounts import Role
-from app.domain.chat import MESSAGE_MAX_LENGTH, ChatMessage
+from app.domain.chat import MESSAGE_MAX_LENGTH, ChatMessage, Notice
 
 
 class SendMessageRequest(BaseModel):
@@ -34,9 +34,9 @@ class EditMessageRequest(BaseModel):
 
 
 class MessageAuthor(BaseModel):
-    """Auteur d'un message, tel qu'il est affiché dans le chat."""
+    """Auteur d'un message ; sans identifiant ni nom si son compte a été supprimé."""
 
-    id: UUID
+    id: UUID | None
     display_name: str
     role: Role
 
@@ -49,6 +49,7 @@ class MessageResponse(BaseModel):
         edited: le message a été modifié (mention « (modifié) » visible par tous).
         deleted_by: rôle de qui a supprimé le message, ``None`` s'il ne l'est pas.
         roll: détail d'un jet de dés, ``None`` pour un message ordinaire ou supprimé.
+        notice: annonce du départ d'un joueur, ``None`` pour un message ordinaire.
     """
 
     id: UUID
@@ -59,6 +60,7 @@ class MessageResponse(BaseModel):
     edited: bool
     deleted_by: Literal["player", "gm"] | None
     roll: dict[str, Any] | None = None
+    notice: Notice | None = None
 
     @classmethod
     def from_message(cls, message: ChatMessage) -> "MessageResponse":
@@ -76,6 +78,7 @@ class MessageResponse(BaseModel):
             edited=message.edited_at is not None and not message.is_deleted,
             deleted_by=message.deleted_by_role.value if message.deleted_by_role else None,
             roll=None if message.is_deleted else message.roll,
+            notice=message.notice,
         )
 
 

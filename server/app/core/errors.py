@@ -35,6 +35,7 @@ class ErrorCode(StrEnum):
     GOOGLE_FAILED = "google_failed"
     GOOGLE_ALREADY_LINKED = "google_already_linked"
     LAST_LOGIN_METHOD = "last_login_method"
+    CONFIRMATION_MISMATCH = "confirmation_mismatch"
     WRONG_PASSWORD = "wrong_password"
     REAUTHENTICATION_REQUIRED = "reauthentication_required"
     USERNAME_TAKEN = "username_taken"

@@ -40,6 +40,7 @@ from app.gateways.supabase_storage import SupabaseStorageGateway
 from app.realtime import endpoint as realtime_endpoint
 from app.realtime.hub import ConnectionHub
 from app.realtime.tickets import TicketStore
+from app.repositories.account_closure import PgAccountClosureRepository
 from app.repositories.accounts import PgAccountRepository
 from app.repositories.characters import PgCharacterRepository
 from app.repositories.chat import PgChatRepository
@@ -50,6 +51,7 @@ from app.repositories.portraits import PgPortraitRepository
 from app.repositories.resources import PgResourceRepository
 from app.repositories.sheet_items import PgSheetItemRepository
 from app.services.account import AccountService
+from app.services.account_closure import AccountClosureService
 from app.services.account_portrait import AccountPortraitService
 from app.services.auth import AuthService
 from app.services.awakening import AwakeningService
@@ -109,7 +111,8 @@ def create_app(settings: Settings | None = None, container: Container | None = N
             portrait_files = PortraitFiles(storage)
             identity = SupabaseAuthGateway(settings, http_client)
             owner_check = OwnerCheck(accounts, identity)
-            chat_service = ChatService(PgChatRepository(pool), hub)
+            chat_repository = PgChatRepository(pool)
+            chat_service = ChatService(chat_repository, hub)
             app.state.container = Container(
                 settings=settings,
                 auth_service=AuthService(
@@ -121,6 +124,15 @@ def create_app(settings: Settings | None = None, container: Container | None = N
                 account_service=AccountService(accounts, identity, owner_check, table_service, hub),
                 account_portrait_service=AccountPortraitService(
                     portrait_repository, accounts, portrait_files, table_service, hub
+                ),
+                account_closure_service=AccountClosureService(
+                    PgAccountClosureRepository(pool),
+                    chat_repository,
+                    identity,
+                    owner_check,
+                    table_service,
+                    hub,
+                    portrait_files,
                 ),
                 google_auth_service=GoogleAuthService(
                     accounts=accounts,

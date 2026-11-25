@@ -146,7 +146,9 @@ export function ChatHistory({ messages, pending, viewerId, viewerIsGm }: ChatHis
             <MessageRow
               key={item.key}
               message={item.message}
-              canModerate={viewerIsGm || item.message.author.id === viewerId}
+              canModerate={
+                viewerIsGm || (!item.message.isNotice && item.message.author.id === viewerId)
+              }
               interactive
             />
           ),

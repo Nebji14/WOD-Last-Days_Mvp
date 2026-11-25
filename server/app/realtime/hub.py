@@ -14,6 +14,7 @@ from fastapi import WebSocket
 
 from app.domain.accounts import Account
 from app.domain.chat import ChatMessage
+from app.realtime.codes import CLOSE_TABLE_FULL, CLOSE_UNAUTHENTICATED
 from app.schemas.chat import MessageResponse
 from app.schemas.table import TableStateResponse
 from app.services.table import TableState
@@ -23,14 +24,13 @@ logger = logging.getLogger(__name__)
 EVENT_TABLE_STATE = "table.state"
 EVENT_CHAT_MESSAGE = "chat.message"
 EVENT_ACCOUNT_CHANGED = "account.changed"
+EVENT_ACCOUNT_REMOVED = "account.removed"
 EVENT_CHARACTER_CHANGED = "character.changed"
 EVENT_IMAGES_CHANGED = "images.changed"
 EVENT_NPCS_CHANGED = "npcs.changed"
 EVENT_DICE_ROLL = "dice.roll"
 
-# Codes de fermeture applicatifs (plage 4000-4999 réservée aux applications).
-CLOSE_UNAUTHENTICATED = 4401
-CLOSE_TABLE_FULL = 4409
+__all__ = ["CLOSE_TABLE_FULL", "CLOSE_UNAUTHENTICATED", "ConnectionHub"]
 
 _SEND_TIMEOUT_SECONDS = 5.0
 
@@ -65,6 +65,10 @@ class ConnectionHub:
             EVENT_ACCOUNT_CHANGED,
             {"account_id": str(account.id), "display_name": account.display_name},
         )
+
+    async def account_removed(self, account_id: UUID) -> None:
+        """Signale un compte supprimé : son nom disparaît des messages déjà affichés."""
+        await self._broadcast(EVENT_ACCOUNT_REMOVED, {"account_id": str(account_id)})
 
     async def message_changed(self, message: ChatMessage) -> None:
         """Diffuse un message créé, modifié ou supprimé."""

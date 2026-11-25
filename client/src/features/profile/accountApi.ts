@@ -31,6 +31,26 @@ export function updateNames(names: AccountNames): Promise<Account> {
   });
 }
 
+/** Départ d'un joueur : désactiver son compte, ou le supprimer définitivement. */
+export type Closure = "disable" | "delete";
+
+/**
+ * Ferme le compte du joueur.
+ *
+ * @param username nom d'utilisateur recopié à l'identique.
+ * @param currentPassword `null` pour un compte sans mot de passe.
+ */
+export function closeAccount(
+  closure: Closure,
+  username: string,
+  currentPassword: string | null,
+): Promise<void> {
+  return apiRequest(`/api/account/${closure}`, {
+    method: "POST",
+    body: { username, current_password: currentPassword },
+  });
+}
+
 /** Donne une photo au MJ, à la place de la précédente. */
 export async function setAccountPortrait(files: PortraitFiles): Promise<void> {
   const account = await uploadPortrait("/api/account/portrait", files.portrait, parseAccount);

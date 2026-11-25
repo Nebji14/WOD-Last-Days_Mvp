@@ -24,9 +24,11 @@ interface PlayerDetailProps {
   readonly characters: readonly Character[];
   readonly busyId: string | null;
   readonly onAwaken: (characterId: string) => void;
+  readonly onReactivate: () => void;
 }
 
-export function PlayerDetail({ player, characters, busyId, onAwaken }: PlayerDetailProps) {
+export function PlayerDetail(props: PlayerDetailProps) {
+  const { player, characters, busyId, onAwaken, onReactivate } = props;
   const text = labels.playersTool;
 
   return (
@@ -54,8 +56,18 @@ export function PlayerDetail({ player, characters, busyId, onAwaken }: PlayerDet
         <dt className="text-ink-muted">{text.account.methods}</dt>
         <dd className="text-ink">{text.account.methodsValue}</dd>
         <dt className="text-ink-muted">{text.account.state}</dt>
-        <dd className="text-ink">
+        <dd className="text-ink flex flex-wrap items-center gap-4">
           {player.status === "active" ? text.account.active : text.account.disabled}
+          {player.status === "disabled" && (
+            <button
+              type="button"
+              onClick={onReactivate}
+              disabled={busyId === player.id}
+              className="border-gold font-display text-gold hover:bg-gold hover:text-abyss min-h-9 cursor-pointer rounded-xs border px-4 text-[11px] font-bold tracking-[2px] transition-colors disabled:cursor-wait disabled:opacity-60"
+            >
+              {text.account.reactivate}
+            </button>
+          )}
         </dd>
       </dl>
 

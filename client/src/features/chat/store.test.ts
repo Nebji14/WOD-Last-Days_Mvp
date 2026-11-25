@@ -22,6 +22,7 @@ function message(position: number, body: string): ChatMessage {
     edited: false,
     deletedBy: null,
     roll: null,
+    isNotice: false,
   };
 }
 
@@ -45,6 +46,19 @@ beforeEach(() => {
 });
 
 describe("useChatStore", () => {
+  it("retire le nom d'un compte supprimé, et garde ses messages", () => {
+    const other = { id: "a2", displayName: "ben", role: "player" } as const;
+    useChatStore.getState().upsert(message(1, "un"));
+    useChatStore.getState().upsert({ ...message(2, "deux"), author: other });
+
+    useChatStore.getState().forgetAuthor("a1");
+
+    const [first, second] = useChatStore.getState().messages;
+    expect(first?.body).toBe("un");
+    expect(first?.author).toEqual({ id: null, displayName: "", role: "player" });
+    expect(second?.author).toEqual(other);
+  });
+
   it("renomme l'auteur sur ses messages, et sur eux seuls", () => {
     const other = { id: "a2", displayName: "ben", role: "player" } as const;
     useChatStore.getState().upsert(message(1, "un"));

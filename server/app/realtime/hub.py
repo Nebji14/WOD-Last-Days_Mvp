@@ -16,7 +16,9 @@ from app.domain.accounts import Account
 from app.domain.chat import ChatMessage
 from app.realtime.codes import CLOSE_TABLE_FULL, CLOSE_UNAUTHENTICATED
 from app.schemas.chat import MessageResponse
+from app.schemas.music import NowPlayingResponse
 from app.schemas.table import TableStateResponse
+from app.services.music import NowPlaying
 from app.services.table import TableState
 
 logger = logging.getLogger(__name__)
@@ -29,6 +31,8 @@ EVENT_CHARACTER_CHANGED = "character.changed"
 EVENT_IMAGES_CHANGED = "images.changed"
 EVENT_NPCS_CHANGED = "npcs.changed"
 EVENT_DICE_ROLL = "dice.roll"
+EVENT_MUSIC_CHANGED = "music.changed"
+EVENT_PLAYLISTS_CHANGED = "playlists.changed"
 
 __all__ = ["CLOSE_TABLE_FULL", "CLOSE_UNAUTHENTICATED", "ConnectionHub"]
 
@@ -111,6 +115,16 @@ class ConnectionHub:
         payload = {"type": EVENT_DICE_ROLL, "data": data}
         targets = [ws for ws, owner in self._connections.items() if owner in recipients]
         await asyncio.gather(*(self._send(ws, payload) for ws in targets))
+
+    async def music_changed(self, now: NowPlaying) -> None:
+        """Diffuse la lecture en cours ; la file du MJ n'en fait pas partie."""
+        await self._broadcast(
+            EVENT_MUSIC_CHANGED, NowPlayingResponse.from_now(now).model_dump(mode="json")
+        )
+
+    async def playlists_changed(self) -> None:
+        """Signale un changement des playlists, sans donnée : l'outil du MJ les relit."""
+        await self._broadcast(EVENT_PLAYLISTS_CHANGED, {})
 
     async def close_account(self, account_id: UUID, code: int) -> None:
         """Ferme toutes les connexions d'un compte, fenêtres détachées comprises (déconnexion)."""

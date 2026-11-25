@@ -25,8 +25,12 @@ from app.services.google_auth import GoogleAuthService
 from app.services.google_link import GoogleLinkService
 from app.services.image_table import ImageTableService
 from app.services.images import ImageService
+from app.services.music import MusicService
+from app.services.music_catalog import MusicCatalog
+from app.services.music_suggestions import MusicSuggestionService
 from app.services.npcs import NpcService
 from app.services.players import PlayerService
+from app.services.playlists import PlaylistService
 from app.services.portraits import PortraitService
 from app.services.resources import ResourceService
 from app.services.sheet_items import SheetItemService
@@ -60,6 +64,10 @@ class Container:
     image_table_service: ImageTableService
     npc_service: NpcService
     dice_service: DiceService
+    music_catalog: MusicCatalog
+    music_suggestions: MusicSuggestionService
+    music_service: MusicService
+    playlist_service: PlaylistService
 
 
 def get_container(request: Request) -> Container:

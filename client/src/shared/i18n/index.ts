@@ -3,6 +3,7 @@ import { fr } from "./fr";
 import { frCreation } from "./fr-creation";
 import { frDice } from "./fr-dice";
 import { frImages } from "./fr-images";
+import { frMusic } from "./fr-music";
 import { frNpcs } from "./fr-npcs";
 import { frPlayers } from "./fr-players";
 import { frProfile } from "./fr-profile";
@@ -15,6 +16,7 @@ export const labels = {
   ...frProfile,
   ...frPlayers,
   ...frImages,
+  ...frMusic,
   ...frNpcs,
   ...frDice,
 };

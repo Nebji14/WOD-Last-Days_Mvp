@@ -52,6 +52,11 @@ class ErrorCode(StrEnum):
     UNSUPPORTED_IMAGE = "unsupported_image"
     IMAGE_TOO_LARGE = "image_too_large"
     FOLDER_CYCLE = "folder_cycle"
+    TRACK_UNAVAILABLE = "track_unavailable"
+    PLAYLIST_EMPTY = "playlist_empty"
+    MUSIC_LIST_FULL = "music_list_full"
+    MUSIC_NOT_CONFIGURED = "music_not_configured"
+    MUSIC_QUOTA_REACHED = "music_quota_reached"
     SERVICE_UNAVAILABLE = "service_unavailable"
     INTERNAL_ERROR = "internal_error"
 

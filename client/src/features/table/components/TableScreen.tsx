@@ -14,6 +14,7 @@ import { DiceOverlay } from "@/features/dice/components/DiceOverlay";
 import { GmDice } from "@/features/dice/components/GmDice";
 import { useDiceSync } from "@/features/dice/useDiceSync";
 import { TableImages } from "@/features/images/components/TableImages";
+import { TableMusic } from "@/features/music/components/TableMusic";
 import { labels } from "@/shared/i18n";
 import { EmberParticles } from "@/shared/ui/EmberParticles";
 import { ScaledStage } from "@/shared/ui/ScaledStage";
@@ -82,6 +83,7 @@ export function TableScreen() {
           <ConnectionNotice status={session.status} />
         </main>
       </ScaledStage>
+      <TableMusic realtime={session.realtime} isGm={isGm} />
       <DiceOverlay viewerId={account.id} seats={seats} gmPortrait={table?.gm.portrait ?? null} />
     </>
   );

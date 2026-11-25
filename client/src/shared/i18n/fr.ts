@@ -97,6 +97,8 @@ export const fr = {
       imagesHint: "Images de la scène",
       npcs: "PNJ",
       npcsHint: "Feuilles de PNJ",
+      music: "MUSIQUE",
+      musicHint: "Musique de la table",
     },
     connection: {
       reconnecting: "Connexion perdue. Reconnexion en cours…",
@@ -164,6 +166,12 @@ export const fr = {
     unsupported_image: "Format non accepté : seules les images PNG, JPEG, WebP et GIF le sont.",
     image_too_large: "Image trop lourde : 8 Mo au maximum.",
     folder_cycle: "Un dossier ne peut pas être rangé dans l'un de ses sous-dossiers.",
+    track_unavailable: "Ce morceau n'existe plus ou ne peut pas être diffusé ici.",
+    playlist_empty: "Cette playlist est vide.",
+    music_list_full: "La liste est pleine : 200 morceaux au maximum.",
+    music_not_configured: "La recherche de musique n'est pas encore configurée sur le serveur.",
+    music_quota_reached:
+      "Le nombre de recherches du jour est atteint. Tes playlists restent disponibles.",
     service_unavailable: "Le service est momentanément indisponible. Réessaie dans un instant.",
     internal_error: "Une erreur est survenue. Réessaie dans un instant.",
     network_error:

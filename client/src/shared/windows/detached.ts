@@ -28,6 +28,7 @@ export const PROFILE_PATH = "/profil";
 export const PLAYERS_TOOL_PATH = "/outils/joueurs";
 export const IMAGES_TOOL_PATH = "/outils/images";
 export const NPCS_TOOL_PATH = "/outils/pnj";
+export const MUSIC_TOOL_PATH = "/outils/musique";
 /** Paramètre d'adresse qui ouvre une fiche directement en mode modification. */
 export const EDIT_MODE_PARAM = "mode";
 export const EDIT_MODE_VALUE = "modification";
@@ -91,6 +92,11 @@ export function openImagesTool(): void {
 /** Outil PNJ du MJ. */
 export function openNpcsTool(): void {
   openDetached("hunter-outil-pnj", NPCS_TOOL_PATH, TOOL_WINDOW);
+}
+
+/** Outil Musique du MJ. */
+export function openMusicTool(): void {
+  openDetached("hunter-outil-musique", MUSIC_TOOL_PATH, TOOL_WINDOW);
 }
 
 /** Ferme toutes les fenêtres détachées ouvertes depuis cette fenêtre. */

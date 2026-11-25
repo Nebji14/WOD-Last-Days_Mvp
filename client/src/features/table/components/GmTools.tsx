@@ -1,5 +1,5 @@
 /**
- * [Outils MJ (icônes)] de l'en-tête : Joueurs, Images, PNJ.
+ * Outils du MJ dans l'en-tête : Joueurs, Images, PNJ, Musique.
  *
  * Ce composant n'est rendu que pour le compte MJ ; les droits sont de toute
  * façon contrôlés par le serveur à chaque appel.
@@ -7,7 +7,12 @@
 import type { ReactNode } from "react";
 
 import { labels } from "@/shared/i18n";
-import { openImagesTool, openNpcsTool, openPlayersTool } from "@/shared/windows/detached";
+import {
+  openImagesTool,
+  openMusicTool,
+  openNpcsTool,
+  openPlayersTool,
+} from "@/shared/windows/detached";
 
 interface ToolProps {
   readonly label: string;
@@ -48,7 +53,7 @@ export function GmTools() {
   const text = labels.table.tools;
 
   return (
-    <nav className="absolute top-1.5 left-1/2 flex -translate-x-1/2 gap-2">
+    <nav className="absolute top-1.5 left-[calc(50%+36px)] flex -translate-x-1/2 gap-2">
       <Tool label={text.players} hint={text.playersHint} onOpen={openPlayersTool}>
         <circle cx="7.5" cy="4.5" r="3.5" />
         <path d="M1 19c0-3.5 2.9-6 6.5-6s6.5 2.5 6.5 6" />
@@ -72,6 +77,11 @@ export function GmTools() {
         <circle cx="12.5" cy="5.5" r="2.5" strokeWidth="1.3" />
         <path d="M8.5 12.5c0-1.7 1.8-2.6 4-2.6s4 .9 4 2.6" strokeWidth="1.3" />
         <path d="M8.5 16.2h8" className="text-gold" stroke="currentColor" strokeWidth="1.3" />
+      </Tool>
+      <Tool label={text.music} hint={text.musicHint} onOpen={openMusicTool}>
+        <path d="M9 15.5V3.5l11-2v12" />
+        <circle cx="6.5" cy="15.5" r="2.5" />
+        <circle cx="17.5" cy="13.5" r="2.5" className="text-gold" fill="currentColor" stroke="none" />
       </Tool>
     </nav>
   );

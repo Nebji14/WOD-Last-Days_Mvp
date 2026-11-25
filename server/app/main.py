@@ -19,8 +19,10 @@ from app.api import (
     google_auth,
     health,
     images,
+    music,
     npcs,
     players,
+    playlists,
     portraits,
     realtime,
     resources,
@@ -35,8 +37,10 @@ from app.core.logging import configure_logging
 from app.core.middleware import register_middlewares
 from app.core.rate_limit import RateLimiter
 from app.core.security import SupabaseTokenVerifier
+from app.gateways.itunes import ItunesGateway
 from app.gateways.supabase_auth import SupabaseAuthGateway
 from app.gateways.supabase_storage import SupabaseStorageGateway
+from app.gateways.youtube import YouTubeGateway
 from app.realtime import endpoint as realtime_endpoint
 from app.realtime.hub import ConnectionHub
 from app.realtime.tickets import TicketStore
@@ -47,6 +51,7 @@ from app.repositories.chat import PgChatRepository
 from app.repositories.images import PgImageRepository
 from app.repositories.npcs import PgNpcRepository
 from app.repositories.players import PgPlayerRepository
+from app.repositories.playlists import PgPlaylistRepository
 from app.repositories.portraits import PgPortraitRepository
 from app.repositories.resources import PgResourceRepository
 from app.repositories.sheet_items import PgSheetItemRepository
@@ -63,9 +68,13 @@ from app.services.google_auth import GoogleAuthService
 from app.services.google_link import GoogleLinkService
 from app.services.image_table import ImageTableService
 from app.services.images import ImageService
+from app.services.music import MusicService
+from app.services.music_catalog import MusicCatalog
+from app.services.music_suggestions import MusicSuggestionService
 from app.services.npcs import NpcService
 from app.services.owner_check import OwnerCheck
 from app.services.players import PlayerService
+from app.services.playlists import PlaylistService
 from app.services.portraits import PortraitFiles, PortraitService
 from app.services.resources import ResourceService
 from app.services.roll_costs import RollCosts
@@ -113,6 +122,7 @@ def create_app(settings: Settings | None = None, container: Container | None = N
             owner_check = OwnerCheck(accounts, identity)
             chat_repository = PgChatRepository(pool)
             chat_service = ChatService(chat_repository, hub)
+            music_service = MusicService(hub)
             app.state.container = Container(
                 settings=settings,
                 auth_service=AuthService(
@@ -171,10 +181,15 @@ def create_app(settings: Settings | None = None, container: Container | None = N
                     chat_service,
                     auto_reroll_seconds=_AUTO_REROLL_SECONDS,
                 ),
+                music_catalog=MusicCatalog(YouTubeGateway(settings, http_client)),
+                music_suggestions=MusicSuggestionService(ItunesGateway(http_client)),
+                music_service=music_service,
+                playlist_service=PlaylistService(PgPlaylistRepository(pool), hub),
             )
             try:
                 yield
             finally:
+                music_service.close()
                 await pool.close()
 
     app = FastAPI(
@@ -205,6 +220,8 @@ def create_app(settings: Settings | None = None, container: Container | None = N
     app.include_router(portraits.router)
     app.include_router(players.router)
     app.include_router(images.router)
+    app.include_router(music.router)
+    app.include_router(playlists.router)
     app.include_router(npcs.router)
     app.include_router(realtime.router)
     app.include_router(realtime_endpoint.router)

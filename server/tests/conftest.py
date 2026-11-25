@@ -26,9 +26,13 @@ from app.services.google_auth import GoogleAuthService
 from app.services.google_link import GoogleLinkService
 from app.services.image_table import ImageTableService
 from app.services.images import ImageService
+from app.services.music import MusicService
+from app.services.music_catalog import MusicCatalog
+from app.services.music_suggestions import MusicSuggestionService
 from app.services.npcs import NpcService
 from app.services.owner_check import OwnerCheck
 from app.services.players import PlayerService
+from app.services.playlists import PlaylistService
 from app.services.portraits import PortraitFiles, PortraitService
 from app.services.resources import ResourceService
 from app.services.roll_costs import RollCosts
@@ -38,6 +42,12 @@ from tests.fake_account_closure import FakeAccountClosureStore
 from tests.fake_characters import FakeCharacterStore
 from tests.fake_dice import ScriptedDice
 from tests.fake_images import FakeFileStorage, FakeImageStore
+from tests.fake_music import (
+    FakeClock,
+    FakeMusicSource,
+    FakePlaylistStore,
+    FakeSuggestionSource,
+)
 from tests.fake_npcs import FakeNpcStore
 from tests.fake_players import FakePlayerStore
 from tests.fake_resources import FakeResourceStore
@@ -66,6 +76,8 @@ class TestContext:
     images: FakeImageStore
     storage: FakeFileStorage
     dice: ScriptedDice
+    music: FakeMusicSource
+    clock: FakeClock
 
 
 @pytest.fixture
@@ -78,6 +90,7 @@ def settings() -> Settings:
         database_url=SecretStr("postgresql://unused"),
         allowed_origins=[ORIGIN],
         gm_access_path="mj-test",
+        youtube_api_key=SecretStr(""),
         _env_file=None,
     )
 
@@ -102,6 +115,8 @@ def ctx(settings: Settings) -> Iterator[TestContext]:
     messages = FakeMessageStore(accounts)
     chat_service = ChatService(messages, hub)
     dice = ScriptedDice()
+    music = FakeMusicSource()
+    clock = FakeClock()
     container = Container(
         settings=settings,
         auth_service=auth_service,
@@ -146,8 +161,21 @@ def ctx(settings: Settings) -> Iterator[TestContext]:
             chat_service,
             roll_die=dice.roll,
         ),
+        music_catalog=MusicCatalog(music),
+        music_suggestions=MusicSuggestionService(FakeSuggestionSource()),
+        music_service=MusicService(hub, clock, shuffle=lambda tracks: tracks.reverse()),
+        playlist_service=PlaylistService(FakePlaylistStore(), hub),
     )
     with TestClient(create_app(settings, container), headers={"Origin": ORIGIN}) as client:
         yield TestContext(
-            client, accounts, identity, auth_service, characters, images, storage, dice
+            client,
+            accounts,
+            identity,
+            auth_service,
+            characters,
+            images,
+            storage,
+            dice,
+            music,
+            clock,
         )

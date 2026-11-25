@@ -31,6 +31,8 @@ class Settings(BaseSettings):
         gm_access_path: chemin réservé de l'accès du MJ côté client, sans barre
             oblique. Communiqué uniquement à qui présente les
             identifiants valides du MJ sur l'accès joueur.
+        youtube_api_key: clé de l'API YouTube, pour la recherche de musique.
+            Vide, l'outil Musique signale qu'il n'est pas configuré.
     """
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
@@ -45,6 +47,7 @@ class Settings(BaseSettings):
     technical_email_domain: str = "users.hunter.local"
     public_app_url: str = "http://localhost:3000"
     gm_access_path: str = Field(default="", pattern=r"^[A-Za-z0-9-]{0,64}$")
+    youtube_api_key: SecretStr = SecretStr("")
 
     @field_validator("allowed_origins", mode="before")
     @classmethod

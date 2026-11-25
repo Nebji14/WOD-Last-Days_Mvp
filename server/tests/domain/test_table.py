@@ -46,6 +46,17 @@ def test_player_is_online_while_one_connection_remains() -> None:
     assert seats.seats()[0].online is False
 
 
+def test_renaming_a_player_keeps_the_seat() -> None:
+    seats = SeatMap()
+    account = uuid4()
+    seats.enter(account, "lea")
+
+    seats.rename(account, "Léa")
+    seats.rename(uuid4(), "Inconnu")
+
+    assert [(s.position, s.display_name) for s in seats.seats()] == [(0, "Léa")]
+
+
 def test_leaving_without_having_entered_is_ignored() -> None:
     seats = SeatMap()
 

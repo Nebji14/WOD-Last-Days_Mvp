@@ -245,7 +245,7 @@ class PgCharacterRepository:
         rows = await self._pool.fetch(
             """
             select a.id as account_id, c.id as character_id, s.name, s.concept, s.health_max,
-                   s.wound_track, s.willpower_max, s.willpower_current
+                   s.wound_track, s.willpower_max, s.willpower_current, s.portrait_path
             from account a
             join character c on c.id = a.played_character_id
             join character_sheet s on s.character_id = c.id and s.is_main
@@ -262,6 +262,7 @@ class PgCharacterRepository:
                 wound_track=row["wound_track"],
                 willpower_max=row["willpower_max"],
                 willpower_current=row["willpower_current"],
+                portrait=row["portrait_path"],
             )
             for row in rows
         }

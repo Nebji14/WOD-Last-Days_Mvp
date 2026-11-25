@@ -59,6 +59,11 @@ class SeatMap:
         self._names[account_id] = display_name
         self._connections[account_id] = self._connections.get(account_id, 0) + 1
 
+    def rename(self, account_id: UUID, display_name: str) -> None:
+        """Change le nom affiché sur la place d'un joueur, s'il en a une."""
+        if account_id in self._names:
+            self._names[account_id] = display_name
+
     def leave(self, account_id: UUID) -> None:
         """Retire une connexion du joueur. Sa place lui reste attribuée."""
         remaining = self._connections.get(account_id, 0) - 1

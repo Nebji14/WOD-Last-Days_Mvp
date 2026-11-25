@@ -4,14 +4,14 @@ Le joueur gère ses personnages ; le MJ consulte et modifie ceux de tous les
 joueurs. Gère aussi les formes du personnage et le personnage joué à la table.
 """
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass
 from typing import Protocol
 from uuid import UUID
 
 from app.core.errors import AppError, ErrorCode
 from app.domain.accounts import Account, Role
-from app.domain.character import Character
+from app.domain.character import Character, Sheet
 from app.domain.creation import (
     Priorities,
     Specialty,
@@ -102,6 +102,12 @@ class ItemLocator(Protocol):
     async def character_id_of(self, kind: ItemKind, item_id: UUID) -> UUID | None: ...
 
 
+class PortraitCleaner(Protocol):
+    """Suppression des images de formes supprimées."""
+
+    async def discard(self, sheets: Iterable[Sheet]) -> None: ...
+
+
 class CharacterService:
     """Orchestre les personnages et leurs formes.
 
@@ -109,14 +115,20 @@ class CharacterService:
         characters: dépôt des personnages.
         locator: retrouve le personnage auquel appartient une forme.
         access: droits, relecture et diffusion.
+        portraits: suppression des images des formes supprimées.
     """
 
     def __init__(
-        self, characters: CharacterStore, locator: ItemLocator, access: CharacterAccess
+        self,
+        characters: CharacterStore,
+        locator: ItemLocator,
+        access: CharacterAccess,
+        portraits: PortraitCleaner,
     ) -> None:
         self._characters = characters
         self._locator = locator
         self._access = access
+        self._portraits = portraits
 
     async def list_for(self, actor: Account, owner_id: UUID) -> list[Character]:
         """Liste les personnages d'un compte : le sien, ou n'importe lequel pour le MJ.
@@ -210,6 +222,7 @@ class CharacterService:
             )
         await self._characters.delete(character_id)
         await self._access.notify(character_id, character.owner_id, character.is_played)
+        await self._portraits.discard(character.sheets)
 
     async def play(self, actor: Account, character_id: UUID) -> Character:
         """Désigne le personnage joué à la table. Réservé à son propriétaire."""
@@ -340,9 +353,11 @@ class CharacterService:
             AppError: ``rule_violation`` pour la forme principale, jamais supprimable.
         """
         character = await self._for_sheet(actor, sheet_id)
-        if self._access.sheet_of(character, sheet_id).is_main:
+        sheet = self._access.sheet_of(character, sheet_id)
+        if sheet.is_main:
             raise rule_violation("main_form", "form")
         await self._characters.delete_form(sheet_id)
+        await self._portraits.discard([sheet])
         return await self._access.changed(character.id)
 
     async def _for_sheet(self, actor: Account, sheet_id: UUID) -> Character:

@@ -3,9 +3,10 @@
  * nom, concept, santé et volonté. Utilisé par le profil et l'outil Joueurs.
  */
 import { type Character, mainSheet } from "@/features/characters/model";
-import { initials } from "@/features/table/seatLayout";
 import { labels } from "@/shared/i18n";
 import { HealthTrack, WillpowerDots } from "@/shared/ui/Gauges";
+
+import { Portrait } from "./Portrait";
 
 const GAUGE_LABEL = "font-display text-ink-muted w-16 text-[9px] font-bold tracking-[2px]";
 
@@ -23,11 +24,8 @@ export function CharacterPreview({ character, online }: CharacterPreviewProps) {
   return (
     <div className="border-line bg-seat flex w-[250px] shrink-0 flex-col gap-2 rounded-md border p-3.5">
       <div className="flex items-center gap-3">
-        <span
-          aria-hidden="true"
-          className="border-line-strong bg-field font-display text-ink relative flex size-11 shrink-0 items-center justify-center rounded-full border-[1.5px] text-[15px] font-bold"
-        >
-          {initials(name)}
+        <span aria-hidden="true" className="relative shrink-0">
+          <Portrait portrait={sheet.portrait} name={name} className="size-11 text-[15px]" />
           {online && (
             <span className="bg-online absolute -right-0.5 -bottom-0.5 size-[11px] rounded-full border-2 border-[#110e0c]" />
           )}

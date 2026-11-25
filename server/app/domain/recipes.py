@@ -5,7 +5,8 @@ attributs, compétences, niveau de l'élément, bonus de l'arme. Il fixe aussi l
 coût en Volonté et, s'il le veut, un coût dans une ressource libre du
 personnage (Mana…) : les deux se cumulent et sont dépensés à chaque
 utilisation. Un pouvoir ajoute toujours l'Avantage surnaturel du personnage
-(son niveau au recto) : ce n'est pas un choix. Au moment du jet, seuls le malus et le bonus du MJ restent à saisir.
+(son niveau au recto) : ce n'est pas un choix. Au moment du jet, seuls le malus
+et le bonus du MJ restent à saisir.
 
 Module pur : aucun accès réseau ni base de données.
 """

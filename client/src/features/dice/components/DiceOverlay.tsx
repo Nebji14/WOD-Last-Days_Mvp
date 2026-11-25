@@ -1,7 +1,9 @@
 "use client";
 
 /**
- * Jets de dés joués devant toute la table, l'un après l'autre.
+ * Jets de dés joués devant toute la table, l'un après l'autre, avec la photo du
+ * personnage qui lance s'il en a une. Le bandeau du haut est opaque : il reste
+ * lisible par-dessus la carte du MJ.
  *
  * Chaque vague roule sur la table puis vient en gros plan, réussites en
  * lumière. S'il reste des dés à relancer, le lanceur clique « Relancer » (son
@@ -11,11 +13,14 @@
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
 
+import { Portrait } from "@/features/characters/components/Portrait";
+import type { Seat } from "@/features/table/state";
 import { fill, labels } from "@/shared/i18n";
 
 import { rerollDice } from "../api";
 import { describeParts, doubledLabel, resultLabel, successesLabel } from "../format";
 import { isSuccess, type Roll } from "../model";
+import { rollerPortrait } from "../rollerPortrait";
 import { useDiceStore } from "../store";
 import type { DieStyle } from "../three/materials";
 
@@ -76,7 +81,14 @@ function RerollAction({ roll, isRoller }: { roll: Roll; isRoller: boolean }) {
   );
 }
 
-function RollPlayer({ roll, viewerId }: { roll: Roll; viewerId: string }) {
+interface RollPlayerProps {
+  readonly roll: Roll;
+  readonly viewerId: string;
+  /** Photo du lanceur, `null` s'il n'en a pas. */
+  readonly portrait: string | null;
+}
+
+function RollPlayer({ roll, viewerId, portrait }: RollPlayerProps) {
   const done = useDiceStore((state) => state.done);
   // Vagues déjà roulées pour ce jet. Le composant n'est pas recréé d'un jet à
   // l'autre : la scène 3D reste en place quand plusieurs jets s'enchaînent.
@@ -123,7 +135,7 @@ function RollPlayer({ roll, viewerId }: { roll: Roll; viewerId: string }) {
       <div
         aria-hidden="true"
         className={`animate-fade-to-black absolute inset-0 transition-[background-color,backdrop-filter] duration-500 ${
-          throwing ? "bg-black/50" : "bg-black/80 backdrop-blur-md"
+          throwing ? "bg-black/75" : "bg-black/80 backdrop-blur-md"
         }`}
       />
       <div className="absolute inset-0">
@@ -138,19 +150,30 @@ function RollPlayer({ roll, viewerId }: { roll: Roll; viewerId: string }) {
           }
         />
       </div>
-      <header className="relative mt-10 flex flex-col items-center gap-1 text-center">
-        <p className="font-display text-gold text-sm font-bold tracking-[4px]">
-          {fill(labels.dice.rolledBy, { name: roll.roller_name })}
-          {roll.label != null && ` · ${roll.label.toUpperCase()}`}
-          {roll.secret && (
-            <span className="border-gold ml-3 rounded-xs border px-2 py-0.5 text-[10px]">
-              {labels.dice.secretBadge}
-            </span>
-          )}
-        </p>
-        <p className="text-ink text-xl italic">
-          {roll.chance ? labels.dice.chanceDie : describeParts(roll.parts)}
-        </p>
+      <header className="border-gold/60 bg-night relative mx-auto mt-4 flex max-w-[calc(100vw-32px)] items-center gap-5 rounded-md border px-6 py-3 shadow-[0_10px_40px_rgb(0_0_0/0.9)]">
+        {portrait !== null && (
+          <Portrait
+            portrait={portrait}
+            name={roll.roller_name}
+            className="ring-gold size-[72px] text-2xl shadow-[0_0_20px_rgb(201_176_106/0.35)] ring-2"
+          />
+        )}
+        <div
+          className={`flex min-w-0 flex-col gap-1 ${portrait === null ? "text-center" : "text-left"}`}
+        >
+          <p className="font-display text-gold text-sm font-bold tracking-[4px]">
+            {fill(labels.dice.rolledBy, { name: roll.roller_name })}
+            {roll.label != null && ` · ${roll.label.toUpperCase()}`}
+            {roll.secret && (
+              <span className="border-gold ml-3 rounded-xs border px-2 py-0.5 text-[10px]">
+                {labels.dice.secretBadge}
+              </span>
+            )}
+          </p>
+          <p className="text-ink text-xl italic">
+            {roll.chance ? labels.dice.chanceDie : describeParts(roll.parts)}
+          </p>
+        </div>
       </header>
       {!throwing && (
         <footer
@@ -187,8 +210,24 @@ function RollPlayer({ roll, viewerId }: { roll: Roll; viewerId: string }) {
   );
 }
 
+interface DiceOverlayProps {
+  readonly viewerId: string;
+  /** Sièges de la table et photo du MJ, où se trouvent les photos. */
+  readonly seats: readonly Seat[];
+  readonly gmPortrait: string | null;
+}
+
 /** Le jet en tête de file, s'il y en a un. */
-export function DiceOverlay({ viewerId }: { viewerId: string }) {
+export function DiceOverlay({ viewerId, seats, gmPortrait }: DiceOverlayProps) {
   const current = useDiceStore((state) => state.queue[0] ?? null);
-  return current === null ? null : <RollPlayer roll={current} viewerId={viewerId} />;
+  if (current === null) {
+    return null;
+  }
+  return (
+    <RollPlayer
+      roll={current}
+      viewerId={viewerId}
+      portrait={rollerPortrait(current, seats, gmPortrait)}
+    />
+  );
 }

@@ -17,17 +17,18 @@ const character = {
   wound_track: "*X/",
   willpower_max: 4,
   willpower_current: 2,
+  portrait: "abc.webp",
 };
 
 describe("parseTableState", () => {
   it("convertit un état valide", () => {
     const state = parseTableState({
-      gm: { display_name: "conteur", online: false },
+      gm: { display_name: "conteur", online: false, portrait: "mj.webp" },
       seats: [seat],
     });
 
     expect(state).toEqual({
-      gm: { displayName: "conteur", online: false },
+      gm: { displayName: "conteur", online: false, portrait: "mj.webp" },
       seats: [
         { position: 0, accountId: "a1", displayName: "lea.vale", online: true, character: null },
       ],
@@ -48,7 +49,17 @@ describe("parseTableState", () => {
       woundTrack: "*X/",
       willpowerMax: 4,
       willpowerCurrent: 2,
+      portrait: "abc.webp",
     });
+  });
+
+  it("affiche un personnage sans portrait", () => {
+    const state = parseTableState({
+      gm: { display_name: null, online: false },
+      seats: [{ ...seat, character: { ...character, portrait: null } }],
+    });
+
+    expect(state?.seats[0]?.character?.portrait).toBeNull();
   });
 
   it("rejette un siège dont le personnage est mal formé", () => {
@@ -61,7 +72,7 @@ describe("parseTableState", () => {
 
   it("accepte un MJ dont le compte n'existe pas encore", () => {
     expect(parseTableState({ gm: { display_name: null, online: false }, seats: [] })).toEqual({
-      gm: { displayName: null, online: false },
+      gm: { displayName: null, online: false, portrait: null },
       seats: [],
     });
   });

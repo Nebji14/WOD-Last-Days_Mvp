@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Panneau « Identité » : nom, joueur, concept, profession, vertu, vice,
+ * Panneau « Identité » : portrait de la forme, nom, joueur, concept, profession, vertu, vice,
  * compact. Pour un PNJ, la ligne du joueur devient la catégorie.
  */
 import { setSheetField } from "@/features/characters/api";
@@ -9,6 +9,7 @@ import { labels } from "@/shared/i18n";
 
 import { NpcCategoryLine } from "./NpcPanels";
 import { PANEL, SMALL_LABEL, TextValue, useSheet } from "./primitives";
+import { SheetPortrait } from "./SheetPortrait";
 
 const FIELDS = ["concept", "profession", "virtue", "vice", "compact"] as const;
 
@@ -19,7 +20,8 @@ export function IdentityPanel() {
     void run(() => setSheetField(sheet.id, field, value, sheet.texts[field] ?? ""));
 
   return (
-    <section className={`${PANEL} flex min-h-[104px] items-center gap-8 px-6 py-3.5`}>
+    <section className={`${PANEL} flex min-h-[104px] items-center gap-6 px-6 py-3.5`}>
+      <SheetPortrait />
       <div className="w-[290px] shrink-0">
         <TextValue
           label={text.identity.name}

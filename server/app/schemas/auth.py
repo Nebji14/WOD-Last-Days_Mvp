@@ -9,8 +9,8 @@ from app.domain.accounts import Account, Role
 # Bornes larges : elles protègent le serveur des charges excessives. Les règles
 # précises (format, sécurité) sont appliquées par le domaine, avec des codes
 # d'erreur dédiés.
-_MAX_USERNAME_INPUT = 64
-_MAX_PASSWORD_INPUT = 256
+MAX_USERNAME_INPUT = 64
+MAX_PASSWORD_INPUT = 256
 
 
 class RegisterRequest(BaseModel):
@@ -18,9 +18,9 @@ class RegisterRequest(BaseModel):
 
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=False)
 
-    username: str = Field(min_length=1, max_length=_MAX_USERNAME_INPUT)
-    password: str = Field(min_length=1, max_length=_MAX_PASSWORD_INPUT)
-    password_confirmation: str = Field(min_length=1, max_length=_MAX_PASSWORD_INPUT)
+    username: str = Field(min_length=1, max_length=MAX_USERNAME_INPUT)
+    password: str = Field(min_length=1, max_length=MAX_PASSWORD_INPUT)
+    password_confirmation: str = Field(min_length=1, max_length=MAX_PASSWORD_INPUT)
 
 
 class LoginRequest(BaseModel):
@@ -28,8 +28,8 @@ class LoginRequest(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    username: str = Field(min_length=1, max_length=_MAX_USERNAME_INPUT)
-    password: str = Field(min_length=1, max_length=_MAX_PASSWORD_INPUT)
+    username: str = Field(min_length=1, max_length=MAX_USERNAME_INPUT)
+    password: str = Field(min_length=1, max_length=MAX_PASSWORD_INPUT)
 
 
 class LoginMethodsResponse(BaseModel):
@@ -46,6 +46,7 @@ class AccountResponse(BaseModel):
     username: str
     display_name: str
     role: Role
+    portrait: str | None
 
     @classmethod
     def from_account(cls, account: Account) -> "AccountResponse":
@@ -55,4 +56,5 @@ class AccountResponse(BaseModel):
             username=account.username,
             display_name=account.display_name,
             role=account.role,
+            portrait=account.portrait,
         )

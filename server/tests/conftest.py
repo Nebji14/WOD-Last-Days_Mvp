@@ -13,6 +13,8 @@ from app.core.rate_limit import RateLimiter
 from app.main import create_app
 from app.realtime.hub import ConnectionHub
 from app.realtime.tickets import TicketStore
+from app.services.account import AccountService
+from app.services.account_portrait import AccountPortraitService
 from app.services.auth import AuthService
 from app.services.awakening import AwakeningService
 from app.services.character_access import CharacterAccess
@@ -20,10 +22,13 @@ from app.services.characters import CharacterService
 from app.services.chat import ChatService
 from app.services.dice import DiceService
 from app.services.google_auth import GoogleAuthService
+from app.services.google_link import GoogleLinkService
 from app.services.image_table import ImageTableService
 from app.services.images import ImageService
 from app.services.npcs import NpcService
+from app.services.owner_check import OwnerCheck
 from app.services.players import PlayerService
+from app.services.portraits import PortraitFiles, PortraitService
 from app.services.resources import ResourceService
 from app.services.roll_costs import RollCosts
 from app.services.sheet_items import SheetItemService
@@ -79,6 +84,8 @@ def settings() -> Settings:
 def ctx(settings: Settings) -> Iterator[TestContext]:
     accounts = FakeAccountStore()
     identity = FakeIdentityProvider()
+    accounts.identity = identity
+    owner_check = OwnerCheck(accounts, identity)
     hub = ConnectionHub()
     characters = FakeCharacterStore(accounts)
     resources = FakeResourceStore(characters)
@@ -86,6 +93,7 @@ def ctx(settings: Settings) -> Iterator[TestContext]:
     access = CharacterAccess(characters, accounts, hub, table_service.refresh)
     images = FakeImageStore()
     storage = FakeFileStorage()
+    portrait_files = PortraitFiles(storage)
     auth_service = AuthService(
         accounts, identity, settings.technical_email_domain, gm_access_path="mj-test"
     )
@@ -94,8 +102,15 @@ def ctx(settings: Settings) -> Iterator[TestContext]:
     container = Container(
         settings=settings,
         auth_service=auth_service,
+        account_service=AccountService(accounts, identity, owner_check, table_service, hub),
+        account_portrait_service=AccountPortraitService(
+            characters, accounts, portrait_files, table_service, hub
+        ),
         google_auth_service=GoogleAuthService(
             accounts, identity, f"{ORIGIN}/api/auth/google/callback", gm_access_path="mj-test"
+        ),
+        google_link_service=GoogleLinkService(
+            accounts, identity, owner_check, f"{ORIGIN}/api/auth/google/callback"
         ),
         token_verifier=FakeTokenVerifier(identity),
         rate_limiter=RateLimiter(),
@@ -103,14 +118,15 @@ def ctx(settings: Settings) -> Iterator[TestContext]:
         table_service=table_service,
         hub=hub,
         tickets=TicketStore(),
-        character_service=CharacterService(characters, characters, access),
+        character_service=CharacterService(characters, characters, access, portrait_files),
+        portrait_service=PortraitService(characters, characters, storage, portrait_files, access),
         sheet_item_service=SheetItemService(characters, access),
         resource_service=ResourceService(resources, access),
         player_service=PlayerService(FakePlayerStore(accounts, characters), table_service),
         awakening_service=AwakeningService(characters, access),
         image_service=ImageService(images, storage, hub),
         image_table_service=ImageTableService(images, storage, hub),
-        npc_service=NpcService(FakeNpcStore(characters), characters, access, hub),
+        npc_service=NpcService(FakeNpcStore(characters), characters, access, hub, portrait_files),
         dice_service=DiceService(
             access,
             RollCosts(access, characters, resources),

@@ -1,7 +1,7 @@
 """Client du stockage de fichiers de Supabase (bucket privé des images).
 
-La clé d'administration ne quitte jamais le serveur. Le navigateur ne reçoit
-que des URL signées, valables pour une durée limitée.
+La clé d'administration ne quitte jamais le serveur. Le navigateur reçoit des
+URL signées à durée limitée, ou le fichier relayé par le serveur.
 """
 
 import logging
@@ -61,6 +61,21 @@ class SupabaseStorageGateway:
             headers=self._headers,
         )
         self._raise_for_status(response, "suppression")
+
+    async def download(self, path: str) -> bytes | None:
+        """Retourne le contenu d'un fichier, ou ``None`` s'il n'existe pas.
+
+        Raises:
+            StorageError: si la lecture échoue.
+        """
+        response = await self._request(
+            "GET", f"/object/authenticated/{IMAGE_BUCKET}/{path}", headers=self._headers
+        )
+        # Un fichier absent est signalé par 400 ou 404 selon la version du stockage.
+        if response.status_code in (400, 404):
+            return None
+        self._raise_for_status(response, "lecture")
+        return response.content
 
     async def signed_urls(self, paths: list[str], expires_in: int) -> dict[str, str]:
         """Produit une URL signée par fichier, en un seul appel.

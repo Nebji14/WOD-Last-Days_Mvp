@@ -119,6 +119,10 @@ class FakeFileStorage:
         self._check()
         self.files.pop(path, None)
 
+    async def download(self, path: str) -> bytes | None:
+        self._check()
+        return self.files.get(path)
+
     async def signed_urls(self, paths: list[str], expires_in: int) -> dict[str, str]:
         self._check()
         return {p: f"https://storage.test/{p}?ttl={expires_in}" for p in paths if p in self.files}

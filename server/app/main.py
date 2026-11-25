@@ -11,6 +11,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api import (
+    account,
     auth,
     characters,
     chat,
@@ -20,6 +21,7 @@ from app.api import (
     images,
     npcs,
     players,
+    portraits,
     realtime,
     resources,
     sheet_items,
@@ -44,8 +46,11 @@ from app.repositories.chat import PgChatRepository
 from app.repositories.images import PgImageRepository
 from app.repositories.npcs import PgNpcRepository
 from app.repositories.players import PgPlayerRepository
+from app.repositories.portraits import PgPortraitRepository
 from app.repositories.resources import PgResourceRepository
 from app.repositories.sheet_items import PgSheetItemRepository
+from app.services.account import AccountService
+from app.services.account_portrait import AccountPortraitService
 from app.services.auth import AuthService
 from app.services.awakening import AwakeningService
 from app.services.character_access import CharacterAccess
@@ -53,10 +58,13 @@ from app.services.characters import CharacterService
 from app.services.chat import ChatService
 from app.services.dice import DiceService
 from app.services.google_auth import GoogleAuthService
+from app.services.google_link import GoogleLinkService
 from app.services.image_table import ImageTableService
 from app.services.images import ImageService
 from app.services.npcs import NpcService
+from app.services.owner_check import OwnerCheck
 from app.services.players import PlayerService
+from app.services.portraits import PortraitFiles, PortraitService
 from app.services.resources import ResourceService
 from app.services.roll_costs import RollCosts
 from app.services.sheet_items import SheetItemService
@@ -92,12 +100,15 @@ def create_app(settings: Settings | None = None, container: Container | None = N
         character_repository = PgCharacterRepository(pool)
         item_repository = PgSheetItemRepository(pool)
         resource_repository = PgResourceRepository(pool)
+        portrait_repository = PgPortraitRepository(pool)
         table_service = TableService(accounts, character_repository, hub)
         access = CharacterAccess(character_repository, accounts, hub, table_service.refresh)
         image_repository = PgImageRepository(pool)
         async with httpx.AsyncClient() as http_client:
             storage = SupabaseStorageGateway(settings, http_client)
+            portrait_files = PortraitFiles(storage)
             identity = SupabaseAuthGateway(settings, http_client)
+            owner_check = OwnerCheck(accounts, identity)
             chat_service = ChatService(PgChatRepository(pool), hub)
             app.state.container = Container(
                 settings=settings,
@@ -107,11 +118,18 @@ def create_app(settings: Settings | None = None, container: Container | None = N
                     technical_email_domain=settings.technical_email_domain,
                     gm_access_path=settings.gm_access_path,
                 ),
+                account_service=AccountService(accounts, identity, owner_check, table_service, hub),
+                account_portrait_service=AccountPortraitService(
+                    portrait_repository, accounts, portrait_files, table_service, hub
+                ),
                 google_auth_service=GoogleAuthService(
                     accounts=accounts,
                     identity=identity,
                     redirect_url=google_callback_url(settings),
                     gm_access_path=settings.gm_access_path,
+                ),
+                google_link_service=GoogleLinkService(
+                    accounts, identity, owner_check, google_callback_url(settings)
                 ),
                 token_verifier=SupabaseTokenVerifier(settings.supabase_url),
                 rate_limiter=RateLimiter(),
@@ -119,14 +137,21 @@ def create_app(settings: Settings | None = None, container: Container | None = N
                 table_service=table_service,
                 hub=hub,
                 tickets=TicketStore(),
-                character_service=CharacterService(character_repository, item_repository, access),
+                character_service=CharacterService(
+                    character_repository, item_repository, access, portrait_files
+                ),
+                portrait_service=PortraitService(
+                    portrait_repository, item_repository, storage, portrait_files, access
+                ),
                 sheet_item_service=SheetItemService(item_repository, access),
                 resource_service=ResourceService(resource_repository, access),
                 player_service=PlayerService(PgPlayerRepository(pool), table_service),
                 awakening_service=AwakeningService(character_repository, access),
                 image_service=ImageService(image_repository, storage, hub),
                 image_table_service=ImageTableService(image_repository, storage, hub),
-                npc_service=NpcService(PgNpcRepository(pool), character_repository, access, hub),
+                npc_service=NpcService(
+                    PgNpcRepository(pool), character_repository, access, hub, portrait_files
+                ),
                 dice_service=DiceService(
                     access,
                     RollCosts(access, character_repository, resource_repository),
@@ -159,11 +184,13 @@ def create_app(settings: Settings | None = None, container: Container | None = N
     app.include_router(health.router)
     app.include_router(auth.router)
     app.include_router(google_auth.router)
+    app.include_router(account.router)
     app.include_router(chat.router)
     app.include_router(dice.router)
     app.include_router(characters.router)
     app.include_router(sheet_items.router)
     app.include_router(resources.router)
+    app.include_router(portraits.router)
     app.include_router(players.router)
     app.include_router(images.router)
     app.include_router(npcs.router)

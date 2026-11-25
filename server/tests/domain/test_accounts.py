@@ -1,10 +1,13 @@
-"""Règles des comptes : nom d'utilisateur, mot de passe, adresse technique."""
+"""Règles des comptes : noms, mot de passe, adresse technique."""
+
+from uuid import UUID
 
 import pytest
 
 from app.domain.accounts import (
     PasswordRule,
     is_valid_username,
+    normalized_display_name,
     numbered_username,
     password_violations,
     technical_email,
@@ -45,8 +48,33 @@ def test_password_max_length_counts_bytes() -> None:
     assert PasswordRule.MAX_LENGTH in password_violations("é" * 36 + "a1")
 
 
-def test_technical_email_ignores_case() -> None:
-    assert technical_email("Lea.Vale", "users.hunter.local") == "lea.vale@users.hunter.local"
+def test_technical_email_does_not_depend_on_username() -> None:
+    identifier = UUID("00000000-0000-0000-0000-00000000000a")
+
+    assert technical_email(identifier, "users.hunter.local") == (
+        "0000000000000000000000000000000a@users.hunter.local"
+    )
+
+
+# --- Nom affiché --------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("name", "expected"),
+    [
+        ("Léa", "Léa"),
+        ("  Léa   la  Chasseuse ", "Léa la Chasseuse"),
+        ("x" * 40, "x" * 40),
+        ("Le\u0301a", "Léa"),
+    ],
+)
+def test_display_name_is_normalized(name: str, expected: str) -> None:
+    assert normalized_display_name(name) == expected
+
+
+@pytest.mark.parametrize("name", ["", "   ", "x" * 41, "Lé\u200ba", "Léa\x00", "\u202eaéL"])
+def test_invalid_display_names(name: str) -> None:
+    assert normalized_display_name(name) is None
 
 
 # --- Nom d'utilisateur d'un compte Google ------------------------------------------------

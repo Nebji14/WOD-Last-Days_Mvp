@@ -6,12 +6,13 @@ renouvellement et fermeture de la session.
 
 import logging
 from typing import Protocol
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from app.core.errors import AppError, ErrorCode
 from app.core.security import SessionTokens
 from app.domain.accounts import (
     Account,
+    LoginMethods,
     Role,
     is_valid_username,
     password_violations,
@@ -34,6 +35,8 @@ class AccountStore(Protocol):
 
     async def get_by_username(self, username: str) -> Account | None: ...
 
+    async def login_methods(self, account_id: UUID) -> LoginMethods: ...
+
     async def create(
         self, *, account_id: UUID, username: str, display_name: str, auth_email: str, role: Role
     ) -> Account: ...
@@ -52,8 +55,6 @@ class IdentityProvider(Protocol):
 
     async def sign_out(self, access_token: str) -> None: ...
 
-    async def get_providers(self, user_id: UUID) -> list[str]: ...
-
 
 def _invalid_credentials() -> AppError:
     """Erreur unique pour tout échec de connexion : aucune énumération des comptes."""
@@ -62,7 +63,8 @@ def _invalid_credentials() -> AppError:
     )
 
 
-def _username_taken() -> AppError:
+def username_taken_error() -> AppError:
+    """Nom d'utilisateur déjà porté par un autre compte."""
     return AppError(
         ErrorCode.USERNAME_TAKEN, "Ce nom d'utilisateur est déjà pris.", status_code=409
     )
@@ -75,6 +77,24 @@ def unavailable_error() -> AppError:
         "Le service d'authentification est momentanément indisponible.",
         status_code=503,
     )
+
+
+def ensure_password_allowed(password: str, password_confirmation: str) -> None:
+    """Contrôle un nouveau mot de passe et sa confirmation.
+
+    Raises:
+        AppError: ``password_mismatch`` ou ``password_too_weak``.
+    """
+    if password != password_confirmation:
+        raise AppError(ErrorCode.PASSWORD_MISMATCH, "Les deux mots de passe sont différents.", 422)
+    violations = password_violations(password)
+    if violations:
+        raise AppError(
+            ErrorCode.PASSWORD_TOO_WEAK,
+            "Le mot de passe ne respecte pas les règles de sécurité.",
+            422,
+            details=[{"rule": rule.value} for rule in violations],
+        )
 
 
 def wrong_portal_error(account_role: Role, gm_access_path: str) -> AppError:
@@ -129,24 +149,13 @@ class AuthService:
             raise AppError(
                 ErrorCode.USERNAME_INVALID, "Ce nom d'utilisateur n'est pas valide.", 422
             )
-        if password != password_confirmation:
-            raise AppError(
-                ErrorCode.PASSWORD_MISMATCH, "Les deux mots de passe sont différents.", 422
-            )
-        violations = password_violations(password)
-        if violations:
-            raise AppError(
-                ErrorCode.PASSWORD_TOO_WEAK,
-                "Le mot de passe ne respecte pas les règles de sécurité.",
-                422,
-                details=[{"rule": rule.value} for rule in violations],
-            )
+        ensure_password_allowed(password, password_confirmation)
         if await self._accounts.get_by_username(username) is not None:
-            raise _username_taken()
+            raise username_taken_error()
         return await self._create_account(
             username=username,
             password=password,
-            auth_email=technical_email(username, self._email_domain),
+            auth_email=technical_email(uuid4(), self._email_domain),
             role=Role.PLAYER,
         )
 
@@ -160,14 +169,7 @@ class AuthService:
         """
         if not is_valid_username(username):
             raise AppError(ErrorCode.USERNAME_INVALID, "Identifiant du MJ invalide.", 422)
-        violations = password_violations(password)
-        if violations:
-            raise AppError(
-                ErrorCode.PASSWORD_TOO_WEAK,
-                "Le mot de passe ne respecte pas les règles de sécurité.",
-                422,
-                details=[{"rule": rule.value} for rule in violations],
-            )
+        ensure_password_allowed(password, password)
         return await self._create_account(
             username=username, password=password, auth_email=email.lower(), role=Role.GM
         )
@@ -227,18 +229,9 @@ class AuthService:
                 "Révocation de session impossible ; les cookies sont tout de même retirés"
             )
 
-    async def login_methods(self, account_id: UUID) -> list[str]:
-        """Méthodes de connexion du compte : ``password`` et/ou ``google``.
-
-        Raises:
-            AppError: ``service_unavailable`` si le fournisseur ne répond pas.
-        """
-        try:
-            providers = await self._identity.get_providers(account_id)
-        except IdentityProviderError:
-            raise unavailable_error() from None
-        names = {"email": "password", "google": "google"}
-        return sorted({names[provider] for provider in providers if provider in names})
+    async def login_methods(self, account_id: UUID) -> LoginMethods:
+        """Méthodes de connexion utilisables du compte."""
+        return await self._accounts.login_methods(account_id)
 
     async def get_active_account(self, account_id: UUID) -> Account | None:
         """Retourne le compte s'il existe et s'il est actif."""
@@ -252,7 +245,7 @@ class AuthService:
         try:
             user_id = await self._identity.create_user(auth_email, password)
         except IdentityAlreadyExistsError:
-            raise _username_taken() from None
+            raise username_taken_error() from None
         except IdentityProviderError:
             raise unavailable_error() from None
         try:
@@ -265,7 +258,7 @@ class AuthService:
             )
         except UsernameAlreadyExistsError:
             await self._delete_orphan_identity(user_id)
-            raise _username_taken() from None
+            raise username_taken_error() from None
         except Exception:
             await self._delete_orphan_identity(user_id)
             raise

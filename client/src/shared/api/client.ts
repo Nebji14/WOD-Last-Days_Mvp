@@ -63,6 +63,22 @@ export async function apiRequest<T = void>(
   return options.parse(await response.json());
 }
 
+/**
+ * Lit un fichier de l'API. Même renouvellement de session que `apiRequest`.
+ *
+ * @throws {ApiError} si l'API répond en erreur ou si le réseau est coupé.
+ */
+export async function fetchBlob(path: string): Promise<Blob> {
+  let response = await send(path, {});
+  if ((await isExpiredSession(response, path)) && (await refreshSession())) {
+    response = await send(path, {});
+  }
+  if (!response.ok) {
+    throw await toApiError(response);
+  }
+  return response.blob();
+}
+
 async function send<T>(path: string, options: RequestOptions<T>): Promise<Response> {
   try {
     return await fetch(path, {
@@ -89,26 +105,28 @@ export async function uploadFile<T>(
   file: Blob,
   onProgress: (ratio: number) => void,
   parse: (data: unknown) => T,
+  method: "POST" | "PUT" = "POST",
 ): Promise<T> {
-  let response = await sendFile(path, file, onProgress);
+  let response = await sendFile(method, path, file, onProgress);
   if ((await isExpiredSession(response, path)) && (await refreshSession())) {
-    response = await sendFile(path, file, onProgress);
+    response = await sendFile(method, path, file, onProgress);
   }
   if (!response.ok) {
     throw await toApiError(response);
   }
-  return parse(await response.json());
+  return parse(response.status === 204 ? null : await response.json());
 }
 
 /** `fetch` ne rapporte pas la progression d'un envoi : XMLHttpRequest le fait. */
 function sendFile(
+  method: string,
   path: string,
   file: Blob,
   onProgress: (ratio: number) => void,
 ): Promise<Response> {
   return new Promise((resolve, reject) => {
     const request = new XMLHttpRequest();
-    request.open("POST", path);
+    request.open(method, path);
     request.setRequestHeader("Content-Type", "application/octet-stream");
     request.upload.onprogress = (event) => {
       if (event.lengthComputable) {

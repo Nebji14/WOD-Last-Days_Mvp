@@ -53,6 +53,7 @@ def test_seat_shows_the_played_character_to_everyone(ctx: TestContext, connect: 
         "wound_track": "",
         "willpower_max": 4,
         "willpower_current": 4,
+        "portrait": None,
     }
 
 

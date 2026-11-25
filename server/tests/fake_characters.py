@@ -22,9 +22,11 @@ from app.domain.character import (
     Tactic,
 )
 from app.domain.npc_profile import NpcProfile
+from app.domain.portraits import PortraitOwner
 from app.domain.sheet_fields import NUMBER_FIELDS, TEXT_FIELDS
 from app.domain.traits import ATTRIBUTE_NAMES, SKILL_NAMES
 from app.repositories.characters import NewCharacter
+from app.repositories.portraits import PortraitChange
 from app.repositories.sheet_items import EntryValues, ItemKind
 from tests.fakes import FakeAccountStore
 
@@ -193,6 +195,7 @@ class FakeCharacterStore:
             id=uuid4(),
             is_main=False,
             form_name=form_name,
+            portrait=None,
             entries=[replace(e, id=uuid4()) for e in main.entries],
             morality_notes=[replace(n, id=uuid4()) for n in main.morality_notes],
         )
@@ -218,8 +221,35 @@ class FakeCharacterStore:
                     wound_track=main.wound_track,
                     willpower_max=main.numbers["willpower_max"],
                     willpower_current=main.numbers["willpower_current"],
+                    portrait=main.portrait,
                 )
         return seats
+
+    # --- Portraits ----------------------------------------------------------------------
+
+    async def set_portrait(self, sheet_id: UUID, path: str | None) -> PortraitChange | None:
+        previous = self._sheet(sheet_id).portrait
+        self._edit_sheet(sheet_id, portrait=path)
+        return PortraitChange(previous)
+
+    async def set_account_portrait(
+        self, account_id: UUID, path: str | None
+    ) -> PortraitChange | None:
+        account = self._accounts.accounts[account_id]
+        self._accounts.accounts[account_id] = replace(account, portrait=path)
+        return PortraitChange(account.portrait)
+
+    async def owner_of(self, path: str) -> PortraitOwner | None:
+        for account in self._accounts.accounts.values():
+            if account.portrait == path:
+                return PortraitOwner(account.id, is_main=True, is_played=True)
+        for character in self._characters.values():
+            for sheet in character.sheets:
+                if sheet.portrait == path:
+                    owner = character.owner_id
+                    played = owner is not None and self._played.get(owner) == character.id
+                    return PortraitOwner(owner, sheet.is_main, played)
+        return None
 
     # --- Éléments -----------------------------------------------------------------------
 

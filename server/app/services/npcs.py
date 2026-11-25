@@ -32,7 +32,7 @@ from app.services.character_access import (
     not_found,
     rule_violation,
 )
-from app.services.characters import MAIN_FORM_NAME
+from app.services.characters import MAIN_FORM_NAME, PortraitCleaner
 
 
 class NpcStore(Protocol):
@@ -97,11 +97,13 @@ class NpcService:
         characters: CharacterRemover,
         access: CharacterAccess,
         broadcaster: NpcBroadcaster,
+        portraits: PortraitCleaner,
     ) -> None:
         self._npcs = npcs
         self._characters = characters
         self._access = access
         self._broadcaster = broadcaster
+        self._portraits = portraits
 
     async def directory(self) -> NpcDirectory:
         """Retourne les catégories et tous les PNJ."""
@@ -143,10 +145,11 @@ class NpcService:
 
     async def delete(self, actor: Account, character_id: UUID) -> None:
         """Supprime définitivement la feuille du PNJ."""
-        await self._profile(actor, character_id)
+        character = await self._npc(actor, character_id)
         await self._characters.delete(character_id)
         await self._access.notify(character_id, None, seat_affected=False)
         await self._signal()
+        await self._portraits.discard(character.sheets)
 
     # --- Catégories ------------------------------------------------------
 
@@ -189,11 +192,18 @@ class NpcService:
         await self._broadcaster.npcs_changed(await self._access.gm_recipients())
 
     async def _profile(self, actor: Account, character_id: UUID) -> NpcProfile:
-        """Retourne le profil du PNJ modifiable ; un personnage joueur répond comme absent."""
-        character = await self._access.editable(actor, character_id)
+        """Retourne le profil du PNJ modifiable."""
+        character = await self._npc(actor, character_id)
         if character.npc is None:
             raise not_found()
         return character.npc
+
+    async def _npc(self, actor: Account, character_id: UUID) -> Character:
+        """Retourne le PNJ modifiable ; un personnage joueur répond comme absent."""
+        character = await self._access.editable(actor, character_id)
+        if not character.is_npc:
+            raise not_found()
+        return character
 
     async def _parents(self) -> dict[UUID, UUID | None]:
         return {c.id: c.parent_id for c in await self._npcs.list_categories()}

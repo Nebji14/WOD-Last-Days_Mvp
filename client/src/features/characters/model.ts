@@ -155,6 +155,8 @@ export interface Sheet {
   readonly morality_notes: readonly MoralityNote[];
   readonly entries: readonly Entry[];
   readonly tactics: readonly Tactic[];
+  /** Nom du fichier de l'image de cette forme, `null` sans image. */
+  readonly portrait: string | null;
 }
 
 export interface Experience {
@@ -275,9 +277,11 @@ export function parseCharacter(data: unknown): Character {
     Array.isArray(data.expenses) &&
     Array.isArray(data.notes)
   ) {
-    // Un serveur pas encore à jour n'envoie pas les ressources : la fiche s'affiche sans.
+    // Un serveur pas encore à jour n'envoie ni les ressources ni les portraits : la
+    // fiche s'affiche sans.
     const resources = Array.isArray(data.resources) ? data.resources : [];
-    return { ...data, resources } as unknown as Character;
+    const sheets = data.sheets.map((sheet) => ({ ...sheet, portrait: sheet.portrait ?? null }));
+    return { ...data, resources, sheets } as unknown as Character;
   }
   throw new ApiError(502, "internal_error");
 }

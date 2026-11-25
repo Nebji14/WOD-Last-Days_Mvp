@@ -24,6 +24,8 @@ class NpcSummaryResponse(BaseModel):
     """PNJ de la liste : santé et volonté, plus Puissance, Finesse et Résilience en simplifié."""
 
     id: UUID
+    sheet_id: UUID
+    portrait: str | None
     name: str
     concept: str
     model: NpcModel
@@ -38,6 +40,8 @@ class NpcSummaryResponse(BaseModel):
     def from_summary(cls, npc: NpcSummary) -> "NpcSummaryResponse":
         return cls(
             id=npc.id,
+            sheet_id=npc.sheet_id,
+            portrait=npc.portrait,
             name=npc.name,
             concept=npc.concept,
             model=npc.profile.model,

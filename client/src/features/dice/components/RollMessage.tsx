@@ -44,9 +44,7 @@ export function RollMessage({ roll }: { readonly roll: Roll }) {
         {resultLabel(roll)}
         {counted && roll.outcome === "exceptional" && ` · ${successesLabel(roll.successes)}`}
       </span>
-      {counted && doubled !== null && (
-        <span className="text-gold text-sm italic">{doubled}</span>
-      )}
+      {counted && doubled !== null && <span className="text-gold text-sm italic">{doubled}</span>}
     </span>
   );
 }

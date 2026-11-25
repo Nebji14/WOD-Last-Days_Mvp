@@ -11,6 +11,10 @@ export interface NpcCategory {
 /** PNJ tel qu'il apparaît dans la liste de l'outil PNJ. */
 export interface NpcCard {
   readonly id: string;
+  /** Feuille qui porte la photo. */
+  readonly sheetId: string;
+  /** Nom du fichier de la photo, `null` sans photo. */
+  readonly portrait: string | null;
   readonly name: string;
   readonly concept: string;
   readonly model: NpcModel;
@@ -52,6 +56,8 @@ function parseCard(data: unknown): NpcCard {
   if (
     isRecord(data) &&
     typeof data.id === "string" &&
+    typeof data.sheet_id === "string" &&
+    isNullableString(data.portrait) &&
     typeof data.name === "string" &&
     typeof data.concept === "string" &&
     (data.model === "full" || data.model === "simplified") &&
@@ -64,6 +70,8 @@ function parseCard(data: unknown): NpcCard {
   ) {
     return {
       id: data.id,
+      sheetId: data.sheet_id,
+      portrait: data.portrait,
       name: data.name,
       concept: data.concept,
       model: data.model,

@@ -3,18 +3,19 @@
 /**
  * Siège d'un joueur autour de la table.
  *
- * - Personnage joué : initiales, nom, concept, santé et volonté, visibles de
+ * - Personnage joué : portrait ou initiales, nom, concept, santé et volonté, visibles de
  *   tous ; sinon « Aucun personnage ».
  * - Mon siège : bordure or, étiquette « VOUS » et bouton « Ouvrir ma fiche » ou
  *   « Créer mon personnage ».
  * - Le MJ n'ouvre pas les fiches depuis les sièges : il passe par l'outil Joueurs.
  * - Joueur déconnecté : siège atténué. Le siège apparaît en fondu à l'arrivée.
  */
+import { Portrait } from "@/features/characters/components/Portrait";
 import { labels } from "@/shared/i18n";
 import { HealthTrack, WillpowerDots } from "@/shared/ui/Gauges";
 import { openCreation, openSheet } from "@/shared/windows/detached";
 
-import { initials, type PlacedSeat, type SeatSlot } from "../seatLayout";
+import type { PlacedSeat, SeatSlot } from "../seatLayout";
 
 const SLOT_POSITION: Record<SeatSlot, string> = {
   "left-1": "left-10 top-[196px]",
@@ -48,12 +49,11 @@ export function PlayerSeat({ slot, seat, mine }: PlacedSeat) {
         seat.online ? "" : "opacity-55"
       }`}
     >
-      <span
-        aria-hidden="true"
-        className="border-line-strong bg-field font-display text-ink absolute top-3.5 left-3.5 flex size-11 items-center justify-center rounded-full border-[1.5px] text-[15px] font-bold"
-      >
-        {character ? initials(character.name) : "?"}
-      </span>
+      <Portrait
+        portrait={character?.portrait ?? null}
+        name={character ? character.name : "?"}
+        className="absolute top-3.5 left-3.5 size-11 text-[15px]"
+      />
       {seat.online && (
         <span
           aria-hidden="true"

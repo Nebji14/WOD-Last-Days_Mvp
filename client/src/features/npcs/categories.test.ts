@@ -16,6 +16,8 @@ function npc(id: string, name: string, categoryId: string | null): NpcCard {
     concept: "",
     model: "simplified",
     categoryId,
+    sheetId: "s1",
+    portrait: null,
     healthMax: 5,
     willpowerMax: 3,
     power: 1,

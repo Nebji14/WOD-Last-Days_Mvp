@@ -8,6 +8,8 @@ export interface Account {
   readonly username: string;
   readonly displayName: string;
   readonly role: Role;
+  /** Nom du fichier de la photo du compte (MJ), `null` sans photo. */
+  readonly portrait: string | null;
 }
 
 export interface Credentials {
@@ -29,6 +31,7 @@ export function parseAccount(data: unknown): Account {
       username: data.username,
       displayName: data.display_name,
       role: data.role,
+      portrait: typeof data.portrait === "string" ? data.portrait : null,
     };
   }
   throw new ApiError(502, "internal_error");

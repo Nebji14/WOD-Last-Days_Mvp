@@ -34,11 +34,13 @@ class NpcSummary:
     """PNJ tel qu'il apparaît dans la liste : nom, modèle, concept et résumé chiffré."""
 
     id: UUID
+    sheet_id: UUID
     name: str
     concept: str
     profile: NpcProfile
     health_max: int
     willpower_max: int
+    portrait: str | None = None
 
 
 def check_npc_sheet_field(profile: NpcProfile | None, field: str) -> None:

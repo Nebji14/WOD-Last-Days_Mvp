@@ -10,7 +10,7 @@ from uuid import UUID
 from fastapi import APIRouter, Query, Request, Response, status
 
 from app.api.deps import ContainerDep, CurrentAccount, CurrentGm, enforce_rate_limit
-from app.core.errors import AppError, ErrorCode
+from app.api.uploads import read_body
 from app.domain.images import MAX_IMAGE_BYTES
 from app.schemas.images import (
     CreatedResponse,
@@ -29,29 +29,6 @@ _UPLOAD_LIMIT = 60
 _NO_CONTENT = status.HTTP_204_NO_CONTENT
 
 router = APIRouter(prefix="/api", tags=["images"])
-
-
-def _too_large() -> AppError:
-    return AppError(ErrorCode.IMAGE_TOO_LARGE, "Image trop lourde.", status_code=413)
-
-
-async def _read_body(request: Request) -> bytes:
-    """Lit le fichier envoyé, sans jamais dépasser le poids maximal en mémoire.
-
-    Raises:
-        AppError: ``image_too_large`` dès que la limite est franchie.
-    """
-    declared = request.headers.get("content-length")
-    if declared is not None and declared.isdigit() and int(declared) > MAX_IMAGE_BYTES:
-        raise _too_large()
-    chunks: list[bytes] = []
-    size = 0
-    async for chunk in request.stream():
-        size += len(chunk)
-        if size > MAX_IMAGE_BYTES:
-            raise _too_large()
-        chunks.append(chunk)
-    return b"".join(chunks)
 
 
 # --- Bibliothèque (MJ) ---------------------------------------------------------------------
@@ -75,7 +52,7 @@ async def upload_image(
     enforce_rate_limit(
         container.rate_limiter, f"images:upload:{gm.id}", _UPLOAD_LIMIT, _UPLOAD_WINDOW_SECONDS
     )
-    content = await _read_body(request)
+    content = await read_body(request, MAX_IMAGE_BYTES)
     image = await container.image_service.upload(filename, folder_id, content)
     return ImageResponse.from_image(image, {})
 

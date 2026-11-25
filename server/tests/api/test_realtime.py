@@ -94,7 +94,10 @@ def test_arrivals_and_departures_are_broadcast(ctx: TestContext, connect: Connec
 
     gm_socket = connect(gm)
     state = _next(gm_socket, "table.state")
-    assert state == {"gm": {"display_name": "conteur", "online": True}, "seats": []}
+    assert state == {
+        "gm": {"display_name": "conteur", "online": True, "portrait": None},
+        "seats": [],
+    }
 
     lea_socket = connect(lea)
     assert _next(lea_socket, "table.state") == _next(gm_socket, "table.state")
@@ -128,7 +131,11 @@ def test_gm_name_is_known_while_gm_is_offline(ctx: TestContext, connect: Connect
 
     socket = connect(lea)
 
-    assert _next(socket, "table.state")["gm"] == {"display_name": "conteur", "online": False}
+    assert _next(socket, "table.state")["gm"] == {
+        "display_name": "conteur",
+        "online": False,
+        "portrait": None,
+    }
 
 
 def test_player_stays_online_while_one_window_remains(ctx: TestContext, connect: Connect) -> None:

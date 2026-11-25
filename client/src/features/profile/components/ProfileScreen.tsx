@@ -8,16 +8,44 @@
  */
 import { useEffect } from "react";
 
+import type { Account } from "@/features/auth/api";
+import { mainSheet } from "@/features/characters/model";
 import { errorLabel, labels } from "@/shared/i18n";
 import { DetachedTitleBar } from "@/shared/ui/DetachedTitleBar";
 
 import type { GoogleResult } from "../googleResult";
-import { useProfile } from "../useProfile";
+import { type ProfileState, useProfile } from "../useProfile";
 import { AccountPanel } from "./AccountPanel";
 import { CharactersPanel } from "./CharactersPanel";
+import type { ProfilePictureSource } from "./ProfilePicture";
 
 const MESSAGE =
   "bg-night text-ink-muted flex min-h-screen items-center justify-center p-8 text-xl italic";
+
+/** Photo du profil : celle du compte pour le MJ, celle du personnage joué pour un joueur. */
+function pictureOf(profile: ProfileState, account: Account): ProfilePictureSource | null {
+  if (account.role === "gm") {
+    return {
+      portrait: account.portrait,
+      name: labels.table.gm.initials,
+      busy: profile.busyId === account.id,
+      onSave: (files) => profile.changeOwnPortrait(account.id, files),
+      onRemove: () => profile.clearOwnPortrait(account.id),
+    };
+  }
+  const played = profile.characters.find((character) => character.is_played);
+  if (played === undefined) {
+    return null;
+  }
+  const sheet = mainSheet(played);
+  return {
+    portrait: sheet.portrait,
+    name: sheet.texts.name || account.displayName,
+    busy: profile.busyId === played.id,
+    onSave: (files) => profile.changePortrait(played.id, sheet.id, files),
+    onRemove: () => profile.clearPortrait(played.id, sheet.id),
+  };
+}
 
 interface ProfileScreenProps {
   /** Résultat à afficher au retour de Google, `null` sinon. */
@@ -25,7 +53,8 @@ interface ProfileScreenProps {
 }
 
 export function ProfileScreen({ googleResult }: ProfileScreenProps) {
-  const { account, characters, errorCode, busyId, play, remove, refresh } = useProfile();
+  const profile = useProfile();
+  const { account, characters, errorCode, busyId, changePortrait, clearPortrait } = profile;
   const text = labels.profile;
 
   useEffect(() => {
@@ -60,14 +89,23 @@ export function ProfileScreen({ googleResult }: ProfileScreenProps) {
             : "grid-cols-1 lg:grid-cols-[360px_minmax(0,1fr)]"
         }`}
       >
-        <AccountPanel account={account} googleResult={googleResult} onChanged={refresh} />
+        <AccountPanel
+          account={account}
+          picture={pictureOf(profile, account)}
+          // Un joueur voit l'erreur à côté de ses personnages.
+          errorCode={isGm ? errorCode : null}
+          googleResult={googleResult}
+          onChanged={profile.refresh}
+        />
         {!isGm && (
           <CharactersPanel
             characters={characters}
             busyId={busyId}
             errorCode={errorCode}
-            onPlay={play}
-            onDelete={remove}
+            onPlay={profile.play}
+            onDelete={profile.remove}
+            onPortrait={changePortrait}
+            onRemovePortrait={clearPortrait}
           />
         )}
       </main>

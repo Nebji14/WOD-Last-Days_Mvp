@@ -14,6 +14,7 @@ from app.domain.accounts import Account, Role
 from app.realtime.hub import ConnectionHub
 from app.realtime.tickets import TicketStore
 from app.services.account import AccountService
+from app.services.account_portrait import AccountPortraitService
 from app.services.auth import AuthService
 from app.services.awakening import AwakeningService
 from app.services.characters import CharacterService
@@ -25,6 +26,7 @@ from app.services.image_table import ImageTableService
 from app.services.images import ImageService
 from app.services.npcs import NpcService
 from app.services.players import PlayerService
+from app.services.portraits import PortraitService
 from app.services.resources import ResourceService
 from app.services.sheet_items import SheetItemService
 from app.services.table import TableService
@@ -37,6 +39,7 @@ class Container:
     settings: Settings
     auth_service: AuthService
     account_service: AccountService
+    account_portrait_service: AccountPortraitService
     google_auth_service: GoogleAuthService
     google_link_service: GoogleLinkService
     token_verifier: TokenVerifier
@@ -46,6 +49,7 @@ class Container:
     hub: ConnectionHub
     tickets: TicketStore
     character_service: CharacterService
+    portrait_service: PortraitService
     sheet_item_service: SheetItemService
     resource_service: ResourceService
     player_service: PlayerService

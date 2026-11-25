@@ -164,6 +164,7 @@ export function NpcsToolScreen() {
                   <NpcCardItem
                     key={npc.id}
                     npc={npc}
+                    act={act}
                     onDelete={() => setPending({ kind: "npc", npc })}
                   />
                 ))}

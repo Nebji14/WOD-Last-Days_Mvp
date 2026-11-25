@@ -52,6 +52,8 @@ class FakeNpcStore:
             summaries.append(
                 NpcSummary(
                     id=npc.id,
+                    sheet_id=main.id,
+                    portrait=main.portrait,
                     name=main.texts["name"],
                     concept=main.texts["concept"],
                     profile=npc.npc,

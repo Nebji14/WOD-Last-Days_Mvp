@@ -10,6 +10,7 @@
 import { type FormEvent, useState } from "react";
 
 import { addForm, deleteForm, setSheetField } from "@/features/characters/api";
+import { Portrait } from "@/features/characters/components/Portrait";
 import type { Character, Sheet } from "@/features/characters/model";
 import { labels } from "@/shared/i18n";
 
@@ -78,6 +79,13 @@ export function FormTabs({ character, activeId, onSelect, editing, run }: FormTa
             key={sheet.id}
             className={`${TAB} ${active ? "border-gold bg-seat" : "border-line bg-panel/60"}`}
           >
+            {sheet.portrait !== null && (
+              <Portrait
+                portrait={sheet.portrait}
+                name={tabLabel(sheet)}
+                className="size-7 text-[9px]"
+              />
+            )}
             {renaming === sheet.id ? (
               <input
                 autoFocus

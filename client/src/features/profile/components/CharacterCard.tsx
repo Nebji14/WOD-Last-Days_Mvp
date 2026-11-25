@@ -16,10 +16,11 @@ import { ConfirmDialog } from "@/shared/ui/ConfirmDialog";
 import { openSheet } from "@/shared/windows/detached";
 
 import { formsSummary } from "../summary";
+import { CharacterPortraits, type PortraitActions } from "./CharacterPortraits";
 
 const TAG = "font-display h-6 rounded-xs px-2.5 text-[10px] font-bold tracking-[2px]";
 
-interface CharacterCardProps {
+interface CharacterCardProps extends PortraitActions {
   readonly character: Character;
   /** Une action sur ce personnage est en cours. */
   readonly busy: boolean;
@@ -27,7 +28,8 @@ interface CharacterCardProps {
   readonly onDelete: () => void;
 }
 
-export function CharacterCard({ character, busy, onPlay, onDelete }: CharacterCardProps) {
+export function CharacterCard(props: CharacterCardProps) {
+  const { character, busy, onPlay, onDelete, onPortrait, onRemovePortrait } = props;
   const text = labels.profile.characters;
   const [confirming, setConfirming] = useState(false);
   const name = mainSheet(character).texts.name ?? "";
@@ -59,7 +61,13 @@ export function CharacterCard({ character, busy, onPlay, onDelete }: CharacterCa
           )}
           <p className="text-ink-muted text-base italic">{formsSummary(character)}</p>
         </div>
-        <div className="flex items-center justify-between gap-4">
+        <CharacterPortraits
+          character={character}
+          busy={busy}
+          onPortrait={onPortrait}
+          onRemovePortrait={onRemovePortrait}
+        />
+        <div className="flex flex-wrap items-center justify-between gap-4">
           <button
             type="button"
             onClick={() => openSheet(character.id)}

@@ -46,6 +46,7 @@ class AccountResponse(BaseModel):
     username: str
     display_name: str
     role: Role
+    portrait: str | None
 
     @classmethod
     def from_account(cls, account: Account) -> "AccountResponse":
@@ -55,4 +56,5 @@ class AccountResponse(BaseModel):
             username=account.username,
             display_name=account.display_name,
             role=account.role,
+            portrait=account.portrait,
         )

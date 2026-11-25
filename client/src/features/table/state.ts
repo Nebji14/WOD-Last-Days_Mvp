@@ -12,6 +12,8 @@ export interface SeatCharacter {
   readonly woundTrack: string;
   readonly willpowerMax: number;
   readonly willpowerCurrent: number;
+  /** Nom du fichier du portrait de la forme principale, `null` sans image. */
+  readonly portrait: string | null;
 }
 
 export interface Seat {
@@ -26,7 +28,12 @@ export interface Seat {
 }
 
 export interface TableState {
-  readonly gm: { readonly displayName: string | null; readonly online: boolean };
+  readonly gm: {
+    readonly displayName: string | null;
+    readonly online: boolean;
+    /** Nom du fichier de la photo du MJ, `null` sans photo. */
+    readonly portrait: string | null;
+  };
   readonly seats: readonly Seat[];
 }
 
@@ -49,6 +56,7 @@ function parseSeatCharacter(data: unknown): SeatCharacter | null {
       woundTrack: data.wound_track,
       willpowerMax: data.willpower_max,
       willpowerCurrent: data.willpower_current,
+      portrait: typeof data.portrait === "string" ? data.portrait : null,
     };
   }
   return null;
@@ -92,7 +100,11 @@ export function parseTableState(data: unknown): TableState | null {
     return null;
   }
   return {
-    gm: { displayName: gmName, online: gmOnline },
+    gm: {
+      displayName: gmName,
+      online: gmOnline,
+      portrait: typeof data.gm.portrait === "string" ? data.gm.portrait : null,
+    },
     seats: seats.filter((seat): seat is Seat => seat !== null),
   };
 }

@@ -20,6 +20,7 @@ class TableState:
 
     Attributs:
         gm_name: nom affiché du MJ, ``None`` tant que son compte n'existe pas.
+        gm_portrait: photo du MJ, ``None`` sans photo.
         gm_online: présence du MJ.
         seats: places attribuées aux joueurs, dans l'ordre des positions.
         characters: personnage joué par compte ; un compte sans personnage en
@@ -27,6 +28,7 @@ class TableState:
     """
 
     gm_name: str | None
+    gm_portrait: str | None
     gm_online: bool
     seats: list[Seat]
     characters: dict[UUID, SeatCharacter]
@@ -70,7 +72,7 @@ class TableService:
         self._broadcaster = broadcaster
         self._seats = SeatMap()
         self._gm_connections = 0
-        self._gm_name: str | None = None
+        self._gm: Account | None = None
 
     async def enter(self, account: Account) -> None:
         """Enregistre l'arrivée d'une connexion et diffuse le nouvel état.
@@ -80,7 +82,7 @@ class TableService:
         """
         if account.role is Role.GM:
             self._gm_connections += 1
-            self._gm_name = account.display_name
+            self._gm = account
         else:
             self._seats.enter(account.id, account.display_name)
         await self._broadcaster.table_changed(await self.state())
@@ -93,10 +95,10 @@ class TableService:
             self._seats.leave(account.id)
         await self._broadcaster.table_changed(await self.state())
 
-    async def rename(self, account: Account) -> None:
-        """Affiche le nouveau nom d'un participant et diffuse l'état."""
+    async def refresh_account(self, account: Account) -> None:
+        """Affiche le nouveau nom ou la nouvelle photo d'un participant."""
         if account.role is Role.GM:
-            self._gm_name = account.display_name
+            self._gm = account
         else:
             self._seats.rename(account.id, account.display_name)
         await self.refresh()
@@ -111,12 +113,12 @@ class TableService:
 
     async def state(self) -> TableState:
         """Retourne l'état courant de la table."""
-        if self._gm_name is None:
-            gm = await self._accounts.get_gm()
-            self._gm_name = gm.display_name if gm else None
+        if self._gm is None:
+            self._gm = await self._accounts.get_gm()
         seats = self._seats.seats()
         return TableState(
-            gm_name=self._gm_name,
+            gm_name=self._gm.display_name if self._gm else None,
+            gm_portrait=self._gm.portrait if self._gm else None,
             gm_online=self._gm_connections > 0,
             seats=seats,
             characters=await self._characters.played_by([seat.account_id for seat in seats]),

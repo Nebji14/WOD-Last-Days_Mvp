@@ -7,7 +7,6 @@
 import { useState } from "react";
 
 import type { Account } from "@/features/auth/api";
-import { initials } from "@/features/table/seatLayout";
 import { errorLabel, labels } from "@/shared/i18n";
 
 import type { GoogleResult } from "../googleResult";
@@ -16,9 +15,14 @@ import { AccountSummary } from "./AccountSummary";
 import { GoogleForm } from "./GoogleForm";
 import { NamesForm } from "./NamesForm";
 import { PasswordForm } from "./PasswordForm";
+import { ProfilePicture, type ProfilePictureSource } from "./ProfilePicture";
 
 interface AccountPanelProps {
   readonly account: Account;
+  /** Photo modifiable du profil ; `null` pour un joueur sans personnage. */
+  readonly picture: ProfilePictureSource | null;
+  /** Échec de la dernière action, affiché sous la photo du MJ. */
+  readonly errorCode: string | null;
   /** Résultat à afficher au retour de Google, `null` sinon. */
   readonly googleResult: GoogleResult | null;
   readonly onChanged: () => void;
@@ -41,7 +45,8 @@ function GoogleNotice({ result }: { readonly result: GoogleResult }) {
   );
 }
 
-export function AccountPanel({ account, googleResult, onChanged }: AccountPanelProps) {
+export function AccountPanel(props: AccountPanelProps) {
+  const { account, picture, errorCode, googleResult, onChanged } = props;
   const text = labels.profile;
   const isGm = account.role === "gm";
   const { methods, refresh } = useLoginMethods();
@@ -54,12 +59,12 @@ export function AccountPanel({ account, googleResult, onChanged }: AccountPanelP
       className="border-line bg-panel flex flex-col rounded-xs border px-6 py-8 lg:min-h-0 lg:overflow-y-auto"
     >
       <div className="border-line-soft flex flex-col items-center gap-2 border-b pb-6">
-        <span
-          aria-hidden="true"
-          className="border-gold bg-field font-display text-gold flex size-28 items-center justify-center rounded-full border-2 text-5xl font-bold shadow-[0_0_24px_rgb(201_176_106/0.2)]"
-        >
-          {isGm ? labels.table.gm.initials : initials(account.displayName).slice(0, 1)}
-        </span>
+        <ProfilePicture account={account} source={picture} />
+        {errorCode !== null && (
+          <p role="alert" className="text-danger text-center text-[16px] font-semibold">
+            {errorLabel(errorCode)}
+          </p>
+        )}
         <h2 className="text-ink-bright mt-3 max-w-full text-center text-3xl font-bold break-words">
           {account.displayName}
         </h2>

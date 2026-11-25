@@ -1,10 +1,20 @@
-"""Routes de gestion de son propre compte : noms, mot de passe, connexion Google."""
+"""Routes de gestion de son propre compte : noms, mot de passe, Google, photo du MJ."""
 
 from fastapi import APIRouter, Request, Response, status
 
-from app.api.deps import Container, ContainerDep, CurrentSession, Session, enforce_rate_limit
+from app.api.deps import (
+    Container,
+    ContainerDep,
+    CurrentGm,
+    CurrentSession,
+    Session,
+    enforce_rate_limit,
+)
 from app.api.google_auth import set_flow_cookie
+from app.api.portraits import limit_portrait_uploads
+from app.api.uploads import read_body
 from app.core.security import ACCESS_COOKIE, set_session_cookies
+from app.domain.portraits import MAX_PORTRAIT_BYTES
 from app.schemas.account import (
     ChangePasswordRequest,
     GoogleUrlResponse,
@@ -54,6 +64,24 @@ async def change_password(
     response = Response(status_code=status.HTTP_204_NO_CONTENT)
     set_session_cookies(response, tokens, container.settings)
     return response
+
+
+@router.put("/portrait")
+async def replace_portrait(
+    request: Request, gm: CurrentGm, container: ContainerDep
+) -> AccountResponse:
+    """Donne une photo au MJ ; le fichier est envoyé tel quel."""
+    limit_portrait_uploads(container, gm)
+    content = await read_body(request, MAX_PORTRAIT_BYTES)
+    account = await container.account_portrait_service.replace(gm, content)
+    return AccountResponse.from_account(account)
+
+
+@router.delete("/portrait")
+async def remove_portrait(gm: CurrentGm, container: ContainerDep) -> AccountResponse:
+    """Retire la photo du MJ."""
+    account = await container.account_portrait_service.remove(gm)
+    return AccountResponse.from_account(account)
 
 
 @router.post("/google/link")

@@ -6,7 +6,7 @@ import asyncpg
 
 from app.domain.accounts import Account, AccountStatus, LoginMethods, Role
 
-_COLUMNS = "id, username, display_name, auth_email, role, status"
+_COLUMNS = "id, username, display_name, auth_email, role, status, portrait_path"
 
 
 class UsernameAlreadyExistsError(Exception):
@@ -151,4 +151,5 @@ def _to_account(row: asyncpg.Record) -> Account:
         auth_email=row["auth_email"],
         role=Role(row["role"]),
         status=AccountStatus(row["status"]),
+        portrait=row["portrait_path"],
     )

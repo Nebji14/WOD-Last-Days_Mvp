@@ -54,6 +54,7 @@ class Account:
     Attributs:
         auth_email: adresse connue du fournisseur d'identité. Donnée interne,
             jamais renvoyée au client.
+        portrait: nom du fichier de la photo du compte (MJ), ``None`` sans photo.
     """
 
     id: UUID
@@ -62,6 +63,7 @@ class Account:
     auth_email: str
     role: Role
     status: AccountStatus
+    portrait: str | None = None
 
     @property
     def is_active(self) -> bool:

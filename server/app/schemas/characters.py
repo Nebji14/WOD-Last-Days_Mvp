@@ -93,6 +93,7 @@ class SheetResponse(BaseModel):
     morality_notes: list[MoralityNoteResponse]
     entries: list[EntryResponse]
     tactics: list[TacticResponse]
+    portrait: str | None
 
     @classmethod
     def from_sheet(cls, sheet: Sheet) -> "SheetResponse":
@@ -146,6 +147,7 @@ class SheetResponse(BaseModel):
                 TacticResponse(id=t.id, name=t.name, description=t.description)
                 for t in sheet.tactics
             ],
+            portrait=sheet.portrait,
         )
 
 

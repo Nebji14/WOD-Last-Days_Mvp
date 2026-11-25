@@ -68,6 +68,7 @@ export const frProfile = {
       deleteQuestion:
         "Supprimer définitivement « {name} » ? Sa fiche, ses formes et ses notes seront effacées. Cette action est irréversible.",
       deleteHint: "Supprimer un personnage demande toujours une confirmation.",
+      portraits: "Images des formes",
       mainForm: "principale",
       oneForm: "1 forme : {names}",
       manyForms: "{count} formes : {names}",

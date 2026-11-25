@@ -82,7 +82,7 @@ export function TableScreen() {
           <ConnectionNotice status={session.status} />
         </main>
       </ScaledStage>
-      <DiceOverlay viewerId={account.id} />
+      <DiceOverlay viewerId={account.id} seats={seats} gmPortrait={table?.gm.portrait ?? null} />
     </>
   );
 }

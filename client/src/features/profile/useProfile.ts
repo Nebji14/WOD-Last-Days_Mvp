@@ -14,8 +14,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { type Account, fetchCurrentAccount } from "@/features/auth/api";
 import { deleteCharacter, fetchCharacters, playCharacter } from "@/features/characters/api";
 import type { Character } from "@/features/characters/model";
+import { type PortraitFiles, removePortrait, setPortrait } from "@/features/characters/portrait";
 import { ApiError } from "@/shared/api/client";
 import { useDetachedRealtime } from "@/shared/realtime/useDetachedRealtime";
+
+import { removeAccountPortrait, setAccountPortrait } from "./accountApi";
 
 const REALTIME_EVENTS = ["character.changed", "account.changed"] as const;
 
@@ -24,10 +27,16 @@ export interface ProfileState {
   readonly characters: readonly Character[];
   /** Code de la dernière erreur, à traduire par `errorLabel`. */
   readonly errorCode: string | null;
-  /** Personnage dont une action est en cours. */
+  /** Personnage, ou compte, dont une action est en cours. */
   readonly busyId: string | null;
   readonly play: (characterId: string) => void;
   readonly remove: (characterId: string) => void;
+  /** Donne une image à une forme, à la place de la précédente. */
+  readonly changePortrait: (characterId: string, sheetId: string, files: PortraitFiles) => void;
+  readonly clearPortrait: (characterId: string, sheetId: string) => void;
+  /** Donne une photo au compte du MJ, ou la retire. */
+  readonly changeOwnPortrait: (accountId: string, files: PortraitFiles) => void;
+  readonly clearOwnPortrait: (accountId: string) => void;
   /** Relit le compte et les personnages. */
   readonly refresh: () => void;
 }
@@ -72,10 +81,10 @@ export function useProfile(): ProfileState {
   const refresh = useCallback(() => void reload(), [reload]);
   useDetachedRealtime(REALTIME_EVENTS, refresh);
 
-  /** Lance une action sur un personnage, puis relit la liste. */
+  /** Lance une action sur un personnage ou sur le compte, puis relit le profil. */
   const act = useCallback(
-    (characterId: string, action: () => Promise<unknown>) => {
-      setBusyId(characterId);
+    (subjectId: string, action: () => Promise<unknown>) => {
+      setBusyId(subjectId);
       setErrorCode(null);
       void action()
         .then(reload)
@@ -102,5 +111,35 @@ export function useProfile(): ProfileState {
     [act],
   );
 
-  return { account, characters, errorCode, busyId, play, remove, refresh };
+  const changePortrait = useCallback(
+    (characterId: string, sheetId: string, files: PortraitFiles) =>
+      act(characterId, () => setPortrait(sheetId, files)),
+    [act],
+  );
+  const clearPortrait = useCallback(
+    (characterId: string, sheetId: string) => act(characterId, () => removePortrait(sheetId)),
+    [act],
+  );
+  const changeOwnPortrait = useCallback(
+    (accountId: string, files: PortraitFiles) => act(accountId, () => setAccountPortrait(files)),
+    [act],
+  );
+  const clearOwnPortrait = useCallback(
+    (accountId: string) => act(accountId, removeAccountPortrait),
+    [act],
+  );
+
+  return {
+    account,
+    characters,
+    errorCode,
+    busyId,
+    play,
+    remove,
+    changePortrait,
+    clearPortrait,
+    changeOwnPortrait,
+    clearOwnPortrait,
+    refresh,
+  };
 }

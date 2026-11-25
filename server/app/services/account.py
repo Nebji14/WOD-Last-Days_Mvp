@@ -44,14 +44,14 @@ class OwnerConfirmation(Protocol):
     ) -> LoginMethods: ...
 
 
-class AccountRenamer(Protocol):
-    """Met à jour le nom d'un participant autour de la table."""
+class AccountRefresher(Protocol):
+    """Met à jour l'affichage d'un participant autour de la table."""
 
-    async def rename(self, account: Account) -> None: ...
+    async def refresh_account(self, account: Account) -> None: ...
 
 
 class AccountBroadcaster(Protocol):
-    """Diffusion en temps réel du nouveau nom d'un compte."""
+    """Diffusion en temps réel d'un compte modifié."""
 
     async def account_changed(self, account: Account) -> None: ...
 
@@ -72,7 +72,7 @@ class AccountService:
         accounts: ProfileStore,
         identity: PasswordProvider,
         owner_check: OwnerConfirmation,
-        table: AccountRenamer,
+        table: AccountRefresher,
         broadcaster: AccountBroadcaster,
     ) -> None:
         self._accounts = accounts
@@ -101,7 +101,7 @@ class AccountService:
             raise username_taken_error() from None
         if updated.display_name != account.display_name:
             await self._broadcaster.account_changed(updated)
-            await self._table.rename(updated)
+            await self._table.refresh_account(updated)
         return updated
 
     async def change_password(

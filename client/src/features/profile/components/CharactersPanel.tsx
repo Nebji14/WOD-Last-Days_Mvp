@@ -8,8 +8,9 @@ import { openCreation } from "@/shared/windows/detached";
 
 import { playedFirst } from "../summary";
 import { CharacterCard } from "./CharacterCard";
+import type { PortraitActions } from "./CharacterPortraits";
 
-interface CharactersPanelProps {
+interface CharactersPanelProps extends PortraitActions {
   readonly characters: readonly Character[];
   readonly busyId: string | null;
   readonly errorCode: string | null;
@@ -18,7 +19,7 @@ interface CharactersPanelProps {
 }
 
 export function CharactersPanel(props: CharactersPanelProps) {
-  const { characters, busyId, errorCode, onPlay, onDelete } = props;
+  const { characters, busyId, errorCode, onPlay, onDelete, onPortrait, onRemovePortrait } = props;
   const text = labels.profile.characters;
 
   return (
@@ -56,6 +57,8 @@ export function CharactersPanel(props: CharactersPanelProps) {
               busy={busyId === character.id}
               onPlay={() => onPlay(character.id)}
               onDelete={() => onDelete(character.id)}
+              onPortrait={onPortrait}
+              onRemovePortrait={onRemovePortrait}
             />
           ))}
         </ul>

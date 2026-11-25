@@ -1,7 +1,8 @@
 /**
- * Siège du MJ, en haut de la table : nom, présence et nombre de joueurs
+ * Siège du MJ, en haut de la table : photo ou initiales, nom, présence et nombre de joueurs
  * connectés. Aucune action. Vu par le MJ, il porte l'étiquette « VOUS ».
  */
+import { Portrait } from "@/features/characters/components/Portrait";
 import { labels } from "@/shared/i18n";
 
 import type { TableState } from "../state";
@@ -29,12 +30,20 @@ export function GmSeat({ gm, onlinePlayers, isViewer }: GmSeatProps) {
         isViewer ? "border-copper border-[1.5px]" : "border-copper-to border"
       }`}
     >
-      <span
-        aria-hidden="true"
-        className="border-copper font-display text-ink-bright absolute top-[18px] left-[18px] flex size-[68px] items-center justify-center rounded-full border-2 bg-[radial-gradient(circle,#322218_0%,#130d09_100%)] text-2xl font-black shadow-[0_0_14px_rgb(183_119_77/0.4)]"
-      >
-        {text.initials}
-      </span>
+      {gm.portrait === null ? (
+        <span
+          aria-hidden="true"
+          className="border-copper font-display text-ink-bright absolute top-[18px] left-[18px] flex size-[68px] items-center justify-center rounded-full border-2 bg-[radial-gradient(circle,#322218_0%,#130d09_100%)] text-2xl font-black shadow-[0_0_14px_rgb(183_119_77/0.4)]"
+        >
+          {text.initials}
+        </span>
+      ) : (
+        <Portrait
+          portrait={gm.portrait}
+          name={text.initials}
+          className="ring-copper absolute top-[18px] left-[18px] size-[68px] text-2xl shadow-[0_0_14px_rgb(183_119_77/0.4)] ring-2"
+        />
+      )}
       <p className="font-display text-copper absolute top-5 left-[104px] text-[10px] leading-[13px] font-bold tracking-[3px]">
         {text.title}
       </p>

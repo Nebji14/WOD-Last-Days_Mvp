@@ -8,7 +8,7 @@ relisent.
 import logging
 from dataclasses import dataclass
 from typing import Protocol
-from uuid import UUID, uuid4
+from uuid import UUID
 
 from app.core.errors import AppError, ErrorCode
 from app.domain.hierarchy import would_create_cycle
@@ -18,12 +18,12 @@ from app.domain.images import (
     MAX_IMAGE_BYTES,
     Image,
     ImageFolder,
-    detect_image_type,
     image_name_from_filename,
 )
 from app.domain.names import clean_name
 from app.gateways.supabase_storage import StorageError
 from app.services.image_links import UrlSigner, image_links, storage_unavailable
+from app.services.uploads import checked_image_type, new_storage_path
 
 logger = logging.getLogger(__name__)
 
@@ -113,15 +113,9 @@ class ImageService:
             AppError: ``image_too_large``, ``unsupported_image``, ``not_found``
                 (dossier absent) ou ``service_unavailable``.
         """
-        if not content or len(content) > MAX_IMAGE_BYTES:
-            raise AppError(ErrorCode.IMAGE_TOO_LARGE, "Image trop lourde.", status_code=413)
-        image_type = detect_image_type(content[:12])
-        if image_type is None:
-            raise AppError(
-                ErrorCode.UNSUPPORTED_IMAGE, "Format d'image non accepté.", status_code=415
-            )
+        image_type = checked_image_type(content, MAX_IMAGE_BYTES)
         await self._require_folder(folder_id)
-        path = f"{uuid4().hex}.{image_type.extension}"
+        path = new_storage_path(image_type)
         try:
             await self._storage.upload(path, content, image_type.value)
         except StorageError:

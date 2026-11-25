@@ -164,6 +164,7 @@ def _to_sheet(row: dict[str, Any]) -> Sheet:
             Tactic(id=UUID(t["id"]), name=t["name"], description=t["description"])
             for t in row["tactics"]
         ],
+        portrait=row.get("portrait_path"),
     )
 
 

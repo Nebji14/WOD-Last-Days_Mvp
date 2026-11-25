@@ -60,7 +60,7 @@ class ConnectionHub:
         )
 
     async def account_changed(self, account: Account) -> None:
-        """Diffuse le nouveau nom affiché d'un participant."""
+        """Diffuse le nom affiché d'un participant dont le compte a changé."""
         await self._broadcast(
             EVENT_ACCOUNT_CHANGED,
             {"account_id": str(account.id), "display_name": account.display_name},

@@ -12,10 +12,11 @@ class GmPresence(BaseModel):
 
     display_name: str | None
     online: bool
+    portrait: str | None
 
 
 class SeatCharacterResponse(BaseModel):
-    """Personnage affiché sur un siège : nom, concept, santé et volonté."""
+    """Personnage affiché sur un siège : image, nom, concept, santé et volonté."""
 
     id: UUID
     name: str
@@ -24,6 +25,7 @@ class SeatCharacterResponse(BaseModel):
     wound_track: str
     willpower_max: int
     willpower_current: int
+    portrait: str | None
 
 
 class SeatResponse(BaseModel):
@@ -50,7 +52,11 @@ class TableStateResponse(BaseModel):
     def from_state(cls, state: TableState) -> "TableStateResponse":
         """Projette l'état du service vers sa représentation publique."""
         return cls(
-            gm=GmPresence(display_name=state.gm_name, online=state.gm_online),
+            gm=GmPresence(
+                display_name=state.gm_name,
+                online=state.gm_online,
+                portrait=state.gm_portrait,
+            ),
             seats=[
                 SeatResponse(
                     position=seat.position,
@@ -76,6 +82,7 @@ def _seat_character(state: TableState, account_id: UUID) -> SeatCharacterRespons
         wound_track=character.wound_track,
         willpower_max=character.willpower_max,
         willpower_current=character.willpower_current,
+        portrait=character.portrait,
     )
 
 

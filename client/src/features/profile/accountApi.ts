@@ -1,5 +1,6 @@
 /** Appels API de modification de son propre compte. */
 import { type Account, parseAccount } from "@/features/auth/api";
+import { keepOriginal, type PortraitFiles, uploadPortrait } from "@/features/characters/portrait";
 import { ApiError, apiRequest, isRecord } from "@/shared/api/client";
 
 export interface AccountNames {
@@ -28,6 +29,17 @@ export function updateNames(names: AccountNames): Promise<Account> {
     body: { username: names.username, display_name: names.displayName },
     parse: parseAccount,
   });
+}
+
+/** Donne une photo au MJ, à la place de la précédente. */
+export async function setAccountPortrait(files: PortraitFiles): Promise<void> {
+  const account = await uploadPortrait("/api/account/portrait", files.portrait, parseAccount);
+  await keepOriginal(account.portrait, files.original);
+}
+
+/** Retire la photo du MJ. */
+export function removeAccountPortrait(): Promise<void> {
+  return apiRequest("/api/account/portrait", { method: "DELETE" });
 }
 
 /** Change le mot de passe, ou définit le premier. Les autres sessions sont fermées. */

@@ -106,6 +106,7 @@ class Sheet:
         numbers: valeurs effectives saisies, volonté disponible et
             moralité.
         specialties: spécialités par compétence, dans l'ordre de saisie.
+        portrait: nom du fichier de l'image de cette forme, ``None`` sans image.
     """
 
     id: UUID
@@ -119,6 +120,7 @@ class Sheet:
     morality_notes: list[MoralityNote]
     entries: list[Entry]
     tactics: list[Tactic]
+    portrait: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -194,6 +196,7 @@ class SeatCharacter:
     wound_track: str
     willpower_max: int
     willpower_current: int
+    portrait: str | None = None
 
 
 def can_read(actor: Account, owner_id: UUID | None) -> bool:

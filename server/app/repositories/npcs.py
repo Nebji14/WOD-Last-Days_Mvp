@@ -16,7 +16,8 @@ from app.repositories.characters import NewCharacter, insert_main_sheet
 _PROFILE_FIELDS = frozenset({"notes", *SIMPLIFIED_TRAITS})
 
 _LIST_NPCS = """
-    select c.id, s.name, s.concept, s.health_max, s.willpower_max,
+    select c.id, s.id as sheet_id, s.name, s.concept, s.health_max, s.willpower_max,
+           s.portrait_path,
            p.model, p.category_id, p.notes, p.power, p.finesse, p.resilience
     from character c
     join npc_profile p on p.character_id = c.id
@@ -90,11 +91,13 @@ class PgNpcRepository:
         return [
             NpcSummary(
                 id=row["id"],
+                sheet_id=row["sheet_id"],
                 name=row["name"],
                 concept=row["concept"],
                 profile=to_npc_profile(dict(row)),
                 health_max=row["health_max"],
                 willpower_max=row["willpower_max"],
+                portrait=row["portrait_path"],
             )
             for row in rows
         ]

@@ -57,6 +57,18 @@ def test_renaming_a_player_keeps_the_seat() -> None:
     assert [(s.position, s.display_name) for s in seats.seats()] == [(0, "Léa")]
 
 
+def test_vacating_frees_the_seat_for_someone_else() -> None:
+    seats = SeatMap()
+    first, second = uuid4(), uuid4()
+    seats.enter(first, "lea")
+
+    seats.vacate(first)
+    seats.leave(first)
+    seats.enter(second, "ben")
+
+    assert [(s.position, s.account_id) for s in seats.seats()] == [(0, second)]
+
+
 def test_leaving_without_having_entered_is_ignored() -> None:
     seats = SeatMap()
 

@@ -55,6 +55,38 @@ export const frProfile = {
       cancel: "ANNULER",
       close: "TERMINER",
     },
+    closure: {
+      heading: "QUITTER LA CAMPAGNE",
+      copyUsername: "Recopie ton nom d'utilisateur : {username}",
+      disable: {
+        hint: "Tu fais une pause ? Ton compte est fermé mais rien n'est effacé.",
+        open: "DÉSACTIVER MON COMPTE",
+        title: "DÉSACTIVER MON COMPTE",
+        question: "Veux-tu vraiment désactiver ton compte ?",
+        effects: [
+          "Tu ne pourras plus te connecter, sur aucun appareil.",
+          "Tes personnages, tes notes et tes messages sont conservés.",
+          "Seul le maître du jeu pourra te rendre l'accès.",
+          "Ton départ sera annoncé dans le chat.",
+        ],
+        confirm: "DÉSACTIVER",
+        done: "Ton compte est désactivé.",
+      },
+      delete: {
+        hint: "Tu arrêtes pour de bon ? Tout ce qui t'appartient est effacé.",
+        open: "SUPPRIMER MON COMPTE",
+        title: "SUPPRIMER DÉFINITIVEMENT MON COMPTE",
+        question: "Veux-tu vraiment supprimer ton compte ? C'est irréversible.",
+        effects: [
+          "Ton compte, tes personnages, tes notes et tes photos sont effacés pour toujours.",
+          "Tes messages restent dans le chat, sans ton nom.",
+          "Personne ne pourra les récupérer, pas même le maître du jeu.",
+          "Ton départ sera annoncé dans le chat.",
+        ],
+        confirm: "SUPPRIMER DÉFINITIVEMENT",
+        done: "Ton compte est supprimé.",
+      },
+    },
     characters: {
       title: "MES PERSONNAGES · {count}",
       create: "+  CRÉER UN PERSONNAGE",

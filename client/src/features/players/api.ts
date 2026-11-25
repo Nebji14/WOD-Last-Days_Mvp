@@ -46,6 +46,11 @@ function parsePlayers(data: unknown): Player[] {
   throw new ApiError(502, "internal_error");
 }
 
+/** Rend son accès à un joueur qui avait désactivé son compte. */
+export function reactivatePlayer(playerId: string): Promise<void> {
+  return apiRequest(`/api/players/${playerId}/reactivate`, { method: "POST" });
+}
+
 /** Tous les joueurs, connectés d'abord. */
 export function fetchPlayers(): Promise<Player[]> {
   return apiRequest("/api/players", { parse: parsePlayers });

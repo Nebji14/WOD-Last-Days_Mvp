@@ -14,6 +14,7 @@ from app.main import create_app
 from app.realtime.hub import ConnectionHub
 from app.realtime.tickets import TicketStore
 from app.services.account import AccountService
+from app.services.account_closure import AccountClosureService
 from app.services.account_portrait import AccountPortraitService
 from app.services.auth import AuthService
 from app.services.awakening import AwakeningService
@@ -33,6 +34,7 @@ from app.services.resources import ResourceService
 from app.services.roll_costs import RollCosts
 from app.services.sheet_items import SheetItemService
 from app.services.table import TableService
+from tests.fake_account_closure import FakeAccountClosureStore
 from tests.fake_characters import FakeCharacterStore
 from tests.fake_dice import ScriptedDice
 from tests.fake_images import FakeFileStorage, FakeImageStore
@@ -97,7 +99,8 @@ def ctx(settings: Settings) -> Iterator[TestContext]:
     auth_service = AuthService(
         accounts, identity, settings.technical_email_domain, gm_access_path="mj-test"
     )
-    chat_service = ChatService(FakeMessageStore(accounts), hub)
+    messages = FakeMessageStore(accounts)
+    chat_service = ChatService(messages, hub)
     dice = ScriptedDice()
     container = Container(
         settings=settings,
@@ -105,6 +108,15 @@ def ctx(settings: Settings) -> Iterator[TestContext]:
         account_service=AccountService(accounts, identity, owner_check, table_service, hub),
         account_portrait_service=AccountPortraitService(
             characters, accounts, portrait_files, table_service, hub
+        ),
+        account_closure_service=AccountClosureService(
+            FakeAccountClosureStore(accounts, characters, messages),
+            messages,
+            identity,
+            owner_check,
+            table_service,
+            hub,
+            portrait_files,
         ),
         google_auth_service=GoogleAuthService(
             accounts, identity, f"{ORIGIN}/api/auth/google/callback", gm_access_path="mj-test"

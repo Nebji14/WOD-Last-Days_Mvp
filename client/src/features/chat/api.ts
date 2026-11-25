@@ -7,7 +7,8 @@ export interface ChatMessage {
   /** Rang d'envoi : fixe l'ordre d'affichage et sert de curseur d'historique. */
   readonly position: number;
   readonly author: {
-    readonly id: string;
+    /** `null` si son compte a été supprimé définitivement. */
+    readonly id: string | null;
     readonly displayName: string;
     readonly role: "player" | "gm";
   };
@@ -19,6 +20,8 @@ export interface ChatMessage {
   readonly deletedBy: "player" | "gm" | null;
   /** Détail d'un jet de dés publié dans le chat, `null` pour un message ordinaire. */
   readonly roll: Roll | null;
+  /** Annonce du départ d'un joueur : ni auteur affiché, ni modification. */
+  readonly isNotice: boolean;
 }
 
 export interface HistoryPage {
@@ -43,6 +46,11 @@ export function parseRenamedAccount(data: unknown): { id: string; displayName: s
     : null;
 }
 
+/** Identifiant d'un compte supprimé, reçu du temps réel. Retourne `null` s'il est mal formé. */
+export function parseRemovedAccount(data: unknown): string | null {
+  return isRecord(data) && typeof data.account_id === "string" ? data.account_id : null;
+}
+
 /** Valide un message reçu de l'API ou du temps réel. Retourne `null` s'il est mal formé. */
 export function parseMessage(data: unknown): ChatMessage | null {
   if (
@@ -50,7 +58,7 @@ export function parseMessage(data: unknown): ChatMessage | null {
     !isRecord(data.author) ||
     typeof data.id !== "string" ||
     typeof data.position !== "number" ||
-    typeof data.author.id !== "string" ||
+    (data.author.id !== null && typeof data.author.id !== "string") ||
     typeof data.author.display_name !== "string" ||
     !isRole(data.author.role) ||
     (data.body !== null && typeof data.body !== "string") ||
@@ -73,6 +81,7 @@ export function parseMessage(data: unknown): ChatMessage | null {
     edited: data.edited,
     deletedBy: data.deleted_by,
     roll: data.roll === undefined || data.roll === null ? null : parseRoll(data.roll),
+    isNotice: typeof data.notice === "string",
   };
 }
 

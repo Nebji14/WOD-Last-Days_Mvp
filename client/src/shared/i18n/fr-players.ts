@@ -24,6 +24,7 @@ export const frPlayers = {
       state: "État du compte",
       active: "Actif",
       disabled: "Désactivé",
+      reactivate: "RENDRE L'ACCÈS",
     },
     characters: {
       title: "PERSONNAGES · {count}",

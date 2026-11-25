@@ -64,6 +64,12 @@ class SeatMap:
         if account_id in self._names:
             self._names[account_id] = display_name
 
+    def vacate(self, account_id: UUID) -> None:
+        """Libère la place d'un joueur qui quitte la campagne."""
+        self._positions.pop(account_id, None)
+        self._names.pop(account_id, None)
+        self._connections.pop(account_id, None)
+
     def leave(self, account_id: UUID) -> None:
         """Retire une connexion du joueur. Sa place lui reste attribuée."""
         remaining = self._connections.get(account_id, 0) - 1

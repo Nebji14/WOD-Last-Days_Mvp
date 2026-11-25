@@ -12,6 +12,7 @@ import { errorLabel, labels } from "@/shared/i18n";
 import type { GoogleResult } from "../googleResult";
 import { useLoginMethods } from "../useLoginMethods";
 import { AccountSummary } from "./AccountSummary";
+import { ClosureSection } from "./ClosureSection";
 import { GoogleForm } from "./GoogleForm";
 import { NamesForm } from "./NamesForm";
 import { PasswordForm } from "./PasswordForm";
@@ -83,6 +84,7 @@ export function AccountPanel(props: AccountPanelProps) {
             <>
               <PasswordForm hasPassword={methods.password} onSaved={refresh} />
               <GoogleForm methods={methods} onSaved={refresh} />
+              {!isGm && <ClosureSection account={account} methods={methods} />}
             </>
           )}
         </div>

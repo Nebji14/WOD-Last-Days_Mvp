@@ -10,6 +10,7 @@
  * - « Modifier » et « Supprimer » apparaissent au survol : sur ses propres
  *   messages pour un joueur, sur tous pour le MJ. Le serveur revérifie ce droit.
  *   Un jet de dés se supprime mais ne se modifie pas.
+ * - L'annonce d'un départ n'a pas d'auteur ; seul le MJ peut la supprimer.
  * - Un jet de dés reste masqué tant que les dés roulent à la table.
  */
 import { type FormEvent, useEffect, useState } from "react";
@@ -41,9 +42,12 @@ const ACTION =
   "font-display cursor-pointer text-[9px] font-bold tracking-[1.5px] hover:brightness-125";
 
 export function AuthorName({ message }: { readonly message: ChatMessage }) {
+  if (message.isNotice) {
+    return null;
+  }
   return (
     <span className={message.author.role === "gm" ? "text-gm" : "text-gold"}>
-      {message.author.displayName} :{" "}
+      {message.author.id === null ? labels.chat.formerPlayer : message.author.displayName} :{" "}
     </span>
   );
 }
@@ -152,7 +156,11 @@ export function MessageRow({ message, canModerate, interactive }: MessageRowProp
           : ""
       }
     >
-      <p className="text-ink text-[15px] leading-[19px] font-medium break-words">
+      <p
+        className={`text-[15px] leading-[19px] font-medium break-words ${
+          message.isNotice ? "text-copper-light italic" : "text-ink"
+        }`}
+      >
         <AuthorName message={message} />
         {message.roll === null ? message.body : <RollMessage roll={message.roll} />}
         {message.edited && <span className="text-ink-muted"> {text.edited}</span>}
@@ -160,7 +168,7 @@ export function MessageRow({ message, canModerate, interactive }: MessageRowProp
       {errorCode !== null && <p className="text-danger text-sm">{errorLabel(errorCode)}</p>}
       {showActions && mode === "idle" && (
         <div className="mt-1.5 hidden justify-end gap-[18px] group-focus-within:flex group-hover:flex">
-          {message.roll === null && (
+          {message.roll === null && !message.isNotice && (
             <button
               type="button"
               onClick={() => {

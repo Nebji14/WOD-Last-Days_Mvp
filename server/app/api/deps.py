@@ -14,6 +14,7 @@ from app.domain.accounts import Account, Role
 from app.realtime.hub import ConnectionHub
 from app.realtime.tickets import TicketStore
 from app.services.account import AccountService
+from app.services.account_closure import AccountClosureService
 from app.services.account_portrait import AccountPortraitService
 from app.services.auth import AuthService
 from app.services.awakening import AwakeningService
@@ -40,6 +41,7 @@ class Container:
     auth_service: AuthService
     account_service: AccountService
     account_portrait_service: AccountPortraitService
+    account_closure_service: AccountClosureService
     google_auth_service: GoogleAuthService
     google_link_service: GoogleLinkService
     token_verifier: TokenVerifier

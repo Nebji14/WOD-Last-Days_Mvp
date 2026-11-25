@@ -15,7 +15,7 @@ import type { Character } from "@/features/characters/model";
 import { ApiError } from "@/shared/api/client";
 import { useDetachedRealtime } from "@/shared/realtime/useDetachedRealtime";
 
-import { fetchPlayers, type Player } from "./api";
+import { fetchPlayers, type Player, reactivatePlayer } from "./api";
 
 const REALTIME_EVENTS = ["table.state", "character.changed"] as const;
 
@@ -26,10 +26,12 @@ export interface PlayersToolState {
   /** Personnages du joueur sélectionné. */
   readonly characters: readonly Character[];
   readonly errorCode: string | null;
-  /** Personnage dont l'éveil est en cours d'enregistrement. */
+  /** Personnage ou joueur dont une action est en cours d'enregistrement. */
   readonly busyId: string | null;
   readonly select: (playerId: string) => void;
   readonly awaken: (characterId: string) => void;
+  /** Rend son accès à un joueur désactivé. */
+  readonly reactivate: (playerId: string) => void;
 }
 
 export function usePlayersTool(): PlayersToolState {
@@ -101,11 +103,12 @@ export function usePlayersTool(): PlayersToolState {
     [fail, loadCharacters],
   );
 
-  const awaken = useCallback(
-    (characterId: string) => {
-      setBusyId(characterId);
+  /** Lance une action sur un personnage ou un joueur, puis relit la liste. */
+  const act = useCallback(
+    (subjectId: string, action: () => Promise<unknown>) => {
+      setBusyId(subjectId);
       setErrorCode(null);
-      awakenCharacter(characterId)
+      action()
         .then(() => reload())
         .catch(fail)
         .finally(() => {
@@ -117,5 +120,14 @@ export function usePlayersTool(): PlayersToolState {
     [fail, reload],
   );
 
-  return { players, selectedId, characters, errorCode, busyId, select, awaken };
+  const awaken = useCallback(
+    (characterId: string) => act(characterId, () => awakenCharacter(characterId)),
+    [act],
+  );
+  const reactivate = useCallback(
+    (playerId: string) => act(playerId, () => reactivatePlayer(playerId)),
+    [act],
+  );
+
+  return { players, selectedId, characters, errorCode, busyId, select, awaken, reactivate };
 }

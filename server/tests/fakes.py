@@ -126,6 +126,10 @@ class FakeIdentityProvider:
     async def sign_out(self, access_token: str) -> None:
         self.sessions.pop(access_token, None)
 
+    async def sign_out_everywhere(self, access_token: str) -> None:
+        user_id = self.sessions[access_token]
+        self.sessions = {t: owner for t, owner in self.sessions.items() if owner != user_id}
+
     async def sign_out_others(self, access_token: str) -> None:
         user_id = self.sessions[access_token]
         self.sessions = {

@@ -16,7 +16,8 @@ import { PlayerList } from "./PlayerList";
 const MESSAGE = "text-ink-muted flex flex-1 items-center justify-center p-8 text-xl italic";
 
 export function PlayersToolScreen() {
-  const { players, selectedId, characters, errorCode, busyId, select, awaken } = usePlayersTool();
+  const tool = usePlayersTool();
+  const { players, selectedId, characters, errorCode, busyId, select, awaken } = tool;
   const text = labels.playersTool;
   const selected = players?.find((player) => player.id === selectedId) ?? null;
 
@@ -48,6 +49,7 @@ export function PlayersToolScreen() {
               characters={characters}
               busyId={busyId}
               onAwaken={awaken}
+              onReactivate={() => tool.reactivate(selected.id)}
             />
           )}
         </main>

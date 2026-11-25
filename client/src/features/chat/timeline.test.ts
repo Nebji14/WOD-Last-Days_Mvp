@@ -15,6 +15,7 @@ function message(id: string, sentAt: Date): ChatMessage {
     edited: false,
     deletedBy: null,
     roll: null,
+    isNotice: false,
   };
 }
 

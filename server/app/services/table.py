@@ -103,6 +103,11 @@ class TableService:
             self._seats.rename(account.id, account.display_name)
         await self.refresh()
 
+    async def vacate(self, account_id: UUID) -> None:
+        """Retire un joueur de la table et diffuse l'état."""
+        self._seats.vacate(account_id)
+        await self.refresh()
+
     async def refresh(self) -> None:
         """Rediffuse l'état de la table : un personnage joué a changé."""
         await self._broadcaster.table_changed(await self.state())

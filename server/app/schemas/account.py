@@ -31,6 +31,12 @@ class ChangePasswordRequest(OwnerConfirmationRequest):
     password_confirmation: str = Field(min_length=1, max_length=MAX_PASSWORD_INPUT)
 
 
+class CloseAccountRequest(OwnerConfirmationRequest):
+    """Départ d'un joueur : son nom d'utilisateur, recopié à l'identique."""
+
+    username: str = Field(min_length=1, max_length=MAX_USERNAME_INPUT)
+
+
 class GoogleUrlResponse(BaseModel):
     """Adresse de Google où envoyer le navigateur."""
 

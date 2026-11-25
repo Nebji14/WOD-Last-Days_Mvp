@@ -11,6 +11,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api import (
+    account,
     auth,
     characters,
     chat,
@@ -46,6 +47,7 @@ from app.repositories.npcs import PgNpcRepository
 from app.repositories.players import PgPlayerRepository
 from app.repositories.resources import PgResourceRepository
 from app.repositories.sheet_items import PgSheetItemRepository
+from app.services.account import AccountService
 from app.services.auth import AuthService
 from app.services.awakening import AwakeningService
 from app.services.character_access import CharacterAccess
@@ -53,9 +55,11 @@ from app.services.characters import CharacterService
 from app.services.chat import ChatService
 from app.services.dice import DiceService
 from app.services.google_auth import GoogleAuthService
+from app.services.google_link import GoogleLinkService
 from app.services.image_table import ImageTableService
 from app.services.images import ImageService
 from app.services.npcs import NpcService
+from app.services.owner_check import OwnerCheck
 from app.services.players import PlayerService
 from app.services.resources import ResourceService
 from app.services.roll_costs import RollCosts
@@ -98,6 +102,7 @@ def create_app(settings: Settings | None = None, container: Container | None = N
         async with httpx.AsyncClient() as http_client:
             storage = SupabaseStorageGateway(settings, http_client)
             identity = SupabaseAuthGateway(settings, http_client)
+            owner_check = OwnerCheck(accounts, identity)
             chat_service = ChatService(PgChatRepository(pool), hub)
             app.state.container = Container(
                 settings=settings,
@@ -107,11 +112,15 @@ def create_app(settings: Settings | None = None, container: Container | None = N
                     technical_email_domain=settings.technical_email_domain,
                     gm_access_path=settings.gm_access_path,
                 ),
+                account_service=AccountService(accounts, identity, owner_check, table_service, hub),
                 google_auth_service=GoogleAuthService(
                     accounts=accounts,
                     identity=identity,
                     redirect_url=google_callback_url(settings),
                     gm_access_path=settings.gm_access_path,
+                ),
+                google_link_service=GoogleLinkService(
+                    accounts, identity, owner_check, google_callback_url(settings)
                 ),
                 token_verifier=SupabaseTokenVerifier(settings.supabase_url),
                 rate_limiter=RateLimiter(),
@@ -159,6 +168,7 @@ def create_app(settings: Settings | None = None, container: Container | None = N
     app.include_router(health.router)
     app.include_router(auth.router)
     app.include_router(google_auth.router)
+    app.include_router(account.router)
     app.include_router(chat.router)
     app.include_router(dice.router)
     app.include_router(characters.router)

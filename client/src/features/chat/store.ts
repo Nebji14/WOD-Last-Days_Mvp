@@ -27,6 +27,8 @@ interface ChatState {
   readonly pending: readonly PendingMessage[];
   /** Ajoute un message ou remplace sa version précédente (création, modification, suppression). */
   upsert(message: ChatMessage): void;
+  /** Affiche le nouveau nom d'un participant sur ses messages. */
+  renameAuthor(authorId: string, displayName: string): void;
   /** Recharge les messages les plus récents ; appelé à chaque (re)connexion. */
   loadLatest(): Promise<void>;
   /** Charge la page qui précède le plus ancien message connu. */
@@ -61,6 +63,16 @@ export const useChatStore = create<ChatState>()((set, get) => ({
 
   upsert(message) {
     set((state) => ({ messages: merge(state.messages, [message]) }));
+  },
+
+  renameAuthor(authorId, displayName) {
+    set((state) => ({
+      messages: state.messages.map((message) =>
+        message.author.id === authorId
+          ? { ...message, author: { ...message.author, displayName } }
+          : message,
+      ),
+    }));
   },
 
   async loadLatest() {

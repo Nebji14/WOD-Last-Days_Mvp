@@ -13,12 +13,14 @@ from app.core.security import ACCESS_COOKIE, InvalidTokenError, TokenVerifier
 from app.domain.accounts import Account, Role
 from app.realtime.hub import ConnectionHub
 from app.realtime.tickets import TicketStore
+from app.services.account import AccountService
 from app.services.auth import AuthService
 from app.services.awakening import AwakeningService
 from app.services.characters import CharacterService
 from app.services.chat import ChatService
 from app.services.dice import DiceService
 from app.services.google_auth import GoogleAuthService
+from app.services.google_link import GoogleLinkService
 from app.services.image_table import ImageTableService
 from app.services.images import ImageService
 from app.services.npcs import NpcService
@@ -34,7 +36,9 @@ class Container:
 
     settings: Settings
     auth_service: AuthService
+    account_service: AccountService
     google_auth_service: GoogleAuthService
+    google_link_service: GoogleLinkService
     token_verifier: TokenVerifier
     rate_limiter: RateLimiter
     chat_service: ChatService
@@ -71,10 +75,12 @@ class Session:
 
     Attributs:
         expires_at: expiration du jeton d'accès, en secondes depuis l'époque Unix.
+        authenticated_at: dernière connexion de la session, ``None`` si inconnue.
     """
 
     account: Account
     expires_at: float
+    authenticated_at: float | None
 
 
 async def get_current_session(request: Request, container: ContainerDep) -> Session:
@@ -96,7 +102,11 @@ async def get_current_session(request: Request, container: ContainerDep) -> Sess
     account = await container.auth_service.get_active_account(claims.account_id)
     if account is None:
         raise _not_authenticated()
-    return Session(account=account, expires_at=claims.expires_at)
+    return Session(
+        account=account,
+        expires_at=claims.expires_at,
+        authenticated_at=claims.authenticated_at,
+    )
 
 
 CurrentSession = Annotated[Session, Depends(get_current_session)]

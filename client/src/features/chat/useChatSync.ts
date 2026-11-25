@@ -5,6 +5,7 @@
  *
  * - Chaque événement `chat.message` met à jour le message concerné : création,
  *   modification ou suppression.
+ * - Un participant qui change de nom affiché est renommé sur ses messages.
  * - À chaque (re)connexion, les messages récents sont rechargés pour rattraper
  *   ce qui a été manqué, puis les envois en attente repartent.
  */
@@ -12,7 +13,7 @@ import { useEffect } from "react";
 
 import type { RealtimeClient, RealtimeStatus } from "@/shared/realtime/client";
 
-import { parseMessage } from "./api";
+import { parseMessage, parseRenamedAccount } from "./api";
 import { useChatStore } from "./store";
 
 const PENDING_RETRY_MS = 5000;
@@ -28,8 +29,15 @@ export function useChatSync(realtime: RealtimeClient | null, status: RealtimeSta
         useChatStore.getState().upsert(message);
       }
     });
+    const unsubscribeRename = realtime.on("account.changed", (data) => {
+      const renamed = parseRenamedAccount(data);
+      if (renamed !== null) {
+        useChatStore.getState().renameAuthor(renamed.id, renamed.displayName);
+      }
+    });
     return () => {
       unsubscribe();
+      unsubscribeRename();
       useChatStore.getState().reset();
     };
   }, [realtime]);

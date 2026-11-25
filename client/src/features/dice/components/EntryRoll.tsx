@@ -95,7 +95,9 @@ export function EntryRoll({ character, sheet, entry }: EntryRollProps) {
             </strong>
           </p>
           {cost > 0 && (
-            <p className={`text-sm italic ${enoughWillpower ? "text-copper-light" : "text-danger"}`}>
+            <p
+              className={`text-sm italic ${enoughWillpower ? "text-copper-light" : "text-danger"}`}
+            >
               {enoughWillpower ? fill(text.recipe.costNote, { cost }) : text.recipe.notEnough}
             </p>
           )}

@@ -42,6 +42,10 @@ export function TableScreen() {
 
   const isGm = account.role === "gm";
   const seats = table?.seats ?? [];
+  // Le nom suit l'état diffusé : il change en direct quand le compte est renommé.
+  const liveName = isGm
+    ? table?.gm.displayName
+    : seats.find((seat) => seat.accountId === account.id)?.displayName;
 
   return (
     <>
@@ -53,7 +57,7 @@ export function TableScreen() {
           />
           <EmberParticles className="top-16 opacity-70" density="sparse" />
           <TableHeader
-            account={account}
+            account={{ ...account, displayName: liveName ?? account.displayName }}
             loggingOut={session.loggingOut}
             onLogout={session.logOut}
           />

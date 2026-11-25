@@ -11,7 +11,7 @@ interface DetachedTitleBarProps {
 
 export function DetachedTitleBar({ title, subtitle, closeLabel }: DetachedTitleBarProps) {
   return (
-    <header className="border-line bg-panel flex h-[60px] shrink-0 items-center justify-between border-b px-8">
+    <header className="border-line bg-panel flex h-[60px] shrink-0 items-center justify-between gap-4 border-b px-4 sm:px-8">
       <div>
         <h1 className="font-display text-ink-bright text-[20px] font-bold tracking-[4px]">
           {title}

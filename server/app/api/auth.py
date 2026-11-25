@@ -111,7 +111,7 @@ async def me(account: CurrentAccount) -> AccountResponse:
 async def login_methods(account: CurrentAccount, container: ContainerDep) -> LoginMethodsResponse:
     """Méthodes de connexion rattachées au compte, affichées dans le profil."""
     methods = await container.auth_service.login_methods(account.id)
-    return LoginMethodsResponse(password="password" in methods, google="google" in methods)
+    return LoginMethodsResponse(password=methods.password, google=methods.google)
 
 
 async def _login(

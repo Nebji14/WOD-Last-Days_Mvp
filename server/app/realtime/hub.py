@@ -12,6 +12,7 @@ from uuid import UUID
 
 from fastapi import WebSocket
 
+from app.domain.accounts import Account
 from app.domain.chat import ChatMessage
 from app.schemas.chat import MessageResponse
 from app.schemas.table import TableStateResponse
@@ -21,6 +22,7 @@ logger = logging.getLogger(__name__)
 
 EVENT_TABLE_STATE = "table.state"
 EVENT_CHAT_MESSAGE = "chat.message"
+EVENT_ACCOUNT_CHANGED = "account.changed"
 EVENT_CHARACTER_CHANGED = "character.changed"
 EVENT_IMAGES_CHANGED = "images.changed"
 EVENT_NPCS_CHANGED = "npcs.changed"
@@ -55,6 +57,13 @@ class ConnectionHub:
         """Diffuse l'état de présence de la table."""
         await self._broadcast(
             EVENT_TABLE_STATE, TableStateResponse.from_state(state).model_dump(mode="json")
+        )
+
+    async def account_changed(self, account: Account) -> None:
+        """Diffuse le nouveau nom affiché d'un participant."""
+        await self._broadcast(
+            EVENT_ACCOUNT_CHANGED,
+            {"account_id": str(account.id), "display_name": account.display_name},
         )
 
     async def message_changed(self, message: ChatMessage) -> None:

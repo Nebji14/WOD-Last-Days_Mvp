@@ -7,12 +7,13 @@ from typing import Any
 from uuid import UUID, uuid4
 
 from app.core.security import InvalidTokenError, SessionTokens, TokenClaims, pkce_challenge
-from app.domain.accounts import Account, AccountStatus, Role
+from app.domain.accounts import Account, AccountStatus, LoginMethods, Role
 from app.domain.chat import ChatMessage
 from app.gateways.supabase_auth import (
     ExternalIdentity,
     IdentityAlreadyExistsError,
     InvalidCredentialsError,
+    LinkedIdentity,
 )
 from app.repositories.accounts import UsernameAlreadyExistsError
 
@@ -22,6 +23,7 @@ class FakeAccountStore:
 
     def __init__(self) -> None:
         self.accounts: dict[UUID, Account] = {}
+        self.identity: FakeIdentityProvider | None = None
 
     async def get_by_id(self, account_id: UUID) -> Account | None:
         return self.accounts.get(account_id)
@@ -45,15 +47,38 @@ class FakeAccountStore:
         self.accounts[account_id] = account
         return account
 
-    def disable(self, account_id: UUID) -> None:
+    async def login_methods(self, account_id: UUID) -> LoginMethods:
+        assert self.identity is not None
+        return self.identity.methods_of(account_id)
+
+    async def is_display_name_taken(self, display_name: str, account_id: UUID) -> bool:
+        wanted = display_name.lower()
+        return any(
+            wanted in (a.display_name.lower(), a.username.lower())
+            for a in self.accounts.values()
+            if a.id != account_id
+        )
+
+    async def update_names(
+        self, account_id: UUID, username: str | None, display_name: str | None
+    ) -> Account:
         current = self.accounts[account_id]
-        self.accounts[account_id] = Account(
-            current.id,
-            current.username,
-            current.display_name,
-            current.auth_email,
-            current.role,
-            AccountStatus.DISABLED,
+        holder = await self.get_by_username(username) if username else None
+        if holder is not None and holder.id != account_id:
+            raise UsernameAlreadyExistsError
+        self.accounts[account_id] = replace(
+            current,
+            username=username or current.username,
+            display_name=display_name or current.display_name,
+        )
+        return self.accounts[account_id]
+
+    async def update_auth_email(self, account_id: UUID, auth_email: str) -> None:
+        self.accounts[account_id] = replace(self.accounts[account_id], auth_email=auth_email)
+
+    def disable(self, account_id: UUID) -> None:
+        self.accounts[account_id] = replace(
+            self.accounts[account_id], status=AccountStatus.DISABLED
         )
 
 
@@ -68,8 +93,12 @@ class FakeIdentityProvider:
     # Connexion Google : empreintes PKCE reçues au départ, codes délivrés au retour.
     challenges: set[str] = field(default_factory=set)
     google_codes: dict[str, ExternalIdentity] = field(default_factory=dict)
-    google_users: set[UUID] = field(default_factory=set)
+    # Comptes Google rattachés à chaque utilisateur, du plus ancien au plus récent.
+    google_links: dict[UUID, list[LinkedIdentity]] = field(default_factory=dict)
     google_identities: dict[str, ExternalIdentity] = field(default_factory=dict)
+    # Date de connexion de chaque session, relue par le vérificateur de jetons.
+    authenticated_at: dict[str, float] = field(default_factory=dict)
+    link_requests: int = 0
 
     async def create_user(self, email: str, password: str) -> UUID:
         if email in self.users:
@@ -97,11 +126,39 @@ class FakeIdentityProvider:
     async def sign_out(self, access_token: str) -> None:
         self.sessions.pop(access_token, None)
 
-    async def get_providers(self, user_id: UUID) -> list[str]:
-        providers = ["google"] if user_id in self.google_users else []
-        if any(user[0] == user_id for user in self.users.values()):
-            providers.append("email")
-        return providers
+    async def sign_out_others(self, access_token: str) -> None:
+        user_id = self.sessions[access_token]
+        self.sessions = {
+            token: owner
+            for token, owner in self.sessions.items()
+            if owner != user_id or token == access_token
+        }
+
+    async def set_password(self, user_id: UUID, password: str, email: str | None = None) -> None:
+        known = next((mail for mail, user in self.users.items() if user[0] == user_id), email)
+        assert known is not None
+        self.users[known] = (user_id, password)
+
+    def methods_of(self, user_id: UUID) -> LoginMethods:
+        return LoginMethods(
+            password=any(user[0] == user_id for user in self.users.values()),
+            google=bool(self.google_links.get(user_id)),
+        )
+
+    async def link_url(
+        self, access_token: str, provider: str, redirect_to: str, code_challenge: str
+    ) -> str:
+        assert access_token in self.sessions
+        self.link_requests += 1
+        self.challenges.add(code_challenge)
+        return f"https://example.supabase.co/auth/v1/link?provider={provider}"
+
+    async def linked_identities(self, access_token: str) -> list[LinkedIdentity]:
+        return list(self.google_links.get(self.sessions[access_token], []))
+
+    async def unlink_identity(self, access_token: str, identity_id: UUID) -> None:
+        links = self.google_links[self.sessions[access_token]]
+        links[:] = [link for link in links if link.identity_id != identity_id]
 
     def authorize_url(self, provider: str, redirect_to: str, code_challenge: str) -> str:
         self.challenges.add(code_challenge)
@@ -111,17 +168,30 @@ class FakeIdentityProvider:
         identity = self.google_codes.pop(auth_code, None)
         if identity is None or pkce_challenge(code_verifier) not in self.challenges:
             raise InvalidCredentialsError
-        self.google_users.add(identity.user_id)
+        self._add_google_link(identity.user_id, linking=self.link_requests > 0)
+        self.link_requests = 0
         tokens = self._open_session(identity.user_id)
         self.google_identities[tokens.access_token] = identity
         return tokens
 
     async def get_user(self, access_token: str) -> ExternalIdentity:
-        return self.google_identities[access_token]
+        known = self.google_identities.get(access_token)
+        if known is not None:
+            return known
+        user_id = self.sessions[access_token]
+        email = next(mail for mail, user in self.users.items() if user[0] == user_id)
+        return ExternalIdentity(user_id=user_id, email=email, full_name=None)
+
+    def _add_google_link(self, user_id: UUID, *, linking: bool) -> None:
+        """Une première connexion ou un rattachement ajoute un compte Google."""
+        links = self.google_links.setdefault(user_id, [])
+        if linking or not links:
+            links.append(LinkedIdentity(uuid4(), "google", datetime.now(UTC)))
 
     def _open_session(self, user_id: UUID) -> SessionTokens:
         access, refresh = f"access-{uuid4().hex}", f"refresh-{uuid4().hex}"
         self.sessions[access] = user_id
+        self.authenticated_at[access] = time.time()
         self.refresh_tokens[refresh] = user_id
         return SessionTokens(access_token=access, refresh_token=refresh, expires_in=3600)
 
@@ -136,7 +206,11 @@ class FakeTokenVerifier:
         user_id = self._identity.sessions.get(token)
         if user_id is None:
             raise InvalidTokenError
-        return TokenClaims(account_id=user_id, expires_at=time.time() + 3600)
+        return TokenClaims(
+            account_id=user_id,
+            expires_at=time.time() + 3600,
+            authenticated_at=self._identity.authenticated_at.get(token),
+        )
 
 
 class FakeMessageStore:

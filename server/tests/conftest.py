@@ -13,6 +13,7 @@ from app.core.rate_limit import RateLimiter
 from app.main import create_app
 from app.realtime.hub import ConnectionHub
 from app.realtime.tickets import TicketStore
+from app.services.account import AccountService
 from app.services.auth import AuthService
 from app.services.awakening import AwakeningService
 from app.services.character_access import CharacterAccess
@@ -20,9 +21,11 @@ from app.services.characters import CharacterService
 from app.services.chat import ChatService
 from app.services.dice import DiceService
 from app.services.google_auth import GoogleAuthService
+from app.services.google_link import GoogleLinkService
 from app.services.image_table import ImageTableService
 from app.services.images import ImageService
 from app.services.npcs import NpcService
+from app.services.owner_check import OwnerCheck
 from app.services.players import PlayerService
 from app.services.resources import ResourceService
 from app.services.roll_costs import RollCosts
@@ -79,6 +82,8 @@ def settings() -> Settings:
 def ctx(settings: Settings) -> Iterator[TestContext]:
     accounts = FakeAccountStore()
     identity = FakeIdentityProvider()
+    accounts.identity = identity
+    owner_check = OwnerCheck(accounts, identity)
     hub = ConnectionHub()
     characters = FakeCharacterStore(accounts)
     resources = FakeResourceStore(characters)
@@ -94,8 +99,12 @@ def ctx(settings: Settings) -> Iterator[TestContext]:
     container = Container(
         settings=settings,
         auth_service=auth_service,
+        account_service=AccountService(accounts, identity, owner_check, table_service, hub),
         google_auth_service=GoogleAuthService(
             accounts, identity, f"{ORIGIN}/api/auth/google/callback", gm_access_path="mj-test"
+        ),
+        google_link_service=GoogleLinkService(
+            accounts, identity, owner_check, f"{ORIGIN}/api/auth/google/callback"
         ),
         token_verifier=FakeTokenVerifier(identity),
         rate_limiter=RateLimiter(),

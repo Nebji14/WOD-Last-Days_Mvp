@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { isValidUsername, passwordViolations } from "./validation";
+import { isValidUsername, normalizedDisplayName, passwordViolations } from "./validation";
 
 describe("isValidUsername", () => {
   it.each(["lea", "lea.vale", "Yanis_42", "a-b-c", "x".repeat(24)])("accepte %s", (username) => {
@@ -9,6 +9,20 @@ describe("isValidUsername", () => {
 
   it.each(["", "ab", "x".repeat(25), "léa", "lea vale", "lea@vale"])("refuse %s", (username) => {
     expect(isValidUsername(username)).toBe(false);
+  });
+});
+
+describe("normalizedDisplayName", () => {
+  it.each([
+    ["Léa", "Léa"],
+    ["  Léa   la  Chasseuse ", "Léa la Chasseuse"],
+    ["x".repeat(40), "x".repeat(40)],
+  ])("accepte %s", (name, expected) => {
+    expect(normalizedDisplayName(name)).toBe(expected);
+  });
+
+  it.each(["", "   ", "x".repeat(41), "Lé\u200ba", "Léa\u0000"])("refuse %j", (name) => {
+    expect(normalizedDisplayName(name)).toBeNull();
   });
 });
 

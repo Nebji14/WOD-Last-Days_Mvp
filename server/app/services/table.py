@@ -93,6 +93,14 @@ class TableService:
             self._seats.leave(account.id)
         await self._broadcaster.table_changed(await self.state())
 
+    async def rename(self, account: Account) -> None:
+        """Affiche le nouveau nom d'un participant et diffuse l'état."""
+        if account.role is Role.GM:
+            self._gm_name = account.display_name
+        else:
+            self._seats.rename(account.id, account.display_name)
+        await self.refresh()
+
     async def refresh(self) -> None:
         """Rediffuse l'état de la table : un personnage joué a changé."""
         await self._broadcaster.table_changed(await self.state())

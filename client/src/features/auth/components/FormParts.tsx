@@ -1,7 +1,9 @@
 /** Éléments partagés par les formulaires de connexion et d'inscription. */
 import Link from "next/link";
 
-import { labels } from "@/shared/i18n";
+import { errorLabel, labels } from "@/shared/i18n";
+
+import type { FormIssue } from "../formIssue";
 
 /** Message d'erreur affiché sous les champs. */
 export function FormError({ message }: { readonly message: string }) {
@@ -9,6 +11,22 @@ export function FormError({ message }: { readonly message: string }) {
     <p role="alert" className="text-danger text-[17px] leading-snug font-semibold">
       {message}
     </p>
+  );
+}
+
+/** Refus d'un formulaire, avec les règles de mot de passe non respectées. */
+export function IssueMessage({ issue }: { readonly issue: FormIssue }) {
+  return (
+    <div className="flex flex-col gap-1">
+      <FormError message={errorLabel(issue.code)} />
+      {issue.rules.length > 0 && (
+        <ul className="text-ink-muted list-inside list-disc text-base font-medium">
+          {issue.rules.map((rule) => (
+            <li key={rule}>{labels.passwordRules[rule]}</li>
+          ))}
+        </ul>
+      )}
+    </div>
   );
 }
 

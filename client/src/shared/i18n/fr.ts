@@ -147,7 +147,13 @@ export const fr = {
     username_taken: "Ce nom de chasseur est déjà pris.",
     username_invalid:
       "Le nom doit contenir de 3 à 24 caractères : lettres sans accent, chiffres, point, tiret.",
+    display_name_taken: "Ce nom affiché est déjà pris par un autre participant.",
+    display_name_invalid: "Le nom affiché doit contenir de 1 à 40 caractères visibles.",
     google_failed: "La connexion avec Google n'a pas abouti. Réessaie.",
+    google_already_linked: "Ce compte Google est déjà rattaché à un compte.",
+    last_login_method: "Ajoute d'abord un mot de passe : il faut garder un moyen de te connecter.",
+    wrong_password: "Le mot de passe actuel est incorrect.",
+    reauthentication_required: "Par sécurité, confirme ton identité avec Google, puis recommence.",
     password_mismatch: "Les deux mots de passe sont différents.",
     password_too_weak: "Le mot de passe ne respecte pas les règles de sécurité.",
     rate_limited: "Trop de tentatives. Patiente quelques minutes avant de réessayer.",

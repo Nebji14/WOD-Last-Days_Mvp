@@ -17,6 +17,8 @@ _USERNAME_FORBIDDEN = re.compile(r"[^A-Za-z0-9._-]+")
 _NUMBER_ROOM = 4
 _FALLBACK_USERNAME = "chasseur"
 
+DISPLAY_NAME_MAX_LENGTH = 40
+
 PASSWORD_MIN_LENGTH = 10
 # bcrypt, utilisé par le fournisseur d'identité, ignore les octets au-delà de 72.
 PASSWORD_MAX_BYTES = 72
@@ -67,6 +69,14 @@ class Account:
         return self.status is AccountStatus.ACTIVE
 
 
+@dataclass(frozen=True, slots=True)
+class LoginMethods:
+    """Méthodes de connexion utilisables d'un compte."""
+
+    password: bool
+    google: bool
+
+
 def is_valid_username(username: str) -> bool:
     """Vérifie le format d'un nom d'utilisateur.
 
@@ -75,6 +85,20 @@ def is_valid_username(username: str) -> bool:
     valide.
     """
     return _USERNAME_PATTERN.fullmatch(username) is not None
+
+
+def normalized_display_name(name: str) -> str | None:
+    """Nom affiché sans espace superflu, ou ``None`` s'il n'est pas valide.
+
+    De 1 à 40 caractères visibles ; les caractères de contrôle ou invisibles sont
+    refusés, car ils permettraient d'imiter le nom d'un autre.
+    """
+    normalized = " ".join(unicodedata.normalize("NFC", name).split())
+    if not 1 <= len(normalized) <= DISPLAY_NAME_MAX_LENGTH:
+        return None
+    if any(unicodedata.category(char).startswith("C") for char in normalized):
+        return None
+    return normalized
 
 
 def password_violations(password: str) -> list[PasswordRule]:
@@ -95,14 +119,13 @@ def password_violations(password: str) -> list[PasswordRule]:
     return violations
 
 
-def technical_email(username: str, domain: str) -> str:
-    """Construit l'adresse technique d'un joueur à partir de son nom d'utilisateur.
+def technical_email(identifier: UUID, domain: str) -> str:
+    """Construit l'adresse technique d'un joueur, exigée par le fournisseur d'identité.
 
-    Le fournisseur d'identité exige une adresse ; elle reste invisible pour le
-    joueur. La casse est neutralisée pour rester cohérente avec
-    l'unicité insensible à la casse du nom d'utilisateur.
+    Invisible pour le joueur, elle ne dépend pas de son nom d'utilisateur : il
+    peut en changer, et un autre joueur peut reprendre l'ancien.
     """
-    return f"{username.lower()}@{domain}"
+    return f"{identifier.hex}@{domain}"
 
 
 def username_from_identity(full_name: str | None, email: str) -> str:

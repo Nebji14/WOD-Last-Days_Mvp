@@ -27,6 +27,8 @@ _JWKS_CACHE_SECONDS = 3600
 # Supabase peut avancer de quelques fractions de seconde sur celle du serveur,
 # ce qui ferait refuser un jeton tout juste émis.
 _JWT_CLOCK_LEEWAY_SECONDS = 5
+# Un renouvellement de jeton ne prouve pas la présence du titulaire.
+_REFRESH_METHOD = "token_refresh"
 
 
 # Longueur du vérificateur PKCE : 64 octets aléatoires donnent 86 caractères,
@@ -44,10 +46,13 @@ class TokenClaims:
 
     Attributs:
         expires_at: date d'expiration du jeton, en secondes depuis l'époque Unix.
+        authenticated_at: dernière connexion de la session (mot de passe ou Google) ;
+            un simple renouvellement ne la change pas. ``None`` si elle est inconnue.
     """
 
     account_id: UUID
     expires_at: float
+    authenticated_at: float | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -102,9 +107,27 @@ class SupabaseTokenVerifier:
                 leeway=_JWT_CLOCK_LEEWAY_SECONDS,
                 options={"require": ["exp", "sub", "aud", "iss"]},
             )
-            return TokenClaims(account_id=UUID(payload["sub"]), expires_at=float(payload["exp"]))
+            return TokenClaims(
+                account_id=UUID(payload["sub"]),
+                expires_at=float(payload["exp"]),
+                authenticated_at=_last_authentication(payload.get("amr")),
+            )
         except (jwt.PyJWTError, ValueError, TypeError) as exc:
             raise InvalidTokenError from exc
+
+
+def _last_authentication(methods: object) -> float | None:
+    """Date de la dernière connexion, lue dans la liste ``amr`` du jeton."""
+    if not isinstance(methods, list):
+        return None
+    dates = [
+        float(entry["timestamp"])
+        for entry in methods
+        if isinstance(entry, dict)
+        and entry.get("method") != _REFRESH_METHOD
+        and isinstance(entry.get("timestamp"), int | float)
+    ]
+    return max(dates, default=None)
 
 
 def set_session_cookies(response: Response, tokens: SessionTokens, settings: Settings) -> None:

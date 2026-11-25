@@ -43,15 +43,21 @@ def _verify(token: str) -> TokenClaims:
     return asyncio.run(_verifier().verify(token))
 
 
-def _token(issued_offset: float = 0, expires_offset: float = 3600) -> str:
+def _token(
+    issued_offset: float = 0,
+    expires_offset: float = 3600,
+    amr: list[dict[str, Any]] | None = None,
+) -> str:
     now = time.time()
-    claims = {
+    claims: dict[str, Any] = {
         "sub": str(uuid4()),
         "aud": "authenticated",
         "iss": ISSUER,
         "iat": int(now + issued_offset),
         "exp": int(now + expires_offset),
     }
+    if amr is not None:
+        claims["amr"] = amr
     return jwt.encode(claims, PRIVATE_KEY, algorithm="ES256")
 
 
@@ -73,3 +79,21 @@ def test_rejects_a_token_issued_well_in_the_future() -> None:
 def test_rejects_an_expired_token() -> None:
     with pytest.raises(InvalidTokenError):
         _verify(_token(issued_offset=-3700, expires_offset=-60))
+
+
+def test_reads_the_last_authentication_and_ignores_refreshes() -> None:
+    claims = _verify(
+        _token(
+            amr=[
+                {"method": "password", "timestamp": 1000},
+                {"method": "oauth", "timestamp": 2000},
+                {"method": "token_refresh", "timestamp": 3000},
+            ]
+        )
+    )
+
+    assert claims.authenticated_at == 2000
+
+
+def test_last_authentication_is_unknown_without_methods() -> None:
+    assert _verify(_token()).authenticated_at is None

@@ -35,7 +35,7 @@ export function CharacterCard({ character, busy, onPlay, onDelete }: CharacterCa
   return (
     <li
       aria-label={name}
-      className={`bg-field-deep flex gap-7 rounded-xs border p-3 ${
+      className={`bg-field-deep flex flex-col gap-4 rounded-xs border p-3 sm:flex-row sm:gap-7 ${
         character.is_played ? "border-gold shadow-[0_0_18px_rgb(201_176_106/0.15)]" : "border-line"
       }`}
     >

@@ -1,14 +1,20 @@
-/** Méthodes de connexion du compte, lues une fois à l'ouverture du profil. */
-import { useEffect, useState } from "react";
+/** Méthodes de connexion du compte, relues après chaque changement. */
+import { useCallback, useEffect, useState } from "react";
 
 import { fetchLoginMethods, type LoginMethods } from "@/features/auth/api";
 
-/**
- * Retourne les méthodes de connexion, `null` pendant la lecture ou si elle a
- * échoué : le profil reste alors utilisable, sans état affiché pour les méthodes.
- */
-export function useLoginMethods(): LoginMethods | null {
+export interface LoginMethodsState {
+  /**
+   * `null` pendant la lecture ou si elle a échoué : le profil reste alors
+   * utilisable, sans état affiché pour les méthodes.
+   */
+  readonly methods: LoginMethods | null;
+  readonly refresh: () => void;
+}
+
+export function useLoginMethods(): LoginMethodsState {
   const [methods, setMethods] = useState<LoginMethods | null>(null);
+  const [version, setVersion] = useState(0);
 
   useEffect(() => {
     let active = true;
@@ -25,7 +31,8 @@ export function useLoginMethods(): LoginMethods | null {
     return () => {
       active = false;
     };
-  }, []);
+  }, [version]);
 
-  return methods;
+  const refresh = useCallback(() => setVersion((current) => current + 1), []);
+  return { methods, refresh };
 }

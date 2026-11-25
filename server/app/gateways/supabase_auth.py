@@ -5,6 +5,7 @@ Seul module du serveur à connaître le protocole du fournisseur d'identité.
 
 import logging
 from dataclasses import dataclass
+from datetime import datetime
 from urllib.parse import urlencode
 from uuid import UUID
 
@@ -37,6 +38,15 @@ class ExternalIdentity:
     user_id: UUID
     email: str
     full_name: str | None
+
+
+@dataclass(frozen=True, slots=True)
+class LinkedIdentity:
+    """Méthode de connexion rattachée à un utilisateur du fournisseur d'identité."""
+
+    identity_id: UUID
+    provider: str
+    created_at: datetime
 
 
 class SupabaseAuthGateway:
@@ -115,26 +125,48 @@ class SupabaseAuthGateway:
         Un jeton déjà expiré ou révoqué n'est pas une erreur : la session est
         de toute façon terminée.
         """
+        await self._sign_out(access_token, "local")
+
+    async def sign_out_others(self, access_token: str) -> None:
+        """Révoque toutes les autres sessions de l'utilisateur."""
+        await self._sign_out(access_token, "others")
+
+    async def set_password(self, user_id: UUID, password: str, email: str | None = None) -> None:
+        """Définit le mot de passe d'un utilisateur.
+
+        Args:
+            email: adresse à confirmer en même temps ; elle ajoute la connexion
+                par mot de passe à un utilisateur qui n'avait que Google.
+        """
+        body: dict[str, object] = {"password": password}
+        if email is not None:
+            body |= {"email": email, "email_confirm": True}
         response = await self._request(
-            "POST",
-            "/logout",
-            params={"scope": "local"},
-            headers={**self._public_headers, "Authorization": f"Bearer {access_token}"},
+            "PUT", f"/admin/users/{user_id}", headers=self._admin_headers, json=body
         )
-        if response.status_code not in (204, 401, 403, 404):
-            self._raise_for_unexpected(response)
+        self._raise_for_unexpected(response)
 
     def authorize_url(self, provider: str, redirect_to: str, code_challenge: str) -> str:
         """Adresse vers laquelle envoyer le navigateur pour se connecter chez ``provider``."""
-        query = urlencode(
-            {
-                "provider": provider,
-                "redirect_to": redirect_to,
-                "code_challenge": code_challenge,
-                "code_challenge_method": "s256",
-            }
-        )
+        query = urlencode(_oauth_params(provider, redirect_to, code_challenge))
         return f"{self._base_url}/authorize?{query}"
+
+    async def link_url(
+        self, access_token: str, provider: str, redirect_to: str, code_challenge: str
+    ) -> str:
+        """Adresse où envoyer le navigateur pour rattacher ``provider`` à l'utilisateur.
+
+        Le rattachement manuel doit être activé dans le projet Supabase.
+        """
+        params = _oauth_params(provider, redirect_to, code_challenge)
+        response = await self._request(
+            "GET",
+            "/user/identities/authorize",
+            params={**params, "skip_http_redirect": "true"},
+            headers=self._user_headers(access_token),
+        )
+        self._raise_for_unexpected(response)
+        return str(response.json()["url"])
 
     async def exchange_code(self, auth_code: str, code_verifier: str) -> SessionTokens:
         """Échange le code reçu au retour du fournisseur contre une session.
@@ -161,7 +193,7 @@ class SupabaseAuthGateway:
         response = await self._request(
             "GET",
             "/user",
-            headers={**self._public_headers, "Authorization": f"Bearer {access_token}"},
+            headers=self._user_headers(access_token),
         )
         self._raise_for_unexpected(response)
         body = response.json()
@@ -176,14 +208,41 @@ class SupabaseAuthGateway:
             full_name=str(name) if name else None,
         )
 
-    async def get_providers(self, user_id: UUID) -> list[str]:
-        """Méthodes de connexion rattachées à l'utilisateur (``email``, ``google``…)."""
+    async def linked_identities(self, access_token: str) -> list[LinkedIdentity]:
+        """Méthodes de connexion rattachées à l'utilisateur de la session."""
+        response = await self._request("GET", "/user", headers=self._user_headers(access_token))
+        self._raise_for_unexpected(response)
+        return [
+            LinkedIdentity(
+                identity_id=UUID(entry["identity_id"]),
+                provider=str(entry["provider"]),
+                created_at=datetime.fromisoformat(entry["created_at"]),
+            )
+            for entry in response.json().get("identities") or []
+        ]
+
+    async def unlink_identity(self, access_token: str, identity_id: UUID) -> None:
+        """Retire une méthode de connexion ; le fournisseur refuse de retirer la dernière."""
         response = await self._request(
-            "GET", f"/admin/users/{user_id}", headers=self._admin_headers
+            "DELETE",
+            f"/user/identities/{identity_id}",
+            headers=self._user_headers(access_token),
         )
         self._raise_for_unexpected(response)
-        providers = (response.json().get("app_metadata") or {}).get("providers") or []
-        return [str(provider) for provider in providers]
+
+    def _user_headers(self, access_token: str) -> dict[str, str]:
+        """En-têtes d'un appel au nom de l'utilisateur de la session."""
+        return {**self._public_headers, "Authorization": f"Bearer {access_token}"}
+
+    async def _sign_out(self, access_token: str, scope: str) -> None:
+        response = await self._request(
+            "POST",
+            "/logout",
+            params={"scope": scope},
+            headers=self._user_headers(access_token),
+        )
+        if response.status_code not in (204, 401, 403, 404):
+            self._raise_for_unexpected(response)
 
     async def _request(self, method: str, path: str, **kwargs: object) -> httpx.Response:
         """Exécute une requête et convertit les pannes réseau en erreur du domaine."""
@@ -221,3 +280,13 @@ class SupabaseAuthGateway:
         if response.is_error:
             logger.error("Réponse inattendue du fournisseur d'identité : %s", response.status_code)
             raise IdentityProviderError
+
+
+def _oauth_params(provider: str, redirect_to: str, code_challenge: str) -> dict[str, str]:
+    """Paramètres d'un départ OAuth avec PKCE."""
+    return {
+        "provider": provider,
+        "redirect_to": redirect_to,
+        "code_challenge": code_challenge,
+        "code_challenge_method": "s256",
+    }

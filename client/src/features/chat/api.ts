@@ -34,6 +34,15 @@ function isRole(value: unknown): value is "player" | "gm" {
   return value === "player" || value === "gm";
 }
 
+/** Valide un changement de nom reçu du temps réel. Retourne `null` s'il est mal formé. */
+export function parseRenamedAccount(data: unknown): { id: string; displayName: string } | null {
+  return isRecord(data) &&
+    typeof data.account_id === "string" &&
+    typeof data.display_name === "string"
+    ? { id: data.account_id, displayName: data.display_name }
+    : null;
+}
+
 /** Valide un message reçu de l'API ou du temps réel. Retourne `null` s'il est mal formé. */
 export function parseMessage(data: unknown): ChatMessage | null {
   if (

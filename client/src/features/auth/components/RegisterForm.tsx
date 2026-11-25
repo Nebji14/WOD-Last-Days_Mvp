@@ -10,26 +10,16 @@
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
 
-import { ApiError } from "@/shared/api/client";
-import { errorLabel, labels } from "@/shared/i18n";
+import { labels } from "@/shared/i18n";
 import { setFlashForNextPage } from "@/shared/ui/flash";
 import { PrimaryButton } from "@/shared/ui/PrimaryButton";
 import { TextField } from "@/shared/ui/TextField";
 
 import { googleStartUrl, register } from "../api";
+import { findPasswordIssue, type FormIssue, toIssue } from "../formIssue";
 import { PLAYER_LOGIN_PATH } from "../routes";
-import {
-  isPasswordRule,
-  isValidUsername,
-  type PasswordRule,
-  passwordViolations,
-} from "../validation";
-import { FooterLink, FormError, GoogleButton, OrSeparator } from "./FormParts";
-
-interface FormIssue {
-  readonly code: string;
-  readonly rules: readonly PasswordRule[];
-}
+import { isValidUsername } from "../validation";
+import { FooterLink, GoogleButton, IssueMessage, OrSeparator } from "./FormParts";
 
 /** Contrôle la saisie avant l'envoi, dans l'ordre d'affichage des champs. */
 function findLocalIssue(
@@ -40,24 +30,7 @@ function findLocalIssue(
   if (!isValidUsername(username)) {
     return { code: "username_invalid", rules: [] };
   }
-  const rules = passwordViolations(password);
-  if (rules.length > 0) {
-    return { code: "password_too_weak", rules };
-  }
-  if (password !== confirmation) {
-    return { code: "password_mismatch", rules: [] };
-  }
-  return null;
-}
-
-function toIssue(error: unknown): FormIssue {
-  if (!(error instanceof ApiError)) {
-    return { code: "internal_error", rules: [] };
-  }
-  return {
-    code: error.code,
-    rules: error.details.map((detail) => detail.rule).filter(isPasswordRule),
-  };
+  return findPasswordIssue(password, confirmation);
 }
 
 export function RegisterForm() {
@@ -127,18 +100,7 @@ export function RegisterForm() {
         disabled={busy}
       />
 
-      {issue !== null && (
-        <div className="flex flex-col gap-1">
-          <FormError message={errorLabel(issue.code)} />
-          {issue.rules.length > 0 && (
-            <ul className="text-ink-muted list-inside list-disc text-base font-medium">
-              {issue.rules.map((rule) => (
-                <li key={rule}>{labels.passwordRules[rule]}</li>
-              ))}
-            </ul>
-          )}
-        </div>
-      )}
+      {issue !== null && <IssueMessage issue={issue} />}
 
       <PrimaryButton type="submit" busy={busy}>
         {text.register.submit}

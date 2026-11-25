@@ -48,7 +48,7 @@ export function ConfirmDialog({
         onCancel();
       }}
       onClick={(event) => event.target === event.currentTarget && onCancel()}
-      className="bg-panel border-line-strong text-ink m-auto w-[380px] rounded-xs border p-0 shadow-[0_0_40px_rgb(0_0_0/0.8)] backdrop:bg-black/70"
+      className="bg-panel border-line-strong text-ink m-auto w-[380px] max-w-[calc(100vw-32px)] rounded-xs border p-0 shadow-[0_0_40px_rgb(0_0_0/0.8)] backdrop:bg-black/70"
     >
       <div className="flex flex-col gap-5 px-7 py-6">
         <h2

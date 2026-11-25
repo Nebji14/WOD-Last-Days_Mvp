@@ -7,11 +7,10 @@ tiré du nom Google.
 """
 
 import logging
-from dataclasses import dataclass
 from typing import Protocol
 
 from app.core.errors import AppError, ErrorCode
-from app.core.security import SessionTokens, new_pkce_verifier, pkce_challenge
+from app.core.security import SessionTokens, pkce_challenge
 from app.domain.accounts import Account, Role, numbered_username, username_from_identity
 from app.gateways.supabase_auth import (
     ExternalIdentity,
@@ -20,6 +19,7 @@ from app.gateways.supabase_auth import (
 )
 from app.repositories.accounts import UsernameAlreadyExistsError
 from app.services.auth import AccountStore, unavailable_error, wrong_portal_error
+from app.services.google_flow import GoogleFlow
 
 logger = logging.getLogger(__name__)
 
@@ -38,31 +38,6 @@ class ExternalIdentityProvider(Protocol):
     async def get_user(self, access_token: str) -> ExternalIdentity: ...
 
     async def sign_out(self, access_token: str) -> None: ...
-
-
-@dataclass(frozen=True, slots=True)
-class GoogleFlow:
-    """Connexion Google en cours, gardée dans un cookie le temps de l'aller-retour.
-
-    Attributs:
-        portal: page de départ (joueurs ou MJ), qui décide du retour en cas d'erreur.
-        verifier: secret PKCE ; sans lui, le code reçu au retour est inutilisable.
-    """
-
-    portal: Role
-    verifier: str
-
-    def encode(self) -> str:
-        """Valeur du cookie."""
-        return f"{self.portal.value}.{self.verifier}"
-
-    @classmethod
-    def decode(cls, value: str | None) -> "GoogleFlow | None":
-        """Relit le cookie ; ``None`` s'il est absent ou altéré."""
-        portal, _, verifier = (value or "").partition(".")
-        if portal not in {Role.PLAYER.value, Role.GM.value} or not verifier:
-            return None
-        return cls(Role(portal), verifier)
 
 
 def google_failed_error() -> AppError:
@@ -96,7 +71,7 @@ class GoogleAuthService:
 
     def start(self, portal: Role) -> tuple[str, GoogleFlow]:
         """Prépare le départ vers Google : adresse à ouvrir et flux à mémoriser."""
-        flow = GoogleFlow(portal, new_pkce_verifier())
+        flow = GoogleFlow.new(portal)
         url = self._identity.authorize_url(
             GOOGLE_PROVIDER, self._redirect_url, pkce_challenge(flow.verifier)
         )

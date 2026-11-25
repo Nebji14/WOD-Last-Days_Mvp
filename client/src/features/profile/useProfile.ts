@@ -17,6 +17,8 @@ import type { Character } from "@/features/characters/model";
 import { ApiError } from "@/shared/api/client";
 import { useDetachedRealtime } from "@/shared/realtime/useDetachedRealtime";
 
+const REALTIME_EVENTS = ["character.changed", "account.changed"] as const;
+
 export interface ProfileState {
   readonly account: Account | null;
   readonly characters: readonly Character[];
@@ -26,6 +28,8 @@ export interface ProfileState {
   readonly busyId: string | null;
   readonly play: (characterId: string) => void;
   readonly remove: (characterId: string) => void;
+  /** Relit le compte et les personnages. */
+  readonly refresh: () => void;
 }
 
 function errorCodeOf(error: unknown): string {
@@ -65,10 +69,8 @@ export function useProfile(): ProfileState {
     }
   }, []);
 
-  useDetachedRealtime(
-    "character.changed",
-    useCallback(() => void reload(), [reload]),
-  );
+  const refresh = useCallback(() => void reload(), [reload]);
+  useDetachedRealtime(REALTIME_EVENTS, refresh);
 
   /** Lance une action sur un personnage, puis relit la liste. */
   const act = useCallback(
@@ -100,5 +102,5 @@ export function useProfile(): ProfileState {
     [act],
   );
 
-  return { account, characters, errorCode, busyId, play, remove };
+  return { account, characters, errorCode, busyId, play, remove, refresh };
 }

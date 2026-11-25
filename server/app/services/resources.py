@@ -74,9 +74,7 @@ class ResourceService:
         self._store = store
         self._access = access
 
-    async def add(
-        self, actor: Account, character_id: UUID, name: str, max_value: int
-    ) -> Character:
+    async def add(self, actor: Account, character_id: UUID, name: str, max_value: int) -> Character:
         """Ajoute une ressource, disponible à son maximum.
 
         Raises:

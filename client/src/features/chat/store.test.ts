@@ -45,6 +45,17 @@ beforeEach(() => {
 });
 
 describe("useChatStore", () => {
+  it("renomme l'auteur sur ses messages, et sur eux seuls", () => {
+    const other = { id: "a2", displayName: "ben", role: "player" } as const;
+    useChatStore.getState().upsert(message(1, "un"));
+    useChatStore.getState().upsert({ ...message(2, "deux"), author: other });
+
+    useChatStore.getState().renameAuthor("a1", "Léa");
+
+    const names = useChatStore.getState().messages.map((entry) => entry.author.displayName);
+    expect(names).toEqual(["Léa", "ben"]);
+  });
+
   it("envoie à la suite deux messages saisis coup sur coup", async () => {
     acceptEverything();
 

@@ -57,6 +57,11 @@ export const frImages = {
     galleryClose: "FERMER",
     galleryEmpty: "Aucune image sur la table.",
     removeFromTable: "RETIRER DE LA TABLE",
+    view: "VOIR EN GRAND",
+    viewLabel: "Voir {name} en grand",
+    viewerClose: "RÉDUIRE",
+    viewerPrevious: "Image précédente",
+    viewerNext: "Image suivante",
     unavailable: "Image indisponible",
   },
 } as const;

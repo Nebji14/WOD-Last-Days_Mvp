@@ -5,7 +5,8 @@
  *
  * Tout à gauche du tapis, pour ne pas gêner les dés : miniatures à bord blanc
  * posées en éventail, la dernière au-dessus, avec un compteur. Un clic ouvre la
- * galerie de toutes les images posées ; le MJ peut y retirer une image.
+ * galerie de toutes les images posées ; le MJ peut y retirer une image. Chacun
+ * peut y regarder une image en grand, sur son écran seulement.
  */
 import { useEffect, useRef, useState } from "react";
 
@@ -13,6 +14,7 @@ import { fill, labels } from "@/shared/i18n";
 import { SignedImage } from "@/shared/ui/SignedImage";
 
 import type { LibraryImage } from "../api";
+import { TableImageViewer } from "./TableImageViewer";
 
 /** Rotation des trois miniatures visibles, de la plus ancienne à la plus récente. */
 const FAN = ["-rotate-[10deg]", "rotate-[7deg]", "-rotate-2"] as const;
@@ -20,21 +22,26 @@ const FAN = ["-rotate-[10deg]", "rotate-[7deg]", "-rotate-2"] as const;
 interface TableImagePileProps {
   readonly pile: readonly LibraryImage[];
   readonly isGm: boolean;
+  /** Le MJ montre une image à tous : elle passe devant la galerie. */
+  readonly paused: boolean;
   readonly onRemove: (imageId: string) => void;
 }
 
-export function TableImagePile({ pile, isGm, onRemove }: TableImagePileProps) {
+export function TableImagePile({ pile, isGm, paused, onRemove }: TableImagePileProps) {
   const text = labels.tableImages;
   const [open, setOpen] = useState(false);
+  const [viewedId, setViewedId] = useState<string | null>(null);
   const dialog = useRef<HTMLDialogElement>(null);
   const visible = pile.slice(0, 3).reverse();
+  const galleryOpen = open && !paused;
+  const viewed = galleryOpen ? (pile.find((image) => image.id === viewedId) ?? null) : null;
 
   useEffect(() => {
     const element = dialog.current;
     if (element === null) return;
-    if (open && !element.open) element.showModal();
-    if (!open && element.open) element.close();
-  }, [open]);
+    if (galleryOpen && !element.open) element.showModal();
+    if (!galleryOpen && element.open) element.close();
+  }, [galleryOpen]);
 
   if (pile.length === 0) {
     return null;
@@ -86,14 +93,27 @@ export function TableImagePile({ pile, isGm, onRemove }: TableImagePileProps) {
             {text.galleryClose} ✕
           </button>
         </div>
-        <ul className="grid max-h-[70vh] grid-cols-2 gap-5 overflow-y-auto p-6">
+        <ul className="grid max-h-[70vh] grid-cols-1 gap-5 overflow-y-auto p-6 sm:grid-cols-2">
           {pile.map((image) => (
             <li key={image.id} className="flex flex-col gap-2">
-              <SignedImage
-                url={image.url}
-                alt={image.name}
-                className="aspect-[4/3] w-full border-4 border-[#efe6cf] object-contain"
-              />
+              <button
+                type="button"
+                onClick={() => setViewedId(image.id)}
+                aria-label={fill(text.viewLabel, { name: image.name })}
+                className="group relative cursor-zoom-in"
+              >
+                <SignedImage
+                  url={image.url}
+                  alt={image.name}
+                  className="aspect-[4/3] w-full border-4 border-[#efe6cf] object-contain"
+                />
+                <span
+                  aria-hidden="true"
+                  className="border-gold font-display text-gold absolute right-3 bottom-3 rounded-xs border bg-black/80 px-3 py-1.5 text-[11px] font-bold tracking-[2px] group-hover:bg-gold group-hover:text-abyss"
+                >
+                  {text.view}
+                </span>
+              </button>
               <div className="flex items-center justify-between gap-3">
                 <span className="text-ink-bright truncate text-lg font-semibold">{image.name}</span>
                 {isGm && (
@@ -110,6 +130,12 @@ export function TableImagePile({ pile, isGm, onRemove }: TableImagePileProps) {
           ))}
         </ul>
       </dialog>
+      <TableImageViewer
+        pile={pile}
+        image={viewed}
+        onView={setViewedId}
+        onClose={() => setViewedId(null)}
+      />
     </>
   );
 }

@@ -30,6 +30,7 @@ export function TableImages({ realtime, isGm, gmName }: TableImagesProps) {
       <TableImagePile
         pile={scene.pile}
         isGm={isGm}
+        paused={scene.shown !== null}
         onRemove={(imageId) => void removeFromTable(imageId).catch(report)}
       />
       {scene.shown !== null && (
